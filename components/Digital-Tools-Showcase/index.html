@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Tools Showcase | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Portrait card */
+    .product-card {
+      position: relative;
+      width: 288px;
+      height: 384px;
+      border-radius: 16px;
+      overflow: hidden;
+      flex-shrink: 0;
+      cursor: pointer;
+      background: #071830;
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+                  box-shadow 0.4s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 0 1px rgba(39,101,255,0.45),
+                  0 24px 48px rgba(39,101,255,0.18);
+    }
+
+    /* Image zoom */
+    .card-img {
+      transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+    .product-card:hover .card-img {
+      transform: scale(1.06);
+    }
+
+    /* Hover overlay */
+    .card-overlay {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .product-card:hover .card-overlay {
+      opacity: 1;
+    }
+
+    /* Title lift */
+    .card-title {
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .product-card:hover .card-title {
+      transform: translateY(-4px);
+    }
+
+    /* "Learn more" slides up */
+    .card-cta {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .product-card:hover .card-cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Sliding track */
+    #cards-track {
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+      transition: transform 0.55s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    /* Right-edge fade mask */
+    #cards-viewport {
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to right, black 82%, transparent 100%);
+      mask-image: linear-gradient(to right, black 82%, transparent 100%);
+    }
+
+    /* Nav buttons */
+    .nav-btn {
+      width: 40px; height: 40px;
+      border-radius: 9999px;
+      background: #2765FF;
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 20px rgba(39,101,255,0.25);
+      transition: background 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .nav-btn:hover:not(:disabled) { background: #1a50e0; transform: scale(1.05); }
+    .nav-btn:active:not(:disabled) { transform: scale(0.95); }
+    .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* CTA link arrow */
+    .cta-link svg { transition: transform 0.3s ease; }
+    .cta-link:hover svg { transform: translateX(4px); }
+
+    /* Scroll-in animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both; }
+    .fade-up-delay { animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.12s both; }
+  </style>
+</head>
+<body class="bg-white min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ Digital Tools Showcase</span>
+  </div>
+
+  <section class="bg-white w-full px-4 md:px-[48px] lg:px-[120px] py-4 md:py-6">
+    <div class="max-w-[1400px] mx-auto">
+
+      <!-- Header -->
+      <div class="flex flex-col gap-4 mb-12">
+        <h2 class="fade-up text-[24px] md:text-[36px] font-normal text-[#072447] leading-[150%] tracking-tight max-w-lg">
+          Make your business smarter with our powerful ecosystem of digital tools
+        </h2>
+        <p class="fade-up-delay text-[14px] md:text-[16px] text-[#3A4B5C] leading-relaxed max-w-sm">
+          Our user-friendly platforms give you complete visibility of your finances, all in one place.
+        </p>
+      </div>
+
+      <!-- Cards viewport -->
+      <div id="cards-viewport" class="mb-10 pt-2">
+        <div id="cards-track">
+
+          <!-- businessONLINE -->
+          <div class="product-card">
+            <div class="absolute inset-0">
+              <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&h=700&fit=crop&q=80"
+                   alt="businessONLINE" class="card-img w-full h-full object-cover" />
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+            <div class="card-overlay absolute inset-0 bg-[#072447]/40"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-5">
+              <p class="card-title text-white text-lg font-semibold tracking-tight">businessONLINE</p>
+              <div class="card-cta flex items-center gap-1.5 text-white/80 text-sm font-medium mt-1">
+                <span>Learn more</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- smartTRADE -->
+          <div class="product-card">
+            <div class="absolute inset-0">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=700&fit=crop&q=80"
+                   alt="smartTRADE" class="card-img w-full h-full object-cover" />
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+            <div class="card-overlay absolute inset-0 bg-[#072447]/40"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-5">
+              <p class="card-title text-white text-lg font-semibold tracking-tight">smartTRADE</p>
+              <div class="card-cta flex items-center gap-1.5 text-white/80 text-sm font-medium mt-1">
+                <span>Learn more</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Emirates NBD Pay -->
+          <div class="product-card">
+            <div class="absolute inset-0">
+              <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=700&fit=crop&q=80"
+                   alt="Emirates NBD Pay" class="card-img w-full h-full object-cover" />
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+            <div class="card-overlay absolute inset-0 bg-[#072447]/40"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-5">
+              <p class="card-title text-white text-lg font-semibold tracking-tight">Emirates NBD Pay</p>
+              <div class="card-cta flex items-center gap-1.5 text-white/80 text-sm font-medium mt-1">
+                <span>Learn more</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- smartSCF -->
+          <div class="product-card">
+            <div class="absolute inset-0">
+              <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=700&fit=crop&q=80"
+                   alt="smartSCF" class="card-img w-full h-full object-cover" />
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+            <div class="card-overlay absolute inset-0 bg-[#072447]/40"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-5">
+              <p class="card-title text-white text-lg font-semibold tracking-tight">smartSCF</p>
+              <div class="card-cta flex items-center gap-1.5 text-white/80 text-sm font-medium mt-1">
+                <span>Learn more</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Footer row -->
+      <div class="flex items-center justify-between">
+        <a href="#" class="cta-link group flex items-center gap-2 text-[#2765FF] text-sm font-semibold">
+          Explore Digital Channels
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </a>
+        <div id="nav-buttons" class="flex items-center gap-2">
+          <button id="btn-prev" class="nav-btn" onclick="slide(-1)" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
+          </button>
+          <button id="btn-next" class="nav-btn" onclick="slide(1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    const CARD_W = 288;
+    const CARD_GAP = 24;
+    const TOTAL = 4;
+    let offset = 0;
+
+    function getMaxOffset() {
+      const vp = document.getElementById('cards-viewport');
+      const visible = Math.floor((vp.clientWidth + CARD_GAP) / (CARD_W + CARD_GAP));
+      return Math.max(0, TOTAL - visible);
+    }
+
+    function slide(dir) {
+      const max = getMaxOffset();
+      offset = Math.max(0, Math.min(max, offset + dir));
+      document.getElementById('cards-track').style.transform =
+        `translateX(${-(offset * (CARD_W + CARD_GAP))}px)`;
+      document.getElementById('btn-prev').disabled = offset === 0;
+      document.getElementById('btn-next').disabled = offset >= max;
+
+      // Remove mask and hide nav when all cards fit
+      const vp = document.getElementById('cards-viewport');
+      const noOverflow = max === 0;
+      const mask = noOverflow ? 'none' : 'linear-gradient(to right, black 82%, transparent 100%)';
+      vp.style.webkitMaskImage = mask;
+      vp.style.maskImage = mask;
+      document.getElementById('nav-buttons').style.display = noOverflow ? 'none' : 'flex';
+    }
+
+    window.addEventListener('resize', () => {
+      offset = Math.min(offset, getMaxOffset());
+      slide(0);
+    });
+
+    slide(0);
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

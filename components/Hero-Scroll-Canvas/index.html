@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hero — Scroll Canvas | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
+
+    /* ── Loading screen ── */
+    #loading-screen {
+      position: fixed; inset: 0; z-index: 100;
+      background: #040a14;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      transition: opacity 0.6s ease;
+    }
+    #loading-screen.hidden { opacity: 0; pointer-events: none; }
+    #load-bar-fill { height: 100%; background: rgba(255,255,255,0.55); border-radius: 2px; transition: width 0.12s linear; width: 0%; }
+
+    /* ── Scroll container ── */
+    #scroll-container { height: 300vh; position: relative; }
+
+    /* ── Sticky viewport ── */
+    #sticky-viewport {
+      position: sticky; top: 0;
+      height: 100vh; width: 100%;
+      overflow: hidden;
+      background: #040a14;
+    }
+
+    canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+    /* ── Gradient overlay ── */
+    #gradient-overlay {
+      position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(to top, rgba(4,10,20,0.55) 0%, rgba(4,10,20,0.21) 45%, rgba(4,10,20,0.06) 100%);
+      transition: background 0.4s;
+    }
+
+    /* ── Text phase panels — layout only, animation is all inline via JS ── */
+    .phase-panel {
+      position: absolute; inset: 0;
+      pointer-events: none;
+    }
+    .phase-panel > * { will-change: opacity, transform; }
+
+    /* ── Scroll indicator travel animation ── */
+    @keyframes scrollTravel {
+      0%   { transform: translateY(-100%); opacity: 0; }
+      15%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translateY(250%); opacity: 0; }
+    }
+
+    /* ── Back nav ── */
+    #back-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: 40px; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; padding: 0 24px;
+    }
+
+  </style>
+</head>
+<body style="background:#040a14;">
+
+  <!-- ── Scroll Indicator ─────────────────────────────────────────── -->
+  <div id="scroll-indicator" style="
+    position:fixed;
+    right:clamp(16px,8.33vw,120px);
+    bottom:clamp(32px,5vh,64px);
+    z-index:100;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    transition:opacity 0.6s ease;
+    pointer-events:none;
+  ">
+    <span style="
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      transform:rotate(180deg);
+      font-size:10px;
+      font-weight:500;
+      letter-spacing:0.2em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,0.4);
+    ">Scroll</span>
+
+    <!-- Track line -->
+    <div style="position:relative;width:1px;height:56px;background:rgba(255,255,255,0.15);border-radius:1px;overflow:hidden;">
+      <!-- Traveling highlight -->
+      <div style="
+        position:absolute;
+        top:0;left:0;
+        width:1px;
+        height:40%;
+        background:#2765FF;
+        border-radius:1px;
+        animation:scrollTravel 1.6s cubic-bezier(0.4,0,0.6,1) infinite;
+      "></div>
+    </div>
+  </div>
+
+  <!-- Back nav -->
+  <div id="back-nav">
+    <a href="../../index.html" class="text-xs text-white/55 hover:text-white transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+  </div>
+
+  <!-- Loading screen -->
+  <div id="loading-screen">
+    <p style="font-size:10px; font-weight:600; letter-spacing:0.28em; text-transform:uppercase; color:rgba(255,255,255,0.22); margin-bottom:32px;">
+      Emirates NBD
+    </p>
+    <div style="width:208px; height:1px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden;">
+      <div id="load-bar-fill"></div>
+    </div>
+    <p id="load-pct" style="margin-top:16px; font-size:10px; letter-spacing:0.24em; color:rgba(255,255,255,0.22);">0%</p>
+  </div>
+
+  <!-- Scroll container (300vh tall) -->
+  <div id="scroll-container">
+    <div id="sticky-viewport">
+
+      <!-- Canvas -->
+      <canvas id="hero-canvas"></canvas>
+
+      <!-- Gradient overlay -->
+      <div id="gradient-overlay"></div>
+
+      <!-- Top vignette -->
+      <div style="position:absolute; inset:0; pointer-events:none; background:linear-gradient(to bottom, rgba(4,10,20,0.95) 0%, transparent 10%);"></div>
+
+      <!-- ── Phase 1: initial ──────────────────────────────────────── -->
+      <div id="phase-1" class="phase-panel" style="display:flex; flex-direction:column; justify-content:flex-end; padding:0 48px 80px; padding-left:clamp(24px,8vw,120px);">
+        <p style="font-size:clamp(11px,1vw,13px); font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:rgba(255,255,255,0.48); margin-bottom:24px;">
+          Emirates NBD · Trade Finance
+        </p>
+        <h1 style="font-size:clamp(36px,4.5vw,56px); font-weight:400; line-height:1.18; letter-spacing:-0.02em; color:#fff; margin:0 0 24px;">
+          Full-featured product suite<br />that supports your working capital requirements
+        </h1>
+        <p style="font-size:clamp(14px,1.2vw,16px); color:rgba(255,255,255,0.58); line-height:1.65; margin:0 0 24px;">
+          Finance your off-plan home with confidence — exclusive partner pricing on every live release from 13 of Dubai's most<br />established developers, including Emaar, Nakheel, Sobha, DAMAC, Meraas, Aldar and more.
+        </p>
+      </div>
+
+      <!-- ── Phase 2: midway ──────────────────────────────────────── -->
+      <div id="phase-2" class="phase-panel" style="display:flex; flex-direction:column; justify-content:center; padding:0 48px; padding-left:clamp(24px,8vw,120px);">
+        <p style="font-size:clamp(11px,1vw,13px); font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:rgba(255,255,255,0.42); margin-bottom:24px;">
+          From port to portfolio
+        </p>
+        <h1 style="font-size:clamp(36px,4.5vw,48px); font-weight:400; line-height:1.25; letter-spacing:-0.015em; color:#fff; margin:0 0 24px; max-width:560px;">
+          Capital at the speed<br />of commerce.
+        </h1>
+        <p style="font-size:clamp(14px,1.2vw,16px); color:rgba(255,255,255,0.58); line-height:1.65; max-width:360px; margin:0;">
+          Letters of credit, supply chain finance, and FX — all in one place, across 180+ markets.
+        </p>
+      </div>
+
+      <!-- ── Phase 3: CTA ─────────────────────────────────────────── -->
+      <div id="phase-3" class="phase-panel" style="display:flex; flex-direction:column; justify-content:flex-end; padding:0 48px 64px; padding-left:clamp(24px,8vw,120px);">
+        <p style="font-size:clamp(11px,1vw,13px); font-weight:600; letter-spacing:0.22em; text-transform:uppercase; color:rgba(255,255,255,0.42); margin-bottom:24px;">
+          Ready to move?
+        </p>
+        <h1 style="font-size:clamp(36px,4.5vw,48px); font-weight:400; line-height:1.28; letter-spacing:-0.015em; color:#fff; margin:0 0 24px; max-width:520px;">
+          Your trade.<br />Our expertise.<br />Every market.
+        </h1>
+        <div style="display:flex; flex-wrap:wrap; gap:16px;">
+          <a href="#" style="display:inline-flex; align-items:center; gap:10px; padding:14px 28px; background:#fff; color:#072447; font-size:14px; font-weight:700; border-radius:12px; text-decoration:none; box-shadow:0 16px 48px rgba(0,0,0,0.35); transition:transform 0.2s, background 0.2s;"
+            onmouseover="this.style.background='#EEF4FB'; this.style.transform='scale(1.02)'"
+            onmouseout="this.style.background='#fff'; this.style.transform='scale(1)'">
+            Get started
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </a>
+          <a href="#" style="display:inline-flex; align-items:center; gap:10px; padding:14px 28px; color:rgba(255,255,255,0.72); font-size:14px; font-weight:500; border:1px solid rgba(255,255,255,0.2); border-radius:12px; text-decoration:none; transition:background 0.2s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.08)'"
+            onmouseout="this.style.background='transparent'">
+            Explore Trade Finance
+          </a>
+        </div>
+      </div>
+
+
+    </div><!-- /sticky-viewport -->
+  </div><!-- /scroll-container -->
+
+  <script>
+  (function () {
+    const TOTAL = 121;
+    const FRAME_PATH = i =>
+      `./assets/images/hero-frames/ezgif-frame-${String(i + 1).padStart(3, '0')}.jpg`;
+
+    // Phase scroll thresholds (0–1)
+    const P1_EXIT  = 0.26;
+    const P2_ENTER = 0.30;
+    const P2_EXIT  = 0.62;
+    const P3_ENTER = 0.67;
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const canvas      = document.getElementById('hero-canvas');
+    const ctx         = canvas.getContext('2d');
+    const loadScreen  = document.getElementById('loading-screen');
+    const loadFill    = document.getElementById('load-bar-fill');
+    const loadPctEl   = document.getElementById('load-pct');
+    const overlay     = document.getElementById('gradient-overlay');
+    const panel1      = document.getElementById('phase-1');
+    const panel2      = document.getElementById('phase-2');
+    const panel3      = document.getElementById('phase-3');
+    const container   = document.getElementById('scroll-container');
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    const images  = new Array(TOTAL).fill(null);
+    let   loaded  = false;
+    let   currentFrame = 0;
+    let   currentPhase = 0;
+    let   raf     = 0;
+
+    const STAGGER    = 75;   // ms between each child
+    const ENTER_DUR  = 650;  // ms
+    const EXIT_DUR   = 320;  // ms
+    const ENTER_EASE = 'cubic-bezier(0.16,1,0.3,1)';
+    const EXIT_EASE  = 'cubic-bezier(0.4,0,1,1)';
+
+    function children(el) { return Array.from(el.children); }
+
+    // ── Init all panels to hidden ─────────────────────────────────────────────
+    function initPanels() {
+      [panel1, panel2, panel3].forEach(el => {
+        el.style.pointerEvents = 'none';
+        children(el).forEach(c => {
+          c.style.transition = 'none';
+          c.style.opacity    = '0';
+          c.style.transform  = 'translateY(18px)';
+        });
+      });
+    }
+
+    // ── Resize canvas ─────────────────────────────────────────────────────────
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width  = canvas.offsetWidth  * dpr;
+      canvas.height = canvas.offsetHeight * dpr;
+      drawFrame(currentFrame);
+    }
+
+    // ── Draw a single frame (cover-fit) ───────────────────────────────────────
+    function drawFrame(idx) {
+      const img = images[idx];
+      if (!img || !img.complete || !img.naturalWidth) return;
+      const W = canvas.width, H = canvas.height;
+      const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+      const dW = img.naturalWidth  * scale;
+      const dH = img.naturalHeight * scale;
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(img, (W - dW) / 2, (H - dH) / 2, dW, dH);
+    }
+
+    // ── Preload all frames ────────────────────────────────────────────────────
+    let done = 0;
+    for (let i = 0; i < TOTAL; i++) {
+      const img = new Image();
+      img.onload = img.onerror = function () {
+        done++;
+        if (done % 5 === 0 || done === TOTAL) {
+          const pct = Math.round((done / TOTAL) * 100);
+          loadFill.style.width = pct + '%';
+          loadPctEl.textContent = pct + '%';
+        }
+        if (done === TOTAL) {
+          loaded = true;
+          loadScreen.classList.add('hidden');
+          setTimeout(() => { loadScreen.style.display = 'none'; }, 700);
+          initPanels();
+          resizeCanvas();
+          showPhase(1);
+        }
+      };
+      img.src = FRAME_PATH(i);
+      images[i] = img;
+    }
+
+    // ── Phase management ─────────────────────────────────────────────────────
+    const panels = [null, panel1, panel2, panel3];
+
+    function showPhase(p) {
+      if (p === currentPhase) return;
+      const goingDown = p > currentPhase;
+      const prev = currentPhase;
+      currentPhase = p;
+      if (prev > 0) exitPanel(panels[prev], goingDown);
+      enterPanel(panels[p], goingDown);
+    }
+
+    function enterPanel(el, fromBelow) {
+      const items = children(el);
+      const dy = fromBelow ? '18px' : '-18px';
+      // Snap to start state
+      items.forEach(c => {
+        c.style.transition = 'none';
+        c.style.opacity    = '0';
+        c.style.transform  = `translateY(${dy})`;
+      });
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.style.pointerEvents = el === panel3 ? 'auto' : 'none';
+        items.forEach((c, i) => {
+          const delay = i * STAGGER;
+          c.style.transition = `opacity ${ENTER_DUR}ms ${ENTER_EASE} ${delay}ms, transform ${ENTER_DUR}ms ${ENTER_EASE} ${delay}ms`;
+          c.style.opacity    = '1';
+          c.style.transform  = 'translateY(0)';
+        });
+      }));
+    }
+
+    function exitPanel(el, goingDown) {
+      const items = children(el);
+      const dy = goingDown ? '-14px' : '14px';
+      el.style.pointerEvents = 'none';
+      items.forEach((c, i) => {
+        c.style.transition = `opacity ${EXIT_DUR}ms ${EXIT_EASE}, transform ${EXIT_DUR}ms ${EXIT_EASE}`;
+        c.style.opacity    = '0';
+        c.style.transform  = `translateY(${dy})`;
+      });
+    }
+
+    // ── Scroll handler ────────────────────────────────────────────────────────
+    function onScroll() {
+      if (!loaded) return;
+
+      const scrollTop = window.scrollY;
+      const scrollH   = container.scrollHeight - window.innerHeight;
+      const progress  = Math.min(Math.max(scrollTop / scrollH, 0), 1);
+
+      // ── Frame ─────────────────────────────────────────────────────────────
+      const idx = Math.round(progress * (TOTAL - 1));
+      if (idx !== currentFrame) {
+        currentFrame = idx;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => drawFrame(idx));
+      }
+
+      // ── Gradient deepens with scroll ──────────────────────────────────────
+      const t = Math.min(progress * 2, 1); // 0→1 over first half
+      const bot = 0.55 + t * 0.2;
+      overlay.style.background =
+        `linear-gradient(to top, rgba(4,10,20,${bot.toFixed(2)}) 0%, rgba(4,10,20,${(bot * 0.38).toFixed(2)}) 45%, rgba(4,10,20,${(bot * 0.1).toFixed(2)}) 100%)`;
+
+      // ── Phase ─────────────────────────────────────────────────────────────
+      if      (progress >= P3_ENTER) showPhase(3);
+      else if (progress >= P2_ENTER) showPhase(2);
+      else                           showPhase(1);
+
+      // ── Scroll indicator fade-out ──────────────────────────────────────────
+      const indicator = document.getElementById('scroll-indicator');
+      if (indicator) {
+        indicator.style.opacity = progress > 0.06 ? '0' : String(1 - progress / 0.06);
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', resizeCanvas);
+
+    // Trigger on load (show phase 1 once frames are ready — handled in preload callback)
+  }());
+  </script>
+
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

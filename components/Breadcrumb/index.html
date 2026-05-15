@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Breadcrumb | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>*, body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-[#F4F7FB] min-h-screen pt-10">
+  <div class="fixed top-0 left-0 right-0 z-50 flex items-center h-10 px-4 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+    <a href="../../index.html" class="text-[#072447]/60 hover:text-[#072447] text-xs flex items-center gap-2 transition-colors">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-gray-300 text-xs ml-3">/ Breadcrumb</span>
+  </div>
+
+  <section class="bg-white w-full px-6 md:px-[48px] lg:px-[120px] py-4 md:py-6">
+    <div class="max-w-[1400px] mx-auto">
+      <p class="text-xs font-semibold tracking-widest uppercase text-[#072447]/40 mb-4">Examples</p>
+
+      <!-- 3-level breadcrumb -->
+      <div class="mb-10">
+        <p class="text-xs text-gray-400 mb-3">3-level</p>
+        <nav aria-label="Breadcrumb">
+          <ol class="flex items-center gap-1 flex-wrap">
+            <li><a href="#" class="text-[13px] text-[#2765FF] hover:underline font-medium">Home</a></li>
+            <li class="text-gray-300 text-[13px]">/</li>
+            <li><a href="#" class="text-[13px] text-[#2765FF] hover:underline font-medium">Corporate & Institutional</a></li>
+            <li class="text-gray-300 text-[13px]">/</li>
+            <li><span class="text-[13px] text-[#6C7A89]">Digital Solutions</span></li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- 4-level breadcrumb -->
+      <div class="mb-10">
+        <p class="text-xs text-gray-400 mb-3">4-level</p>
+        <nav aria-label="Breadcrumb">
+          <ol class="flex items-center gap-1 flex-wrap">
+            <li><a href="#" class="text-[13px] text-[#2765FF] hover:underline font-medium">Home</a></li>
+            <li class="text-gray-300 text-[13px]">/</li>
+            <li><a href="#" class="text-[13px] text-[#2765FF] hover:underline font-medium">Corporate & Institutional</a></li>
+            <li class="text-gray-300 text-[13px]">/</li>
+            <li><a href="#" class="text-[13px] text-[#2765FF] hover:underline font-medium">Payments & Trade Finance</a></li>
+            <li class="text-gray-300 text-[13px]">/</li>
+            <li><span class="text-[13px] text-[#6C7A89]">Digital Channels</span></li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- With chevron separators -->
+      <div class="mb-10">
+        <p class="text-xs text-gray-400 mb-3">With chevron separators</p>
+        <nav aria-label="Breadcrumb">
+          <ol class="flex items-center gap-1.5 flex-wrap">
+            <li><a href="#" class="text-[13px] text-[#2765FF] hover:underline font-medium">Home</a></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="#D1D5DB"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></li>
+            <li><a href="#" class="text-[13px] text-[#2765FF] hover:underline font-medium">Corporate & Institutional</a></li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="#D1D5DB"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></li>
+            <li><span class="text-[13px] text-[#6C7A89]">businessONLINE</span></li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- Dark background breadcrumb -->
+      <div class="bg-[#072447] rounded-2xl px-8 py-10 mb-10">
+        <p class="text-xs text-white/40 mb-4">On dark background</p>
+        <nav aria-label="Breadcrumb">
+          <ol class="flex items-center gap-1 flex-wrap">
+            <li><a href="#" class="text-[13px] text-white/60 hover:text-white font-medium transition-colors">Home</a></li>
+            <li class="text-white/20 text-[13px]">/</li>
+            <li><a href="#" class="text-[13px] text-white/60 hover:text-white font-medium transition-colors">Corporate & Institutional</a></li>
+            <li class="text-white/20 text-[13px]">/</li>
+            <li><span class="text-[13px] text-white">Digital Solutions</span></li>
+          </ol>
+        </nav>
+      </div>
+
+    </div>
+  </section>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

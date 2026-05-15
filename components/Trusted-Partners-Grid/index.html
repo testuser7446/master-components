@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trusted Partners — Logo Grid | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Scroll-reveal ───────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.9s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.from-y    { transform: translateY(28px); }
+    .reveal.from-y-md { transform: translateY(24px); }
+    .reveal.from-x    { transform: translateX(20px); }
+    .reveal.visible   { opacity: 1 !important; transform: none !important; }
+
+    .delay-1 { transition-delay: 0.12s; }
+    .delay-2 { transition-delay: 0.20s; }
+
+    /* ── Logo cell — grayscale default, color on hover ───────────────── */
+    .logo-wrap {
+      width: 170px; height: 72px;
+      filter: grayscale(100%);
+      transition: filter 0.4s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.4s cubic-bezier(0.16,1,0.3,1);
+      cursor: pointer;
+    }
+    .logo-cell:hover .logo-wrap {
+      filter: grayscale(0%);
+      transform: scale(1.08);
+    }
+
+    /* ── Logo cell fade-in stagger ───────────────────────────────────── */
+    .logo-cell { opacity: 0; transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1); }
+    .logo-cell.visible { opacity: 1; }
+
+    /* ── CTA button arrow ────────────────────────────────────────────── */
+    .cta-btn svg { transition: transform 0.3s ease; }
+    .cta-btn:hover svg { transform: translateX(4px); }
+    .cta-btn { transition: border-color 0.3s ease; }
+  </style>
+</head>
+<body class="bg-white min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ Trusted Partners — Logo Grid</span>
+  </div>
+
+  <!-- ── Section ────────────────────────────────────────────────────── -->
+  <section class="bg-white w-full px-4 md:px-[120px] py-4 md:py-6">
+    <div class="max-w-[1400px] mx-auto">
+
+      <!-- Top row: heading left + description far right -->
+      <div class="flex flex-col lg:flex-row gap-8 mb-16 md:mb-24">
+
+        <h2 class="reveal from-y text-[24px] md:text-[36px] font-normal text-[#072447] leading-tight tracking-tight max-w-sm shrink-0">
+          Trusted by leading innovators.
+        </h2>
+
+        <div class="flex-1 flex lg:justify-end lg:items-start">
+          <p class="reveal from-y-md delay-1 text-[14px] md:text-[16px] font-normal text-[#3A4B5C] leading-relaxed max-w-sm lg:text-right">
+            We partner with forward-thinking enterprises, sovereign groups, and family offices shaping the future of business in the region and beyond.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Logo grid — internal dividers only, no outer border -->
+      <!-- 8 logos · 2 cols mobile · 4 cols desktop -->
+      <div class="grid grid-cols-2 md:grid-cols-4 mb-16 md:mb-24">
+
+        <!-- Logo 0 · EMAAR · col0 row0 -->
+        <div class="logo-cell logo-cell-0 flex items-center justify-center py-12 px-6 border-r border-b border-[#E5E7EB]">
+          <div class="logo-wrap">
+            <!-- EMAAR: bold uppercase wordmark in deep navy, wide tracking -->
+            <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+              <text x="100" y="32" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#072447" text-anchor="middle" letter-spacing="6">EMAAR</text>
+              <text x="100" y="50" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#666" text-anchor="middle" letter-spacing="2">Properties</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Logo 1 · DP WORLD · col1 row0 -->
+        <div class="logo-cell logo-cell-1 flex items-center justify-center py-12 px-6 border-b md:border-r border-[#E5E7EB]">
+          <div class="logo-wrap">
+            <!-- DP World: circle with 3 swoosh arcs (green/white/orange) + anchor, text right -->
+            <svg viewBox="0 0 210 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+              <!-- Circle background -->
+              <circle cx="36" cy="36" r="30" fill="#f8f8f8"/>
+              <!-- Green top arc band -->
+              <path d="M 10 28 A 30 30 0 0 1 62 28 L 62 34 A 30 30 0 0 0 10 34 Z" fill="#00a19c"/>
+              <!-- Orange bottom arc band -->
+              <path d="M 10 42 A 30 30 0 0 0 62 42 L 62 48 A 30 30 0 0 1 10 48 Z" fill="#f47920"/>
+              <!-- White middle band -->
+              <path d="M 10 34 L 62 34 L 62 42 L 10 42 Z" fill="white"/>
+              <!-- Anchor vertical bar -->
+              <rect x="34" y="8" width="4" height="56" rx="2" fill="#072447"/>
+              <!-- Anchor crossbar -->
+              <rect x="22" y="30" width="28" height="3.5" rx="1.5" fill="#072447"/>
+              <!-- Anchor ring top -->
+              <circle cx="36" cy="10" r="5" fill="none" stroke="#072447" stroke-width="3"/>
+              <!-- Clip circle -->
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e5e7eb" stroke-width="0"/>
+              <clipPath id="dpClip">
+                <circle cx="36" cy="36" r="29"/>
+              </clipPath>
+              <!-- Text -->
+              <text x="80" y="30" font-family="Arial Black, sans-serif" font-size="16" font-weight="900" fill="#072447" text-anchor="start">DP World</text>
+              <text x="80" y="50" font-family="Arial, sans-serif" font-size="10" fill="#555" text-anchor="start" letter-spacing="0.3">trade enables growth</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Logo 2 · ALDAR · col2 row0 -->
+        <div class="logo-cell logo-cell-2 flex items-center justify-center py-12 px-6 border-r border-b border-[#E5E7EB]">
+          <div class="logo-wrap">
+            <!-- Aldar: blue circle disc with two interlocking gold lens shapes, wordmark right -->
+            <svg viewBox="0 0 200 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+              <!-- Blue disc -->
+              <circle cx="36" cy="36" r="30" fill="#003087"/>
+              <!-- Two interlocking gold lens/leaf shapes -->
+              <ellipse cx="36" cy="26" rx="12" ry="18" fill="#C9A84C" transform="rotate(-20 36 26)"/>
+              <ellipse cx="36" cy="46" rx="12" ry="18" fill="#C9A84C" transform="rotate(20 36 46)" opacity="0.85"/>
+              <!-- Dark centre overlap -->
+              <ellipse cx="36" cy="36" rx="7" ry="10" fill="#003087"/>
+              <!-- Text -->
+              <text x="78" y="32" font-family="Arial Black, sans-serif" font-size="18" font-weight="900" fill="#003087" text-anchor="start" letter-spacing="0.5">Aldar</text>
+              <text x="78" y="50" font-family="Arial, sans-serif" font-size="10" fill="#888" text-anchor="start" letter-spacing="0.3">Properties</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Logo 3 · MAJID AL FUTTAIM · col3 row0 -->
+        <div class="logo-cell logo-cell-3 flex items-center justify-center py-12 px-6 border-b border-[#E5E7EB]">
+          <div class="logo-wrap">
+            <!-- Majid Al Futtaim: gold dome-arch M mark, text right -->
+            <svg viewBox="0 0 230 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+              <!-- M arch: two arches side by side with dome tops -->
+              <path d="M 6 58 L 6 28 C 6 16 14 10 22 10 C 30 10 38 16 38 28 L 38 38 C 38 46 44 50 50 50 C 56 50 62 46 62 38 L 62 10" fill="none" stroke="#C9A84C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- Text stack -->
+              <text x="80" y="28" font-family="Arial, sans-serif" font-size="9" font-weight="600" fill="#888" text-anchor="start" letter-spacing="1">MAJID AL FUTTAIM</text>
+              <text x="80" y="44" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="#1a1a1a" text-anchor="start" letter-spacing="0.2">Group</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Logo 4 · e& · col0 row1 -->
+        <div class="logo-cell logo-cell-4 flex items-center justify-center py-12 px-6 border-r border-b md:border-b-0 border-[#E5E7EB]">
+          <div class="logo-wrap">
+            <!-- e&: bold lowercase "e&" in dark red, pure typographic wordmark -->
+            <svg viewBox="0 0 160 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+              <text x="80" y="50" font-family="Arial Black, Impact, sans-serif" font-size="52" font-weight="900" fill="#C8102E" text-anchor="middle" letter-spacing="-2">e&amp;</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Logo 5 · ENOC · col1 row1 -->
+        <div class="logo-cell logo-cell-5 flex items-center justify-center py-12 px-6 border-b md:border-r md:border-b-0 border-[#E5E7EB]">
+          <div class="logo-wrap">
+            <!-- ENOC: circle bisected left=green right=red, central flame, ENOC text below -->
+            <svg viewBox="0 0 180 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+              <!-- Left half green -->
+              <path d="M 36 8 A 28 28 0 0 0 36 64 Z" fill="#009b74"/>
+              <!-- Right half red -->
+              <path d="M 36 8 A 28 28 0 0 1 36 64 Z" fill="#c8102e"/>
+              <!-- White flame in centre -->
+              <path d="M 36 16 C 32 22 30 28 34 33 C 35 30 37 28 36 24 C 38 28 40 32 38 36 C 41 33 42 28 40 22 C 43 27 43 35 38 40 C 35 43 33 43 36 44 C 39 43 41 40 41 36 C 43 38 43 43 40 46 C 36 49 32 46 32 42 C 30 44 30 49 33 51 C 25 47 24 36 30 28 C 28 32 28 38 32 40 C 30 34 30 28 36 16 Z" fill="white" opacity="0.9"/>
+              <!-- Border circle -->
+              <circle cx="36" cy="36" r="28" fill="none" stroke="#ddd" stroke-width="0.5"/>
+              <!-- ENOC text -->
+              <text x="80" y="42" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" fill="#1a1a1a" text-anchor="start" letter-spacing="2">ENOC</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Logo 6 · aramex · col2 row1 -->
+        <div class="logo-cell logo-cell-6 flex items-center justify-center py-12 px-6 border-r border-[#E5E7EB]">
+          <div class="logo-wrap">
+            <!-- aramex: all-lowercase wordmark in vivid red, "delivery unlimited" below -->
+            <svg viewBox="0 0 200 64" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+              <text x="100" y="36" font-family="Arial Black, 'Arial Bold', sans-serif" font-size="32" font-weight="900" fill="#DC291E" text-anchor="middle" letter-spacing="-0.5">aramex</text>
+              <text x="100" y="54" font-family="Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="middle" letter-spacing="1.8">delivery unlimited</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Logo 7 · flydubai · col3 row1 · no borders -->
+        <div class="logo-cell logo-cell-7 flex items-center justify-center py-12 px-6">
+          <div class="logo-wrap">
+            <!-- flydubai: "fly" in orange + "dubai" in dark blue + orange dot, bold condensed -->
+            <svg viewBox="0 0 210 60" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+              <text y="40" font-family="Arial Black, sans-serif" font-size="30" text-anchor="middle" x="100">
+                <tspan font-weight="400" fill="#FF8200">fly</tspan><tspan font-weight="900" fill="#006496">dubai</tspan><tspan fill="#FF8200" font-size="38" font-weight="900" dy="-4" dx="2">·</tspan>
+              </text>
+            </svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom CTA row -->
+      <div class="reveal from-y flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+
+        <h3 class="text-[22px] md:text-[28px] font-normal text-[#072447] tracking-tight leading-tight">
+          Ready to bank smarter?
+        </h3>
+
+        <a href="#" class="cta-btn reveal from-x delay-2 flex items-center gap-2 px-6 py-3 border border-[#D1D9E0] rounded-lg text-[#072447] text-sm font-medium hover:border-[#072447] whitespace-nowrap shrink-0">
+          Get in touch
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </a>
+
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    // ── IntersectionObserver scroll reveal ────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ── Logo cells staggered fade-in ──────────────────────────────────
+    const logoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const idx = parseInt(entry.target.dataset.idx);
+          setTimeout(() => entry.target.classList.add('visible'), idx * 50);
+          logoObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px' });
+
+    document.querySelectorAll('.logo-cell').forEach((el, i) => {
+      el.dataset.idx = i;
+      logoObserver.observe(el);
+    });
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

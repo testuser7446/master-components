@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Map — Animated Routes | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Scroll-reveal ───────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.9s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.from-y { transform: translateY(20px); }
+    .reveal.visible { opacity: 1 !important; transform: none !important; }
+    .delay-1 { transition-delay: 0.10s; }
+
+    /* ── Map container aspect ratio ──────────────────────────────────── */
+    .map-container {
+      aspect-ratio: 2 / 1;
+    }
+    @media (min-width: 768px) {
+      .map-container { aspect-ratio: 2.5 / 1; }
+    }
+    @media (min-width: 1024px) {
+      .map-container { aspect-ratio: 2 / 1; }
+    }
+  </style>
+</head>
+<body class="bg-white min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ World Map — Animated Routes</span>
+  </div>
+
+  <!-- ── Section ────────────────────────────────────────────────────── -->
+  <section class="bg-white w-full py-4 md:py-6">
+
+    <!-- Heading -->
+    <div class="max-w-[1400px] mx-auto px-4 md:px-[120px] mb-12 text-center">
+      <h2 class="reveal from-y text-[24px] md:text-[36px] font-normal text-[#072447] leading-[150%] tracking-tight mb-4">
+        180+ markets. Four platforms. One banking relationship.
+      </h2>
+      <p class="reveal from-y delay-1 text-[14px] md:text-[16px] font-normal text-[#3A4B5C] max-w-2xl mx-auto leading-relaxed">
+        Manage cash, accept payments, execute trade, and optimise supply chain finance across 180+ markets with businessONLINE, EmiratesNBD Pay, smartTRADE and smartSCF.
+      </p>
+    </div>
+
+    <!-- Map — matches React WorldMap container exactly -->
+    <div class="map-container w-full rounded-lg relative overflow-hidden bg-white" id="map-wrap">
+
+      <!-- Dotted background (pre-generated, no CDN needed) -->
+      <img src="./dotted-map.svg" alt="world map" draggable="false"
+        class="h-full w-full pointer-events-none select-none object-cover"
+        style="-webkit-mask-image: linear-gradient(to bottom, transparent, white 10%, white 90%, transparent);
+                        mask-image: linear-gradient(to bottom, transparent, white 10%, white 90%, transparent);" />
+
+      <!-- Animated SVG overlay -->
+      <svg id="map-svg"
+        viewBox="0 0 800 400"
+        class="w-full h-full absolute inset-0 select-none"
+        preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="path-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="white"   stop-opacity="0" />
+            <stop offset="5%"   stop-color="#2765FF" stop-opacity="1" />
+            <stop offset="95%"  stop-color="#2765FF" stop-opacity="1" />
+            <stop offset="100%" stop-color="white"   stop-opacity="0" />
+          </linearGradient>
+          <filter id="glow">
+            <feMorphology operator="dilate" radius="0.5" />
+            <feGaussianBlur stdDeviation="1" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <!-- Paths and dots are injected by JS below -->
+      </svg>
+
+    </div>
+
+  </section>
+
+  <script>
+    // ── Config (matches React props for PaymentsAndTrade page) ────────
+    const LINE_COLOR       = '#2765FF';
+    const X_OFFSET         = 8;
+    const Y_OFFSET         = 40;
+    const ANIM_DURATION    = 2;       // seconds per arc
+    const STAGGER_DELAY    = 0.3;     // seconds between arcs
+    const PAUSE_TIME       = 2;       // hold before looping
+
+    // ── Dots data (exact from PaymentsAndTrade.tsx) ───────────────────
+    const DOTS = [
+      { start: { lat: 25.2048, lng:  55.2708, label: 'Dubai',     labelSide: 'below' },
+        end:   { lat: 48.8566, lng:   2.3522, label: 'Paris',     labelSide: 'below' } },
+      { start: { lat: 25.2048, lng:  55.2708, label: 'Dubai',     labelSide: 'below' },
+        end:   { lat: 40.7128, lng: -90.0,    label: 'New York',  labelSide: 'below' } },
+      { start: { lat: 25.2048, lng:  55.2708, label: 'Dubai',     labelSide: 'below' },
+        end:   { lat: 30.0444, lng:  31.2357, label: 'Cairo',     labelSide: 'below' } },
+      { start: { lat: 25.2048, lng:  55.2708, label: 'Dubai',     labelSide: 'below' },
+        end:   { lat: 19.0760, lng:  72.8777, label: 'Mumbai',    labelSide: 'below' } },
+      { start: { lat: 25.2048, lng:  55.2708, label: 'Dubai',     labelSide: 'below' },
+        end:   { lat:  1.3521, lng: 103.8198, label: 'Singapore', labelSide: 'below' } },
+      { start: { lat:  1.3521, lng: 103.8198, label: 'Singapore', labelSide: 'below' },
+        end:   { lat: 31.2304, lng: 121.4737, label: 'Shanghai',  labelSide: 'below' } },
+      { start: { lat:  1.3521, lng: 103.8198, label: 'Singapore', labelSide: 'below' },
+        end:   { lat: 35.6762, lng: 139.6503, label: 'Tokyo',     labelSide: 'below' } },
+    ];
+
+    const N                  = DOTS.length;
+    const totalAnimationTime = N * STAGGER_DELAY + ANIM_DURATION;
+    const fullCycleDuration  = totalAnimationTime + PAUSE_TIME;
+
+    // ── Helpers ───────────────────────────────────────────────────────
+    const svgNS = 'http://www.w3.org/2000/svg';
+    const svg   = document.getElementById('map-svg');
+
+    function projectPoint(lat, lng) {
+      return {
+        x: (lng + 180) * (800 / 360) + X_OFFSET,
+        y: (90 - lat)  * (400 / 180) + Y_OFFSET,
+      };
+    }
+
+    function createCurvedPath(s, e) {
+      const midX = (s.x + e.x) / 2;
+      const midY = Math.min(s.y, e.y) - 50;
+      return `M ${s.x} ${s.y} Q ${midX} ${midY} ${e.x} ${e.y}`;
+    }
+
+    function labelOffset(side) {
+      if (side === 'below') return { x: 0, y:   6 };
+      if (side === 'left')  return { x: 0, y:  -9 };
+      if (side === 'right') return { x: 0, y:  -9 };
+      return { x: 0, y: -26 }; // above (default)
+    }
+
+    function el(tag, attrs = {}) {
+      const e = document.createElementNS(svgNS, tag);
+      Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+      return e;
+    }
+
+    // ── Deduplicate city locations ────────────────────────────────────
+    const seen = new Map();
+    DOTS.forEach((dot, i) => {
+      [dot.start, dot.end].forEach(ep => {
+        const key = `${ep.lat.toFixed(1)},${ep.lng.toFixed(1)}`;
+        if (!seen.has(key)) seen.set(key, { lat: ep.lat, lng: ep.lng, endpoint: ep, index: i });
+      });
+    });
+    const uniqueLocations = Array.from(seen.values());
+
+    // ── Draw animated arc paths ───────────────────────────────────────
+    DOTS.forEach((dot, i) => {
+      const s   = projectPoint(dot.start.lat, dot.start.lng);
+      const e   = projectPoint(dot.end.lat,   dot.end.lng);
+      const d   = createCurvedPath(s, e);
+
+      const startTime = (i * STAGGER_DELAY) / fullCycleDuration;
+      const endTime   = (i * STAGGER_DELAY + ANIM_DURATION) / fullCycleDuration;
+      const resetTime = totalAnimationTime / fullCycleDuration;
+
+      const g    = el('g');
+      const path = el('path', {
+        d,
+        fill:           'none',
+        stroke:         'url(#path-gradient)',
+        'stroke-width': '1',
+      });
+      g.appendChild(path);
+      svg.appendChild(g);
+
+      // Must be in DOM to call getTotalLength()
+      const len = path.getTotalLength();
+      path.style.strokeDasharray  = len;
+      path.style.strokeDashoffset = len;
+
+      const anim = el('animate', {
+        attributeName: 'stroke-dashoffset',
+        values:    `${len};${len};0;0;${len}`,
+        keyTimes:  `0;${startTime.toFixed(4)};${endTime.toFixed(4)};${resetTime.toFixed(4)};1`,
+        dur:       `${fullCycleDuration}s`,
+        repeatCount: 'indefinite',
+        calcMode:  'linear',
+      });
+      path.appendChild(anim);
+    });
+
+    // ── Draw city dots + labels ───────────────────────────────────────
+    uniqueLocations.forEach(({ lat, lng, endpoint, index }) => {
+      const pt         = projectPoint(lat, lng);
+      const side       = endpoint.labelSide ?? 'above';
+      const off        = labelOffset(side);
+      const pulseBegin = ((index * 0.4) % 1.5).toFixed(2);
+      const labelDelay = (0.35 * index + 0.3).toFixed(2);
+
+      const g = el('g');
+
+      // Solid dot with glow
+      g.appendChild(el('circle', {
+        cx: pt.x, cy: pt.y, r: '3',
+        fill: LINE_COLOR, filter: 'url(#glow)',
+      }));
+
+      // Pulsing ring
+      const pulse = el('circle', {
+        cx: pt.x, cy: pt.y, r: '3',
+        fill: LINE_COLOR, opacity: '0.5',
+      });
+      const animR = el('animate', {
+        attributeName: 'r',
+        from: '3', to: '12', dur: '2s',
+        begin: `${pulseBegin}s`, repeatCount: 'indefinite',
+      });
+      const animOp = el('animate', {
+        attributeName: 'opacity',
+        from: '0.6', to: '0', dur: '2s',
+        begin: `${pulseBegin}s`, repeatCount: 'indefinite',
+      });
+      pulse.appendChild(animR);
+      pulse.appendChild(animOp);
+      g.appendChild(pulse);
+
+      // Label (rect + text)
+      if (endpoint.label) {
+        const city  = endpoint.label;
+        const boxW  = Math.ceil(city.length * 4.2 + 16);
+        const boxH  = 14;
+        let centerX = pt.x;
+        if (side === 'left')  centerX = pt.x - boxW / 2 - 10;
+        if (side === 'right') centerX = pt.x + boxW / 2 + 10;
+        const boxX  = centerX - boxW / 2;
+        const boxY  = pt.y + off.y;
+        const textY = boxY + boxH / 2 + 2;
+
+        const labelG = el('g', { opacity: '0' });
+        labelG.style.pointerEvents = 'none';
+
+        const rect = el('rect', {
+          x: boxX, y: boxY,
+          width: boxW, height: boxH, rx: '4',
+          fill: 'rgba(255,255,255,0.95)',
+          stroke: '#e5e7eb', 'stroke-width': '0.75',
+        });
+        rect.style.filter = 'drop-shadow(0 1px 4px rgba(0,0,0,0.14))';
+        labelG.appendChild(rect);
+
+        const text = el('text', {
+          x: centerX, y: textY,
+          'text-anchor': 'middle',
+          fill: '#000000', 'font-size': '6',
+          'font-weight': '600',
+          'font-family': 'Plus Jakarta Sans, system-ui, sans-serif',
+          'letter-spacing': '0.3',
+        });
+        text.textContent = city;
+        labelG.appendChild(text);
+
+        // Fade in label
+        labelG.appendChild(el('animate', {
+          attributeName: 'opacity',
+          from: '0', to: '1',
+          dur: '0.5s', begin: `${labelDelay}s`,
+          fill: 'freeze',
+        }));
+
+        g.appendChild(labelG);
+      }
+
+      svg.appendChild(g);
+    });
+
+    // ── Scroll reveal ─────────────────────────────────────────────────
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

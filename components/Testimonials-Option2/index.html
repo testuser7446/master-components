@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Testimonials — Carousel | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Scroll-reveal ───────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.9s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.from-y { transform: translateY(24px); }
+    .reveal.visible { opacity: 1 !important; transform: none !important; }
+    .delay-1 { transition-delay: 0.08s; }
+
+    /* ── Card transitions ────────────────────────────────────────────── */
+    .t-card {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      transition: opacity 0.5s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.5s cubic-bezier(0.16,1,0.3,1),
+                  width 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+    .t-card.is-active {
+      width: 680px;
+      opacity: 1;
+      transform: scale(1);
+      cursor: default;
+    }
+    .t-card.is-side {
+      width: 240px;
+      opacity: 0.35;
+      transform: scale(0.97);
+      cursor: pointer;
+    }
+
+    /* ── Mobile: full-width active card, hide side cards ─────────────── */
+    @media (max-width: 767px) {
+      .t-card.is-active { width: calc(100vw - 32px); }
+      .t-card.is-side   { display: none; }
+    }
+
+    /* ── Dot pill ────────────────────────────────────────────────────── */
+    .dot {
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      transition: width 0.4s cubic-bezier(0.16,1,0.3,1),
+                  background-color 0.3s ease;
+    }
+    .dot.active   { width: 24px; height: 8px; background: #072447; }
+    .dot.inactive { width: 8px;  height: 8px; background: rgba(7,36,71,0.25); }
+    .dot.inactive:hover { background: rgba(7,36,71,0.50); }
+  </style>
+</head>
+<body class="bg-white min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ Testimonials — Carousel</span>
+  </div>
+
+  <!-- ── Section ────────────────────────────────────────────────────── -->
+  <section class="bg-white w-full py-4 md:py-6 overflow-hidden">
+
+    <!-- Heading -->
+    <div class="max-w-[1400px] mx-auto px-4 md:px-[120px] mb-12">
+      <div class="text-center">
+        <h2 class="reveal from-y text-[24px] md:text-[36px] font-normal text-[#072447] tracking-tight mb-4">
+          Testimonials
+        </h2>
+        <p class="reveal from-y delay-1 text-[15px] md:text-[16px] text-[#3A4B5C] max-w-md mx-auto leading-relaxed">
+          See how we've helped businesses like yours succeed through our clients' experiences.
+        </p>
+      </div>
+    </div>
+
+    <!-- Card strip — full bleed, 3 slots: prev · active · next -->
+    <div class="relative flex items-stretch justify-center gap-5 px-4">
+      <div class="t-card is-side" id="card-prev" onclick="handleSideClick('prev')"></div>
+      <div class="t-card is-active"  id="card-active"></div>
+      <div class="t-card is-side" id="card-next" onclick="handleSideClick('next')"></div>
+    </div>
+
+    <!-- Dot indicators -->
+    <div class="flex items-center justify-center mt-4">
+      <div id="dots-pill"
+        class="flex items-center gap-1.5 rounded-full px-4 h-9"
+        style="background:rgba(0,0,0,0.08);
+               backdrop-filter:blur(24px);
+               -webkit-backdrop-filter:blur(24px);
+               box-shadow:inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 8px rgba(0,0,0,0.08);">
+      </div>
+    </div>
+
+  </section>
+
+  <script>
+    const TESTIMONIALS = [
+      {
+        image:   "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=900&q=80&auto=format&fit=crop",
+        author:  "Khalid Al Rashidi",
+        company: "Al Rashidi Group",
+        quote:   "Managing cash across 14 entities in 6 countries used to take a team. businessONLINE reduced that to one dashboard — and one login.",
+        href:    "#",
+      },
+      {
+        image:   "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=900&q=80&auto=format&fit=crop",
+        author:  "Fatima Al Zarouni",
+        company: "ENOC Group",
+        quote:   "Our treasury team processes cross-border payments in under two minutes. That used to take half a day. The difference is businessONLINE.",
+        href:    "#",
+      },
+      {
+        image:   "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=900&q=80&auto=format&fit=crop",
+        author:  "James Whitfield",
+        company: "DP World",
+        quote:   "The trade finance capability gave us the confidence to move into three new corridors in under six months. That pace would not have been possible otherwise.",
+        href:    "#",
+      },
+      {
+        image:   "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&q=80&auto=format&fit=crop",
+        author:  "Meera Nair",
+        company: "Majid Al Futtaim",
+        quote:   "Our ERP integration took three days. Our team was processing payments on day four. Emirates NBD made a complex transition feel straightforward.",
+        href:    "#",
+      },
+      {
+        image:   "https://images.unsplash.com/photo-1551135049-8a33b5883817?w=900&q=80&auto=format&fit=crop",
+        author:  "Omar Hussain",
+        company: "Aldar Properties",
+        quote:   "Liquidity visibility, cross-border payments, and multi-entity approvals — all in one place. businessONLINE scaled exactly as our portfolio did.",
+        href:    "#",
+      },
+    ];
+
+    const N              = TESTIMONIALS.length;
+    const AUTOPLAY_DELAY = 4000;
+
+    let active  = 0;
+    let playing = true;
+    let timer   = null;
+
+    /* ── Timer ───────────────────────────────────────────────────────── */
+    function startTimer() {
+      clearInterval(timer);
+      timer = setInterval(() => goTo((active + 1) % N), AUTOPLAY_DELAY);
+    }
+
+    /* ── Navigation ──────────────────────────────────────────────────── */
+    function goTo(index) {
+      active = index;
+      render();
+      if (playing) startTimer();
+    }
+
+    function handleSideClick(side) {
+      goTo(side === 'prev' ? (active - 1 + N) % N : (active + 1) % N);
+    }
+
+    /* ── Play / Pause ────────────────────────────────────────────────── */
+    function togglePlay() {
+      playing = !playing;
+      if (playing) startTimer(); else clearInterval(timer);
+      // Just swap the icon without a full re-render
+      const btn = document.getElementById('play-pause-btn');
+      if (btn) btn.innerHTML = playIcon();
+    }
+
+    function playIcon() {
+      return playing
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+    }
+
+    /* ── Build card inner HTML ───────────────────────────────────────── */
+    function cardHTML(t, isActive) {
+      const imgBlock = `
+        <div class="relative rounded-2xl overflow-hidden" style="height:420px;">
+          <img src="${t.image}" alt="${t.author}" class="w-full h-full object-cover" />
+          ${isActive ? `
+          <button id="play-pause-btn"
+            onclick="event.stopPropagation(); togglePlay();"
+            class="absolute bottom-4 left-4 w-9 h-9 rounded-full flex items-center justify-center text-white transition-colors duration-200"
+            style="background:rgba(0,0,0,0.30); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);">
+            ${playIcon()}
+          </button>` : ''}
+        </div>`;
+
+      const textBlock = isActive ? `
+        <div class="mt-4 flex items-start justify-between gap-4">
+          <blockquote class="text-[20px] md:text-[24px] font-light text-[#072447] leading-snug tracking-tight max-w-xl">
+            <span class="text-[#3A4B5C] mr-1">"</span>${t.quote}<span class="text-[#3A4B5C]">"</span>
+          </blockquote>
+          <a href="${t.href}" class="shrink-0 text-[13px] font-semibold text-[#2765FF] hover:underline whitespace-nowrap mt-1">Read case study</a>
+        </div>` : `
+        <div class="mt-4 flex items-start justify-between gap-4">
+          <p class="text-[13px] text-[#3A4B5C] font-medium truncate">${t.author}</p>
+          <a href="${t.href}" class="shrink-0 text-[12px] font-semibold text-[#2765FF] hover:underline whitespace-nowrap">Read case study</a>
+        </div>`;
+
+      return imgBlock + textBlock;
+    }
+
+    /* ── Render ──────────────────────────────────────────────────────── */
+    function render() {
+      const prev = (active - 1 + N) % N;
+      const next = (active + 1) % N;
+
+      document.getElementById('card-prev').innerHTML   = cardHTML(TESTIMONIALS[prev],   false);
+      document.getElementById('card-active').innerHTML = cardHTML(TESTIMONIALS[active], true);
+      document.getElementById('card-next').innerHTML   = cardHTML(TESTIMONIALS[next],   false);
+
+      // Dots
+      const pill = document.getElementById('dots-pill');
+      pill.innerHTML = TESTIMONIALS.map((_, i) =>
+        `<button class="dot ${i === active ? 'active' : 'inactive'}" onclick="goTo(${i})"></button>`
+      ).join('');
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────
+    render();
+    startTimer();
+
+    // ── Scroll reveal ─────────────────────────────────────────────────
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accordion — Two Column | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Accordion body collapse / expand ───────────────────────────── */
+    .acc-body {
+      overflow: hidden;
+      transition: height 0.35s cubic-bezier(0.16,1,0.3,1),
+                  opacity 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    /* ── Icon box: fills blue on button hover ────────────────────────── */
+    .acc-btn:hover .icon-box { background: #2765FF; }
+    .acc-btn:hover .icon-bar { background: white; }
+
+    /* ── Horizontal bar — always visible (the minus) ─────────────────── */
+    .icon-bar-h {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 14px; height: 2px;
+      transform: translate(-50%, -50%);
+      border-radius: 9999px;
+      background: #2765FF;
+      transition: background-color 0.3s ease;
+    }
+
+    /* ── Vertical bar — scaleY 1→0 collapses inward (+ → −) ─────────── */
+    .icon-bar-v {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 2px; height: 14px;
+      transform: translate(-50%, -50%) scaleY(1);
+      transform-origin: center;
+      border-radius: 9999px;
+      background: #2765FF;
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+                  background-color 0.3s ease;
+    }
+    .icon-bar-v.is-open   { transform: translate(-50%, -50%) scaleY(0); }
+    .icon-bar-v.is-closed { transform: translate(-50%, -50%) scaleY(1); }
+  </style>
+</head>
+<body class="bg-white min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ Accordion — Two Column</span>
+  </div>
+
+  <!-- ── Section ────────────────────────────────────────────────────── -->
+  <section class="bg-white w-full px-4 md:px-[120px] py-4 md:py-6">
+    <div class="max-w-[1400px] mx-auto">
+
+      <!-- Top border + accordion rows -->
+      <div class="border-t border-[#E5E7EB]" id="accordion"></div>
+
+    </div>
+  </section>
+
+  <script>
+    const ACCORDION_ITEMS = [
+      {
+        title: "Cash Management",
+        items: [
+          { name: "Multi-bank, multi-currency cash pooling." },
+          { name: "Automated sweeping and notional pooling." },
+          { name: "Real-time liquidity dashboards across all entities." },
+          { name: "Intraday credit and overdraft facilities." },
+          { name: "Working capital optimisation tools." },
+          { name: "Interest optimisation across accounts." },
+        ],
+      },
+    ];
+
+    // First item open by default
+    const openState = ACCORDION_ITEMS.map((_, i) => i === 0);
+
+    /* ── Build DOM ───────────────────────────────────────────────────── */
+    function buildAccordion() {
+      const container = document.getElementById('accordion');
+      container.innerHTML = '';
+
+      ACCORDION_ITEMS.forEach((item, i) => {
+        const isOpen = openState[i];
+
+        const row = document.createElement('div');
+        row.className = 'border-b border-[#E5E7EB]';
+
+        row.innerHTML = `
+          <button class="acc-btn w-full flex items-center gap-4 py-5 text-left" data-idx="${i}">
+            <!-- +/− icon -->
+            <span class="icon-box w-8 h-8 rounded border-2 border-[#2765FF] shrink-0 relative transition-colors duration-300" style="display:flex;align-items:center;justify-content:center;">
+              <span class="icon-bar icon-bar-h"></span>
+              <span class="icon-bar icon-bar-v ${isOpen ? 'is-open' : 'is-closed'}"></span>
+            </span>
+            <span class="text-[16px] md:text-[18px] font-semibold text-[#2765FF]">${item.title}</span>
+          </button>
+
+          <div class="acc-body" style="height:${isOpen ? 'auto' : '0px'}; opacity:${isOpen ? '1' : '0'};">
+            <div class="pb-8 pl-12 grid grid-cols-1 md:grid-cols-2 gap-x-12">
+              ${item.items.map(entry => `
+                <div class="flex items-start gap-3 py-2">
+                  <span class="mt-[6px] rounded-full bg-[#072447] shrink-0"
+                        style="width:6px;height:6px;min-width:6px;"></span>
+                  <p class="text-[14px] md:text-[15px] font-medium text-[#072447]">${entry.name}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+        container.appendChild(row);
+      });
+
+      // Click handlers
+      container.querySelectorAll('.acc-btn').forEach(btn => {
+        btn.addEventListener('click', () => toggle(parseInt(btn.dataset.idx)));
+      });
+    }
+
+    /* ── Toggle ──────────────────────────────────────────────────────── */
+    function toggle(idx) {
+      openState[idx] = !openState[idx];
+      const isOpen = openState[idx];
+
+      const row   = document.querySelectorAll('#accordion > div')[idx];
+      const body  = row.querySelector('.acc-body');
+      const vBar  = row.querySelector('.icon-bar-v');
+      const inner = body.querySelector('div');
+
+      if (isOpen) {
+        // Expand
+        body.style.height  = '0px';
+        body.style.opacity = '0';
+        const target = inner.scrollHeight + 'px';
+        requestAnimationFrame(() => {
+          body.style.height  = target;
+          body.style.opacity = '1';
+        });
+        body.addEventListener('transitionend', () => {
+          body.style.height = 'auto';
+        }, { once: true });
+      } else {
+        // Collapse — pin height first, then animate to 0
+        body.style.height = body.scrollHeight + 'px';
+        requestAnimationFrame(() => {
+          body.style.height  = '0px';
+          body.style.opacity = '0';
+        });
+      }
+
+      // Icon: + ↔ −
+      vBar.classList.toggle('is-open',   isOpen);
+      vBar.classList.toggle('is-closed', !isOpen);
+    }
+
+    buildAccordion();
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emirates NBD — Component Library</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Sidebar scroll */
+    #sidebar { scrollbar-width: thin; scrollbar-color: rgba(7,36,71,0.15) transparent; }
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-track { background: transparent; }
+    #sidebar::-webkit-scrollbar-thumb { background: rgba(7,36,71,0.15); border-radius: 4px; }
+
+    /* Component list item */
+    .comp-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; border-radius: 8px; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      border: 1px solid transparent;
+    }
+    .comp-item:hover { background: #F4F7FB; }
+    .comp-item.active {
+      background: #EEF3FF;
+      border-color: #C7D9FF;
+      color: #072447;
+    }
+    .comp-item.active .comp-dot { background: #2765FF; }
+    .comp-item.active .comp-label { color: #072447; font-weight: 600; }
+
+    .comp-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #CBD5E1; flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .comp-label { font-size: 13px; color: #3A4B5C; line-height: 1.3; }
+
+    /* Category heading */
+    .cat-head {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #072447; opacity: 0.35;
+      padding: 16px 12px 6px; margin-top: 4px;
+    }
+
+    /* Preview iframe */
+    #preview-frame {
+      width: 100%; height: 100%; border: none;
+      transition: opacity 0.2s;
+    }
+    #preview-frame.loading { opacity: 0; }
+
+    /* Viewport buttons */
+    .vp-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 10px; border-radius: 6px; font-size: 11px;
+      font-weight: 500; color: #6C7A89; border: 1px solid #E5E7EB;
+      cursor: pointer; background: white; transition: all 0.15s;
+    }
+    .vp-btn:hover { background: #F4F7FB; color: #072447; }
+    .vp-btn.active { background: #072447; color: white; border-color: #072447; }
+
+    /* Iframe wrapper for viewport sizing */
+    #preview-wrapper {
+      transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
+      margin: 0 auto; height: 100%;
+    }
+
+    /* Search input */
+    #search-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(39,101,255,0.2); }
+
+    /* Tag badges */
+    .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+
+    /* Highlight search match */
+    .match-hide { display: none !important; }
+    .cat-empty { display: none; }
+  </style>
+</head>
+<body class="bg-white overflow-hidden" style="height:100vh; display:flex; flex-direction:column;">
+
+  <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
+  <header class="bg-[#0f2340] flex items-center justify-between h-12 px-5 shrink-0 z-50">
+    <div class="flex items-center gap-3">
+      <img src="./assets/images/EmiratesNBD-logo.svg" alt="Emirates NBD" class="h-6 w-auto brightness-0 invert" />
+      <span class="text-white/25 text-sm">|</span>
+      <span class="text-white/70 text-[11px] font-semibold tracking-widest uppercase">Component Library V3</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span id="comp-count" class="text-white/40 text-xs">45 components</span>
+      <button onclick="openInTab()" title="Open in new tab"
+        class="flex items-center gap-1.5 text-white/50 hover:text-white text-xs transition-colors px-3 py-1.5 rounded-lg hover:bg-white/10">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+        Open in tab
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Body: sidebar + preview ──────────────────────────────────────────── -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- ── Left Sidebar ──────────────────────────────────────────────────── -->
+    <aside class="w-[280px] shrink-0 border-r border-[#E5E7EB] flex flex-col bg-white overflow-hidden">
+
+      <!-- Search -->
+      <div class="px-3 py-3 border-b border-[#E5E7EB]">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input id="search-input" type="text" placeholder="Search components…"
+            oninput="filterComponents(this.value)"
+            class="w-full bg-[#F4F7FB] border border-[#E5E7EB] rounded-lg pl-8 pr-3 py-2 text-[12px] placeholder-gray-400 text-[#072447]" />
+        </div>
+      </div>
+
+      <!-- Component list -->
+      <nav id="sidebar" class="flex-1 overflow-y-auto px-2 pb-6">
+        <!-- Injected by JS -->
+      </nav>
+    </aside>
+
+    <!-- ── Right: Preview area ────────────────────────────────────────────── -->
+    <div class="flex-1 flex flex-col overflow-hidden bg-[#F0F2F5]">
+
+      <!-- Preview toolbar -->
+      <div class="bg-white border-b border-[#E5E7EB] px-5 h-11 flex items-center justify-between shrink-0 gap-4">
+        <!-- Component name -->
+        <div class="flex items-center gap-2 min-w-0">
+          <span id="preview-category" class="text-[10px] font-semibold tracking-widest uppercase text-[#2765FF]/70 shrink-0"></span>
+          <span class="text-[#E5E7EB] text-xs shrink-0">/</span>
+          <span id="preview-title" class="text-[13px] font-semibold text-[#072447] truncate">Select a component</span>
+        </div>
+
+        <!-- Viewport toggles + actions -->
+        <div class="flex items-center gap-2 shrink-0">
+          <!-- Viewport preset buttons -->
+          <div class="flex items-center gap-1" id="vp-btns">
+            <button class="vp-btn active" onclick="setViewport('full', this)" data-w="full" title="Full width">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v2H3V3zm0 16h18v2H3v-2zm0-8h18v2H3v-2z"/></svg>
+              Desktop
+            </button>
+            <button class="vp-btn" onclick="setViewport('1280px', this)" data-w="1280px" title="1280px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3H4v10c0 1.1.9 2 2 2h14a2 2 0 002-2V3zm-2 8H6V5h12v6zm4 7h-2a2 2 0 01-2 2H6a2 2 0 01-2-2H2v-2h20v2z"/></svg>
+              1280
+            </button>
+            <button class="vp-btn" onclick="setViewport('768px', this)" data-w="768px" title="768px tablet">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 0h-13C4.12 0 3 1.12 3 2.5v19C3 22.88 4.12 24 5.5 24h13c1.38 0 2.5-1.12 2.5-2.5v-19C21 1.12 19.88 0 18.5 0zM11 1h2v1h-2V1zm1 21c-.83 0-1.5-.67-1.5-1.5S11.17 19 12 19s1.5.67 1.5 1.5S12.83 22 12 22zm7-4H5V3h14v15z"/></svg>
+              Tablet
+            </button>
+            <button class="vp-btn" onclick="setViewport('390px', this)" data-w="390px" title="390px mobile">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 1h-8C6.12 1 5 2.12 5 3.5v17C5 21.88 6.12 23 7.5 23h8c1.38 0 2.5-1.12 2.5-2.5v-17C18 2.12 16.88 1 15.5 1zm-4 21c-.83 0-1.5-.67-1.5-1.5S10.67 19 11.5 19s1.5.67 1.5 1.5S12.33 22 11.5 22zm4.5-4H7V4h9v14z"/></svg>
+              Mobile
+            </button>
+          </div>
+
+          <div class="w-px h-5 bg-[#E5E7EB]"></div>
+
+          <!-- Reload -->
+          <button onclick="reloadFrame()" title="Reload preview"
+            class="vp-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            Reload
+          </button>
+
+          <!-- Copy HTML -->
+          <button id="copy-btn" onclick="copyHTML()" title="Copy component HTML"
+            class="vp-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4a2 2 0 00-2 2v14h2V3h12V1zm3 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z"/></svg>
+            <span id="copy-label">Copy HTML</span>
+          </button>
+
+          <!-- Open in new tab -->
+          <button onclick="openInTab()" title="Open in new tab"
+            class="vp-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Iframe container -->
+      <div class="flex-1 overflow-auto flex items-start justify-center p-4" id="preview-container">
+        <div id="preview-wrapper" class="bg-white shadow-xl rounded-xl overflow-hidden" style="width:100%; height:calc(100vh - 116px); min-height:600px;">
+
+          <!-- Empty state -->
+          <div id="empty-state" class="w-full h-full flex flex-col items-center justify-center bg-white gap-5">
+            <div class="w-16 h-16 rounded-2xl bg-[#EEF3FF] flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="#2765FF"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z"/></svg>
+            </div>
+            <div class="text-center">
+              <p class="text-[#072447] font-semibold text-base mb-1">Select a component</p>
+              <p class="text-[#6C7A89] text-sm">Choose any component from the left panel to preview it here</p>
+            </div>
+            <div class="flex flex-wrap gap-2 justify-center max-w-xs mt-2">
+              <span class="tag bg-[#EEF3FF] text-[#2765FF]">45 Components</span>
+              <span class="tag bg-[#F0FFF4] text-emerald-700">No Build Step</span>
+              <span class="tag bg-[#FFF8EC] text-amber-700">file:// Compatible</span>
+            </div>
+          </div>
+
+          <iframe id="preview-frame" src="" class="loading" style="display:none; width:100%; height:100%; border:none;"
+            onload="frameLoaded()" title="Component Preview"></iframe>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── Component catalogue ────────────────────────────────────────────────────
+    const COMPONENTS = [
+      {
+        category: 'Hero Sections',
+        items: [
+          { label: 'Scroll Canvas (Frame Sequence)', path: 'components/Hero-Scroll-Canvas/index.html', tags: ['Scroll'] },
+          { label: 'Animation BG — Left Aligned',   path: 'components/Hero-Animation-Left/index.html', tags: ['Canvas'] },
+          { label: 'Animation BG — Center Aligned', path: 'components/Hero-Animation-Center/index.html', tags: ['Canvas'] },
+          { label: 'Animation BG — Arabic RTL',     path: 'components/Hero-Animation-Arabic/index.html', tags: ['RTL'] },
+          { label: 'Video BG — Left Aligned',       path: 'components/Hero-Video-Left/index.html', tags: ['Video'] },
+          { label: 'Video BG — Center Aligned',     path: 'components/Hero-Video-Center/index.html', tags: ['Video'] },
+          { label: 'Video BG — Arabic RTL',         path: 'components/Hero-Video-Arabic/index.html', tags: ['Video','RTL'] },
+          { label: 'Cinematic + Deal Cards',       path: 'components/Hero-IB-Cinematic/index.html',       tags: ['Auto-rotate'] },
+          { label: 'Cinematic + Deal Cards (Light)', path: 'components/Hero-IB-Cinematic-Light/index.html', tags: ['Auto-rotate', 'Light'] },
+          { label: 'Image BG — Left Aligned',       path: 'components/Hero-Image-Left/index.html', tags: ['Image'] },
+        ]
+      },
+      {
+        category: 'Metrics & Stats',
+        items: [
+          { label: 'Metrics — Type 1 (2×2 Grid)',  path: 'components/Metrics-Type1/index.html', tags: ['CountUp'] },
+          { label: 'Metrics — Type 2 (Hero + Row)',path: 'components/Metrics-Type2/index.html', tags: ['CountUp'] },
+        ]
+      },
+      {
+        category: 'Content & Features',
+        items: [
+          { label: 'Storytelling — Video BG Tabs',   path: 'components/VideoTab-Animation/index.html', tags: ['Video'] },
+          { label: 'Features — Auto-Progress Tabs',  path: 'components/Features-AutoProgress/index.html', tags: ['Auto Tab'] },
+          { label: 'Focus Rail — 3D Carousel (Dark)',path: 'components/Focus-Rail-Dark/index.html', tags: ['Carousel'] },
+          { label: 'Focus Rail — 3D Carousel (Light)',path: 'components/Focus-Rail-Light/index.html', tags: ['Carousel'] },
+          { label: 'Feature Tab Cards',              path: 'components/Feature-Tab-Cards/index.html', tags: ['Tabs'] },
+          { label: 'Product Cards — Digital Tools',  path: 'components/Digital-Tools-Showcase/index.html', tags: ['Cards'] },
+        ]
+      },
+      {
+        category: 'Scroll & Parallax',
+        items: [
+          { label: 'Zoom Parallax — Scroll Scale (Dark)',  path: 'components/Zoom-Parallax-Dark/index.html', tags: ['Scroll'] },
+          { label: 'Zoom Parallax — Scroll Scale (Light)', path: 'components/Zoom-Parallax-Light/index.html', tags: ['Scroll'] },
+          { label: 'Download App — GSAP Scroll',           path: 'components/Download-App-Cinematic/index.html', tags: ['GSAP'] },
+        ]
+      },
+      {
+        category: 'Interactive',
+        items: [
+          { label: 'Login — Image Slider + Form',           path: 'components/Login-ImageSlider/index.html', tags: ['Form'] },
+          { label: 'Carousel — Autoplay Left',              path: 'components/Carousel-Left/index.html', tags: ['Carousel'] },
+          { label: 'Carousel — Autoplay Center',            path: 'components/Carousel-Center/index.html', tags: ['Carousel'] },
+        ]
+      },
+      {
+        category: 'Calls to Action',
+        items: [
+          { label: 'CTA — Horizontal Marquee (Dark)',  path: 'components/CTA-Marquee-Dark/index.html', tags: ['Marquee'] },
+          { label: 'CTA — Horizontal Marquee (Light)', path: 'components/CTA-Marquee-Light/index.html', tags: ['Marquee'] },
+          { label: 'Static Banner',                    path: 'components/Static-Banner/index.html', tags: ['Banner'] },
+        ]
+      },
+      {
+        category: 'Content Blocks',
+        items: [
+          { label: 'Content Block with Numbers',           path: 'components/Content-Block-Numbers/index.html',            tags: ['Stats'] },
+          { label: 'Content Block — No Numbers (Stack)',    path: 'components/Content-Block-NoNumbers-Stack/index.html',    tags: ['Content'] },
+          { label: 'Content Block — No Numbers (Side by Side)', path: 'components/Content-Block-NoNumbers-SideBySide/index.html', tags: ['Content'] },
+          { label: 'History Timeline',              path: 'components/History-Timeline/index.html', tags: ['Timeline'] },
+          { label: 'Solutions & Awards',            path: 'components/Solutions-Awards/index.html', tags: ['Awards'] },
+          { label: 'Video Content — Featured + Carousel', path: 'components/Video-Content/index.html', tags: ['Video'] },
+        ]
+      },
+      {
+        category: 'Social Proof & Partners',
+        items: [
+          { label: 'Trusted Partners — Logo Grid',    path: 'components/Trusted-Partners-Grid/index.html', tags: ['Logos'] },
+          { label: 'Trusted Partners — Marquee',      path: 'components/Trusted-Partners-Marquee/index.html', tags: ['Marquee'] },
+          { label: 'Testimonials — Editorial',        path: 'components/Testimonials-Option1/index.html', tags: ['Quote'] },
+          { label: 'Testimonials — Carousel',         path: 'components/Testimonials-Option2/index.html', tags: ['Carousel'] },
+        ]
+      },
+      {
+        category: 'Navigation & Accordions',
+        items: [
+          { label: 'Accordion',                path: 'components/Accordion-Offerings/index.html', tags: ['Accordion'] },
+          { label: 'Accordion — Two Column',  path: 'components/Accordion-TwoCol/index.html',    tags: ['Accordion'] },
+          { label: 'Breadcrumb',              path: 'components/Breadcrumb/index.html', tags: ['Nav'] },
+        ]
+      },
+      {
+        category: 'Maps & Global Reach',
+        items: [
+          { label: 'World Map — Animated Routes', path: 'components/World-Map/index.html', tags: ['SVG'] },
+        ]
+      },
+      {
+        category: 'Bento Grid Layouts',
+        items: [
+          { label: 'Bento Grid — Feature Cards (Dark)',  path: 'components/Bento-Grid-Dark/index.html', tags: ['Bento'] },
+          { label: 'Bento Grid — Feature Cards (Light)', path: 'components/Bento-Grid-Light/index.html', tags: ['Bento'] },
+          { label: 'Bento Image Cards',                  path: 'components/Bento-Image-Cards/index.html', tags: ['Bento'] },
+        ]
+      },
+      {
+        category: 'Footers',
+        items: [
+          { label: 'Footer — Option 1', path: 'components/Footer-Option1/index.html', tags: ['Footer'] },
+          { label: 'Footer — Option 2', path: 'components/Footer-Option2/index.html', tags: ['Footer'] },
+        ]
+      },
+    ];
+
+    // Tag colours
+    const TAG_COLORS = {
+      'Scroll':   'bg-purple-50 text-purple-700',
+      'Canvas':   'bg-rose-50 text-rose-700',
+      'RTL':      'bg-orange-50 text-orange-700',
+      'Video':    'bg-amber-50 text-amber-700',
+      'Auto-rotate': 'bg-sky-50 text-sky-700',
+      'Image':    'bg-teal-50 text-teal-700',
+      'CountUp':  'bg-blue-50 text-blue-700',
+      'Auto Tab': 'bg-indigo-50 text-indigo-700',
+      'Carousel': 'bg-violet-50 text-violet-700',
+      'Tabs':     'bg-cyan-50 text-cyan-700',
+      'Cards':    'bg-slate-100 text-slate-600',
+      'GSAP':     'bg-amber-50 text-amber-700',
+      'Form':     'bg-emerald-50 text-emerald-700',
+      'Marquee':  'bg-slate-100 text-slate-600',
+      'Banner':   'bg-slate-100 text-slate-600',
+      'Stats':    'bg-blue-50 text-blue-700',
+      'Content':  'bg-slate-100 text-slate-600',
+      'Timeline': 'bg-indigo-50 text-indigo-700',
+      'Awards':   'bg-amber-50 text-amber-700',
+      'Logos':    'bg-slate-100 text-slate-600',
+      'Quote':    'bg-slate-100 text-slate-600',
+      'Accordion':'bg-slate-100 text-slate-600',
+      'Nav':      'bg-slate-100 text-slate-600',
+      'SVG':      'bg-blue-50 text-blue-700',
+      'Bento':    'bg-purple-50 text-purple-700',
+      'Footer':   'bg-slate-100 text-slate-600',
+    };
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let activePath = null;
+    let currentViewport = 'full';
+    const previewHeight = 'calc(100vh - 116px)';
+
+    // ── Render sidebar ────────────────────────────────────────────────────────
+    function renderSidebar(filter = '') {
+      const sidebar = document.getElementById('sidebar');
+      const lower = filter.toLowerCase();
+      let html = '';
+      let totalVisible = 0;
+
+      COMPONENTS.forEach(group => {
+        const visibleItems = group.items.filter(item =>
+          !filter || item.label.toLowerCase().includes(lower) || item.tags.some(t => t.toLowerCase().includes(lower))
+        );
+        if (visibleItems.length === 0) return;
+        totalVisible += visibleItems.length;
+
+        html += `<div class="cat-group">
+          <div class="cat-head">${group.category}</div>`;
+        visibleItems.forEach(item => {
+          const isActive = item.path === activePath;
+          const tagHtml = item.tags.map(t =>
+            `<span class="tag ${TAG_COLORS[t] || 'bg-gray-100 text-gray-500'}">${t}</span>`
+          ).join('');
+          html += `
+            <div class="comp-item ${isActive ? 'active' : ''}" onclick="selectComponent('${item.path}', '${escHtml(item.label)}', '${escHtml(group.category)}', this)">
+              <span class="comp-dot"></span>
+              <span class="comp-label flex-1">${item.label}</span>
+              <span class="flex gap-1 shrink-0">${tagHtml}</span>
+            </div>`;
+        });
+        html += `</div>`;
+      });
+
+      if (!html) {
+        html = `<div class="px-3 py-8 text-center text-[12px] text-gray-400">No components match "<strong>${filter}</strong>"</div>`;
+      }
+
+      sidebar.innerHTML = html;
+      document.getElementById('comp-count').textContent = `${totalVisible} components`;
+    }
+
+    function escHtml(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    // ── Select a component ────────────────────────────────────────────────────
+    function selectComponent(path, label, category, el) {
+      activePath = path;
+
+      // Update active state in sidebar
+      document.querySelectorAll('.comp-item').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+
+      // Update toolbar
+      document.getElementById('preview-title').textContent = label;
+      document.getElementById('preview-category').textContent = category;
+
+      // Hide empty state, show frame
+      document.getElementById('empty-state').style.display = 'none';
+      const frame = document.getElementById('preview-frame');
+      frame.style.display = 'block';
+      frame.classList.add('loading');
+      frame.src = path;
+    }
+
+    function frameLoaded() {
+      document.getElementById('preview-frame').classList.remove('loading');
+    }
+
+    // ── Viewport sizing ───────────────────────────────────────────────────────
+    function setViewport(width, btn) {
+      currentViewport = width;
+      const wrapper = document.getElementById('preview-wrapper');
+      if (width === 'full') {
+        wrapper.style.width = '100%';
+        wrapper.style.borderRadius = '12px';
+      } else {
+        wrapper.style.width = width;
+        wrapper.style.borderRadius = '12px';
+      }
+      document.querySelectorAll('.vp-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function reloadFrame() {
+      const frame = document.getElementById('preview-frame');
+      if (frame.src && frame.src !== window.location.href) {
+        frame.classList.add('loading');
+        frame.src = frame.src;
+      }
+    }
+
+    function openInTab() {
+      if (activePath) window.open(activePath, '_blank');
+    }
+
+    function copyHTML() {
+      if (!activePath) return;
+
+      const frame = document.getElementById('preview-frame');
+      if (!frame || !frame.contentWindow) return;
+
+      let responded = false;
+
+      function onMessage(e) {
+        if (!e.data || e.data.type !== 'htmlResponse') return;
+        responded = true;
+        window.removeEventListener('message', onMessage);
+
+        // execCommand works on file:// without needing HTTPS
+        const ta = document.createElement('textarea');
+        ta.value = e.data.html;
+        ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+
+        const label = document.getElementById('copy-label');
+        const btn   = document.getElementById('copy-btn');
+        label.textContent = 'Copied!';
+        btn.style.color   = '#059669';
+        setTimeout(() => {
+          label.textContent = 'Copy HTML';
+          btn.style.color   = '';
+        }, 2000);
+      }
+
+      window.addEventListener('message', onMessage);
+      frame.contentWindow.postMessage({ type: 'requestHTML' }, '*');
+
+      // If no response in 2s the bridge script wasn't found
+      setTimeout(() => {
+        if (!responded) {
+          window.removeEventListener('message', onMessage);
+          const label = document.getElementById('copy-label');
+          label.textContent = 'Failed';
+          setTimeout(() => { label.textContent = 'Copy HTML'; }, 2000);
+        }
+      }, 2000);
+    }
+
+
+
+    // ── Search / filter ───────────────────────────────────────────────────────
+    function filterComponents(value) {
+      renderSidebar(value);
+      // Re-mark active if still visible
+      if (activePath) {
+        document.querySelectorAll('.comp-item').forEach(el => {
+          if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(activePath)) {
+            el.classList.add('active');
+          }
+        });
+      }
+    }
+
+    // ── Keyboard shortcut: Escape clears search ───────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const s = document.getElementById('search-input');
+        s.value = '';
+        filterComponents('');
+        s.blur();
+      }
+    });
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    renderSidebar();
+  </script>
+
+</body>
+</html>

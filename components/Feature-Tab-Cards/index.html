@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Feature Tab Cards | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Hide scrollbar on tab row */
+    #tab-row { scrollbar-width: none; -ms-overflow-style: none; }
+    #tab-row::-webkit-scrollbar { display: none; }
+
+    /* Tab card image transition */
+    .tab-img {
+      transition: opacity 0.65s ease, filter 0.65s ease;
+    }
+    .tab-label {
+      transition: color 0.5s ease;
+    }
+    .tab-card-wrap {
+      transition: box-shadow 0.5s ease;
+    }
+    .tab-card-wrap.active .tab-img {
+      box-shadow: 0 0 0 2px rgba(7,36,71,0.15);
+    }
+
+    /* Ring hidden by default, fades in on active */
+    .ring-wrap {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .tab-card-wrap.active .ring-wrap {
+      opacity: 1;
+    }
+
+    /* Content fade-in animation */
+    @keyframes contentIn {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlideLeft {
+      from { opacity: 0; transform: translateX(-24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeSlideRight {
+      from { opacity: 0; transform: translateX(24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .content-left  { animation: fadeSlideLeft  0.75s cubic-bezier(0.16,1,0.3,1) both; }
+    .content-right { animation: fadeSlideRight 0.75s cubic-bezier(0.16,1,0.3,1) 0.06s both; }
+
+    /* Feature row stagger */
+    .feature-row { opacity: 0; animation: contentIn 0.65s cubic-bezier(0.16,1,0.3,1) both; }
+    .feature-row:nth-child(1) { animation-delay: 0.15s; }
+    .feature-row:nth-child(2) { animation-delay: 0.27s; }
+    .feature-row:nth-child(3) { animation-delay: 0.39s; }
+
+    /* CTA button */
+    .cta-btn {
+      animation: contentIn 0.65s cubic-bezier(0.16,1,0.3,1) 0.18s both;
+    }
+
+    /* Progress ring */
+    @keyframes ringProgress {
+      from { stroke-dashoffset: 62.83; }
+      to   { stroke-dashoffset: 0; }
+    }
+    .progress-ring {
+      stroke-dasharray: 62.83;
+      stroke-dashoffset: 62.83;
+      transition: opacity 0.3s ease;
+    }
+    .progress-ring.running {
+      animation: ringProgress 10s linear forwards;
+    }
+  </style>
+</head>
+<body class="bg-[#F4F7FB] min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ Feature Tab Cards</span>
+  </div>
+
+  <!-- Accessible live region for tab announcements -->
+  <div id="tab-announce" aria-live="polite" aria-atomic="true"
+       class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>
+
+  <section class="w-full py-4 md:py-6 px-4 md:px-[48px] lg:px-[120px]" style="background:#F4F7FB;" aria-label="Feature tabs">
+    <div class="max-w-[1400px] mx-auto flex flex-col gap-10">
+
+      <!-- Top: Image tab cards -->
+      <div class="relative">
+        <!-- Left fade -->
+        <div id="fade-left" class="pointer-events-none absolute left-0 top-0 bottom-1 w-12 z-10 opacity-0 transition-opacity duration-300"
+             style="background: linear-gradient(to right, #F4F7FB 30%, transparent);"></div>
+        <!-- Right fade -->
+        <div id="fade-right" class="pointer-events-none absolute right-0 top-0 bottom-1 w-12 z-10 opacity-0 transition-opacity duration-300"
+             style="background: linear-gradient(to left, #F4F7FB 30%, transparent);"></div>
+        <div id="tab-row" class="flex gap-3 overflow-x-auto pb-1">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+
+      <!-- Bottom: Content -->
+      <div id="content-area"></div>
+
+    </div>
+  </section>
+
+  <script>
+    const TABS = [
+      {
+        id: 1,
+        label: 'Sellers',
+        image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=300&fit=crop&q=80',
+        heading: 'Turning reps into super reps',
+        ctaLabel: 'Explore Sellers solutions',
+        ctaHref: '#',
+        features: [
+          { title: 'Boost meetings booked by 60%', description: 'Use AI-delivered signals to add a new level of precision to your prospecting and watch your conversions soar.' },
+          { title: 'Save 10 hours on research', description: 'Save hours on contact and account research, write perfect emails, and handle objections with generative AI that sounds just like you.' },
+        ],
+      },
+      {
+        id: 2,
+        label: 'Sales Leaders',
+        image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&h=300&fit=crop&q=80',
+        heading: 'Build teams that consistently overperform',
+        ctaLabel: 'Explore Sales Leader solutions',
+        ctaHref: '#',
+        features: [
+          { title: 'Real-time pipeline visibility', description: 'Get instant insight into every deal, forecast with confidence and course-correct before it\'s too late.' },
+          { title: 'Coach at scale', description: 'Identify skill gaps and replicate what top performers do — automatically, across every rep on your team.' },
+        ],
+      },
+      {
+        id: 3,
+        label: 'Founders',
+        image: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=400&h=300&fit=crop&q=80',
+        heading: 'Close your first 100 customers faster',
+        ctaLabel: 'Explore Founder solutions',
+        ctaHref: '#',
+        features: [
+          { title: 'Go from idea to pipeline in days', description: 'Find your ICP, generate your first outreach and book meetings without hiring a full sales team.' },
+          { title: 'Prove product-market fit with data', description: 'Understand exactly which messages resonate and iterate faster with signal-backed insights.' },
+        ],
+      },
+      {
+        id: 4,
+        label: 'RevOps',
+        image: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=400&h=300&fit=crop&q=80',
+        heading: 'Operate your revenue engine with precision',
+        ctaLabel: 'Explore RevOps solutions',
+        ctaHref: '#',
+        features: [
+          { title: 'Single source of truth', description: 'Unify data across every tool in your stack and eliminate the spreadsheet chaos slowing your teams down.' },
+          { title: 'Automate the manual', description: 'Free your team from data entry and reporting — let the platform handle the operational heavy lifting.' },
+        ],
+      },
+      {
+        id: 5,
+        label: 'Marketers',
+        image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=300&fit=crop&q=80',
+        heading: 'Generate demand that actually converts',
+        ctaLabel: 'Explore Marketer solutions',
+        ctaHref: '#',
+        features: [
+          { title: 'Target the right accounts', description: 'Focus spend on accounts showing real buying intent — not just traffic — and watch pipeline quality soar.' },
+          { title: 'Prove marketing impact', description: 'Tie every campaign directly to revenue and finally show leadership the ROI of every dollar spent.' },
+        ],
+      },
+    ];
+
+    let activeId = TABS[0].id;
+    let autoTimer = null;
+
+    function progressRingSVG(isActive) {
+      return `
+        <div class="ring-wrap absolute bottom-2.5 right-2.5"
+             role="timer"
+             aria-label="Tab auto-advances in 10 seconds"
+             aria-hidden="true">
+          <div style="filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" focusable="false">
+              <circle cx="14" cy="14" r="13" fill="rgba(0,0,0,0.38)"/>
+              <circle cx="14" cy="14" r="10" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+              <circle cx="14" cy="14" r="10"
+                stroke="white" stroke-width="2"
+                stroke-linecap="round"
+                transform="rotate(-90 14 14)"
+                class="progress-ring ${isActive ? 'running' : ''}"/>
+            </svg>
+          </div>
+        </div>
+      `;
+    }
+
+    function initTabs() {
+      const row = document.getElementById('tab-row');
+      row.innerHTML = TABS.map(tab => {
+        const isActive = tab.id === activeId;
+        return `
+          <button onclick="setActive(${tab.id})"
+            data-tab-id="${tab.id}"
+            aria-selected="${isActive}"
+            aria-label="${tab.label}${isActive ? ', currently selected' : ''}"
+            role="tab"
+            class="tab-card-wrap flex-shrink-0 flex flex-col items-center gap-3 rounded-2xl cursor-pointer w-[180px] md:w-[220px] ${isActive ? 'active' : ''}">
+            <div class="relative w-full rounded-xl overflow-hidden" style="aspect-ratio:4/5;">
+              <img src="${tab.image}" alt=""
+                class="tab-img w-full h-full object-cover ${isActive ? 'opacity-100' : 'opacity-40 grayscale'}" />
+              ${progressRingSVG(isActive)}
+            </div>
+            <span class="tab-label text-[14px] font-semibold tracking-tight ${isActive ? 'text-[#072447]' : 'text-[#9CA3AF]'}" aria-hidden="true">
+              ${tab.label}
+            </span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function updateTabs() {
+      document.querySelectorAll('[data-tab-id]').forEach(btn => {
+        const id = parseInt(btn.dataset.tabId);
+        const isActive = id === activeId;
+        const tab = TABS.find(t => t.id === id);
+        const img = btn.querySelector('.tab-img');
+        const label = btn.querySelector('.tab-label');
+        const ring = btn.querySelector('.progress-ring');
+
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive);
+        btn.setAttribute('aria-label', `${tab.label}${isActive ? ', currently selected' : ''}`);
+        img.classList.toggle('opacity-100', isActive);
+        img.classList.toggle('opacity-40', !isActive);
+        img.classList.toggle('grayscale', !isActive);
+        label.classList.toggle('text-[#072447]', isActive);
+        label.classList.toggle('text-[#9CA3AF]', !isActive);
+
+        // Restart ring animation on active tab
+        ring.classList.remove('running');
+        void ring.getBoundingClientRect();
+        ring.classList.toggle('running', isActive);
+      });
+
+      // Scroll active tab into view within the tab row
+      const activeBtn = document.querySelector(`[data-tab-id="${activeId}"]`);
+      const row = document.getElementById('tab-row');
+      if (activeBtn && row) {
+        const isFirst = activeId === TABS[0].id;
+        const isLast  = activeId === TABS[TABS.length - 1].id;
+        if (isFirst) {
+          row.scrollTo({ left: 0, behavior: 'smooth' });
+        } else if (isLast) {
+          row.scrollTo({ left: row.scrollWidth, behavior: 'smooth' });
+        } else {
+          const btnCenter = activeBtn.offsetLeft + activeBtn.offsetWidth / 2;
+          const scrollLeft = btnCenter - row.clientWidth / 2;
+          row.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+        }
+      }
+
+      // Announce the active tab to screen readers
+      const activeTab = TABS.find(t => t.id === activeId);
+      document.getElementById('tab-announce').textContent = `Now showing: ${activeTab.label}. ${activeTab.heading}`;
+    }
+
+    function renderContent() {
+      const tab = TABS.find(t => t.id === activeId);
+      const content = document.getElementById('content-area');
+
+      content.innerHTML = `
+        <div class="flex flex-col md:flex-row gap-10 md:gap-20 items-start">
+
+          <!-- Left: Heading + CTA -->
+          <div class="content-left w-full md:w-2/5 flex flex-col gap-6">
+            <h2 class="text-[24px] md:text-[36px] font-normal text-[#072447] leading-[150%] tracking-tight -mt-[5px]">
+              ${tab.heading}
+            </h2>
+            <a href="${tab.ctaHref || '#'}"
+              class="cta-btn inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#072447] text-[#072447] text-sm font-semibold w-fit hover:bg-[#072447] hover:text-white transition-all duration-300 group">
+              ${tab.ctaLabel}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                class="transition-transform duration-300 group-hover:translate-x-0.5">
+                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+              </svg>
+            </a>
+          </div>
+
+          <!-- Right: Feature list -->
+          <div class="content-right w-full md:w-3/5 flex flex-col divide-y divide-[#E5E7EB]">
+            ${tab.features.map((f, i) => `
+              <div class="py-5 ${i === 0 ? 'first:pt-0' : ''} feature-row">
+                <p class="text-[16px] font-semibold text-[#072447] mb-2">${f.title}</p>
+                <p class="text-[14px] text-[#3A4B5C] leading-relaxed">${f.description}</p>
+              </div>
+            `).join('')}
+          </div>
+
+        </div>
+      `;
+    }
+
+    function startAutoPlay() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(() => {
+        const currentIndex = TABS.findIndex(t => t.id === activeId);
+        const nextIndex = (currentIndex + 1) % TABS.length;
+        activeId = TABS[nextIndex].id;
+        updateTabs();
+        renderContent();
+      }, 10000);
+    }
+
+    function setActive(id) {
+      activeId = id;
+      updateTabs();
+      renderContent();
+      startAutoPlay(); // reset timer on manual click
+    }
+
+    function updateFades() {
+      const row = document.getElementById('tab-row');
+      const fl  = document.getElementById('fade-left');
+      const fr  = document.getElementById('fade-right');
+      const atStart = row.scrollLeft <= 2;
+      const atEnd   = row.scrollLeft + row.clientWidth >= row.scrollWidth - 2;
+      fl.style.opacity = atStart ? '0' : '1';
+      fr.style.opacity = atEnd   ? '0' : '1';
+    }
+
+    document.getElementById('tab-row').addEventListener('scroll', updateFades, { passive: true });
+    window.addEventListener('resize', updateFades);
+
+    // Init
+    initTabs();
+    renderContent();
+    startAutoPlay();
+    setTimeout(updateFades, 100);
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

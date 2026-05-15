@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Static Banner | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Scroll-reveal (replaces framer-motion whileInView) ─────────── */
+    .reveal {
+      opacity: 0;
+      transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.8s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.from-y   { transform: translateY(32px); }
+    .reveal.from-y-sm{ transform: translateY(24px); }
+    .reveal.from-y-xs{ transform: translateY(20px); }
+    .reveal.from-y-lg{ transform: translateY(40px); }
+    .reveal.from-x   { transform: translateX(60px) translateY(20px); }
+    .reveal.from-rot { transform: rotate(-6deg) translateY(30px); }
+
+    .reveal.visible  { opacity: 1 !important; transform: none !important; }
+
+    /* delay helpers */
+    .delay-1 { transition-delay: 0.12s; }
+    .delay-2 { transition-delay: 0.24s; }
+    .delay-3 { transition-delay: 0.15s; }
+    .delay-4 { transition-delay: 0.20s; }
+    .delay-5 { transition-delay: 0.30s; }
+
+    /* back phone rests at -3deg rotate, 20px down */
+    .reveal.from-rot.visible {
+      opacity: 1 !important;
+      transform: rotate(-3deg) translateY(20px) !important;
+    }
+
+    /* ── Phone screen pulse dot ─────────────────────────────────────── */
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .dot-pulse { animation: pulse 2s ease-in-out infinite; }
+
+    /* ── Tablet: hide back phone, shrink front phone to fit ─────────── */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      #phones-container { height: 280px !important; }
+      #back-phone       { display: none !important; }
+      #front-phone      { transform: scale(0.72); transform-origin: bottom right; }
+    }
+  </style>
+</head>
+<body class="bg-white min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ Static Banner</span>
+  </div>
+
+  <!-- ── Banner ──────────────────────────────────────────────────────── -->
+  <section class="relative w-full overflow-hidden"
+           style="background: linear-gradient(135deg, #0c1a4a 0%, #0d2270 40%, #1a3aad 100%); min-height: 360px;">
+
+    <!-- Radial glow top-right -->
+    <div class="absolute top-0 right-0 w-3/5 h-full pointer-events-none"
+         style="background: radial-gradient(ellipse at 80% 30%, rgba(39,101,255,0.35) 0%, transparent 65%);"></div>
+
+    <div class="relative z-10 max-w-[1400px] mx-auto px-8 md:px-12 flex items-center justify-between gap-8"
+         style="min-height: 360px;">
+
+      <!-- ── Left: text ─────────────────────────────────────────────── -->
+      <div class="flex flex-col gap-5 max-w-xl py-12">
+
+        <h2 class="reveal from-y text-[24px] md:text-[36px] font-normal text-white leading-tight tracking-tight">
+          50+ Banking Services,<br class="hidden md:block" />One Powerful App.
+        </h2>
+
+        <p class="reveal from-y-sm delay-1 text-[14px] md:text-[16px] text-white/70 font-normal leading-relaxed">
+          Access payments, FX, payroll, approvals, and more — all from one intelligent mobile banking app, anytime and anywhere.
+        </p>
+
+        <div class="reveal from-y-xs delay-2 flex flex-wrap gap-3 mt-2">
+          <button class="px-6 py-3 bg-[#2765FF] hover:bg-[#1a50e0] text-white text-sm font-semibold rounded-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                  style="box-shadow: 0 8px 24px rgba(39,101,255,0.35);">
+            Download the App
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── Right: two iPhone mockups ─────────────────────────────── -->
+      <div id="phones-container" class="reveal from-x delay-4 relative hidden md:flex items-end justify-end shrink-0 self-end"
+           style="height: 400px;">
+
+        <!-- Back phone — rests at rotate(-3deg) translateY(20px) -->
+        <div id="back-phone" class="reveal from-rot delay-5 absolute"
+             style="right: 190px; bottom: 0; z-index: 1;">
+          <!-- iPhone shell -->
+          <div class="relative overflow-hidden"
+               style="background:#111; border-radius:2.8rem; width:220px; height:460px;
+                      box-shadow: inset 0 0 0 2px #3f3f46, inset 0 0 0 7px #000,
+                                  0 40px 80px -10px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);">
+            <!-- Screen -->
+            <div class="absolute bg-[#0a0f1e] overflow-hidden"
+                 style="inset:7px; border-radius:2.4rem;">
+              <!-- Dynamic Island -->
+              <div class="absolute left-1/2 -translate-x-1/2 bg-black rounded-full z-50"
+                   style="top:6px; width:80px; height:22px;"></div>
+              <!-- Screen content -->
+              <div id="phone-screen-back" class="w-full h-full bg-[#0a0f1e] text-white flex flex-col pt-10 overflow-hidden"></div>
+            </div>
+            <!-- Side buttons -->
+            <div class="absolute rounded-l-sm" style="top:110px;left:-3px;width:3px;height:22px;background:linear-gradient(to right,#404040,#222);"></div>
+            <div class="absolute rounded-l-sm" style="top:145px;left:-3px;width:3px;height:40px;background:linear-gradient(to right,#404040,#222);"></div>
+            <div class="absolute rounded-l-sm" style="top:198px;left:-3px;width:3px;height:40px;background:linear-gradient(to right,#404040,#222);"></div>
+            <div class="absolute rounded-r-sm" style="top:158px;right:-3px;width:3px;height:65px;background:linear-gradient(to left,#404040,#222);"></div>
+            <!-- Home indicator -->
+            <div class="absolute left-1/2 -translate-x-1/2 rounded-full z-50"
+                 style="bottom:5px; width:80px; height:4px; background:rgba(255,255,255,0.2);"></div>
+          </div>
+        </div>
+
+        <!-- Front phone -->
+        <div id="front-phone" class="reveal from-y-lg delay-3 relative" style="z-index: 2;">
+          <div class="relative overflow-hidden"
+               style="background:#111; border-radius:2.8rem; width:220px; height:460px;
+                      box-shadow: inset 0 0 0 2px #3f3f46, inset 0 0 0 7px #000,
+                                  0 40px 80px -10px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);">
+            <div class="absolute bg-[#0a0f1e] overflow-hidden"
+                 style="inset:7px; border-radius:2.4rem;">
+              <div class="absolute left-1/2 -translate-x-1/2 bg-black rounded-full z-50"
+                   style="top:6px; width:80px; height:22px;"></div>
+              <div id="phone-screen-front" class="w-full h-full bg-[#0a0f1e] text-white flex flex-col pt-10 overflow-hidden"></div>
+            </div>
+            <div class="absolute rounded-l-sm" style="top:110px;left:-3px;width:3px;height:22px;background:linear-gradient(to right,#404040,#222);"></div>
+            <div class="absolute rounded-l-sm" style="top:145px;left:-3px;width:3px;height:40px;background:linear-gradient(to right,#404040,#222);"></div>
+            <div class="absolute rounded-l-sm" style="top:198px;left:-3px;width:3px;height:40px;background:linear-gradient(to right,#404040,#222);"></div>
+            <div class="absolute rounded-r-sm" style="top:158px;right:-3px;width:3px;height:65px;background:linear-gradient(to left,#404040,#222);"></div>
+            <div class="absolute left-1/2 -translate-x-1/2 rounded-full z-50"
+                 style="bottom:5px; width:80px; height:4px; background:rgba(255,255,255,0.2);"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // ── Market data ───────────────────────────────────────────────────────
+    const MARKET_DATA = [
+      {
+        name: 'Dubai Financial Market', code: 'DFM',
+        price: '3,445.700', change: '+28.69', changePct: '0.84%', isOpen: true,
+        turnover: '371,141,085.04', totalVolume: '171,749,938',
+        trade: '5,751', up: '21.00', down: '13.00', unchanged: '3.00',
+      },
+      {
+        name: 'AbuDhabi Securities Exchange', code: 'ADX',
+        price: '10,010.640', change: '+3.07', changePct: '0.03%', isOpen: true,
+        turnover: '1,677,305,106.10', totalVolume: '218,555,671',
+        trade: '14,336', up: '16.00', down: '10.00', unchanged: '—',
+      },
+    ];
+
+    // ── Build phone screen HTML ───────────────────────────────────────────
+    function buildPhoneScreen(data) {
+      return `
+        <!-- Header -->
+        <div style="padding:0 16px 12px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:8px;">
+          <div style="width:20px;height:20px;border-radius:4px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:8px;font-weight:700;color:#fff;">E</span>
+          </div>
+          <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.8);">Emirates NBD</span>
+          <span style="font-size:8px;color:rgba(255,255,255,0.4);margin-left:2px;">Securities</span>
+        </div>
+        <!-- Markets -->
+        <div style="flex:1;overflow:hidden;">
+          ${data.map(m => `
+          <div style="padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <!-- Name + open -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <div>
+                <p style="font-size:10px;color:rgba(255,255,255,0.5);margin:0 0 2px;">${m.name}</p>
+                <p style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.3);letter-spacing:0.1em;text-transform:uppercase;margin:0;">${m.code}</p>
+              </div>
+              ${m.isOpen ? `<span style="display:flex;align-items:center;gap:4px;font-size:9px;color:rgb(52,211,153);font-weight:600;">
+                <span class="dot-pulse" style="width:6px;height:6px;border-radius:50%;background:rgb(52,211,153);display:inline-block;"></span>Open
+              </span>` : ''}
+            </div>
+            <!-- Price + change -->
+            <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px;">
+              <span style="font-size:18px;font-weight:700;color:#fff;line-height:1;">${m.price}</span>
+              <span style="font-size:10px;font-weight:600;color:rgb(52,211,153);">${m.change} (${m.changePct}) ▲</span>
+            </div>
+            <!-- Stats grid -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-bottom:8px;">
+              <div>
+                <p style="font-size:8px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.05em;margin:0 0 1px;">Turnover</p>
+                <p style="font-size:9px;font-weight:600;color:rgba(255,255,255,0.7);margin:0;">${m.turnover}</p>
+              </div>
+              <div>
+                <p style="font-size:8px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.05em;margin:0 0 1px;">Total Volume</p>
+                <p style="font-size:9px;font-weight:600;color:rgba(255,255,255,0.7);margin:0;">${m.totalVolume}</p>
+              </div>
+            </div>
+            <!-- Trade / Up / Down / Unchanged -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">
+              ${[
+                { label:'Trade', val:m.trade, color:'rgba(255,255,255,0.7)' },
+                { label:'Up',    val:m.up,    color:'rgb(52,211,153)' },
+                { label:'Down',  val:m.down,  color:'rgb(248,113,113)' },
+                { label:'Unch.', val:m.unchanged, color:'rgba(255,255,255,0.7)' },
+              ].map(s => `
+                <div style="background:rgba(255,255,255,0.04);border-radius:4px;padding:4px 6px;">
+                  <p style="font-size:7px;color:rgba(255,255,255,0.3);text-transform:uppercase;margin:0 0 1px;">${s.label}</p>
+                  <p style="font-size:9px;font-weight:600;color:${s.color};margin:0;">${s.val}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>`).join('')}
+        </div>`;
+    }
+
+    // Inject phone screens
+    const html = buildPhoneScreen(MARKET_DATA);
+    document.getElementById('phone-screen-front').innerHTML = html;
+    document.getElementById('phone-screen-back').innerHTML  = html;
+
+    // ── IntersectionObserver — scroll reveal (replaces framer-motion) ─────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

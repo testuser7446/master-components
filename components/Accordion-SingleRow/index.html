@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accordion Single Row | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .tab-content { display: none; }
+    .tab-content.active { display: grid; }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card-anim { animation: fade-up 0.4s ease forwards; }
+    .card-anim:nth-child(2) { animation-delay: 0.08s; opacity: 0; }
+    .card-anim:nth-child(3) { animation-delay: 0.16s; opacity: 0; }
+  </style>
+</head>
+<body class="bg-white">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Back to Component Library
+    </a>
+  </div>
+
+  <section class="py-4 md:py-6 bg-white">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-10">
+        <span class="text-xs font-semibold tracking-[0.2em] uppercase text-[#2765FF]">Product Suite</span>
+        <h2 class="text-[24px] md:text-[36px] font-normal text-[#072447] mt-3">Everything your business needs.</h2>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="flex flex-wrap gap-2 justify-center mb-10" id="tab-pills">
+        <button onclick="setTab('all')" data-tab="all" class="tab-pill px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#072447] text-white">All</button>
+        <button onclick="setTab('corporate')" data-tab="corporate" class="tab-pill px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200">Corporate Banking</button>
+        <button onclick="setTab('trade')" data-tab="trade" class="tab-pill px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200">Trade Finance</button>
+        <button onclick="setTab('treasury')" data-tab="treasury" class="tab-pill px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200">Treasury</button>
+        <button onclick="setTab('digital')" data-tab="digital" class="tab-pill px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200">Digital</button>
+        <button onclick="setTab('islamic')" data-tab="islamic" class="tab-pill px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200">Islamic</button>
+      </div>
+
+      <!-- Content panels -->
+      <div id="content-area" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 tab-content active"></div>
+    </div>
+  </section>
+
+  <script>
+    const products = {
+      all: [
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>`, title: "businessONLINE", desc: "Complete digital banking platform for corporate treasury and payments management across all entities.", category: "Corporate Banking" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>`, title: "Letters of Credit", desc: "Secure, fully digital LC issuance and management with guaranteed settlement and risk protection.", category: "Trade Finance" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>`, title: "FX Solutions", desc: "Spot, forward and options strategies to manage your currency exposure with precision.", category: "Treasury" },
+      ],
+      corporate: [
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>`, title: "businessONLINE", desc: "Complete digital banking platform for corporate treasury and payments management across all entities.", category: "Corporate Banking" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>`, title: "Cash Pooling", desc: "Physical and notional cash pooling to optimise liquidity and reduce inter-company funding costs.", category: "Corporate Banking" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>`, title: "Payroll Services", desc: "Automated WPS-compliant payroll processing for UAE and GCC workforce management.", category: "Corporate Banking" },
+      ],
+      trade: [
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064"/>`, title: "Letters of Credit", desc: "Secure, fully digital LC issuance and management with guaranteed settlement and risk protection.", category: "Trade Finance" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>`, title: "Trade Guarantees", desc: "Bank guarantees, bid bonds and performance bonds for domestic and international transactions.", category: "Trade Finance" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>`, title: "Supply Chain Finance", desc: "Extend payment terms while enabling suppliers to receive early payment through our smartSCF platform.", category: "Trade Finance" },
+      ],
+      treasury: [
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>`, title: "FX Solutions", desc: "Spot, forward and options strategies to manage your currency exposure with precision.", category: "Treasury" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>`, title: "Rates & Derivatives", desc: "Interest rate swaps, caps and structured products to optimise your funding cost.", category: "Treasury" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>`, title: "Money Markets", desc: "Short-term investment and borrowing solutions to efficiently deploy idle cash.", category: "Treasury" },
+      ],
+      digital: [
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>`, title: "API Banking", desc: "Connect your ERP, TMS and internal systems directly to Emirates NBD via our open banking APIs.", category: "Digital" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2v-1a5 5 0 00-10 0v1a2 2 0 002 2zM10 11a2 2 0 104 0 2 2 0 00-4 0z"/>`, title: "Mobile Banking", desc: "Award-winning iOS and Android apps for approvals, payments and real-time account management.", category: "Digital" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>`, title: "Cash Forecasting AI", desc: "AI-powered liquidity forecasting with scenario modelling to optimise working capital decisions.", category: "Digital" },
+      ],
+      islamic: [
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/>`, title: "Murabaha Finance", desc: "Shariah-compliant cost-plus financing for asset acquisition, working capital and trade transactions.", category: "Islamic" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/>`, title: "Ijarah Leasing", desc: "Islamic leasing structures for equipment, vehicles and real estate with full Shariah compliance.", category: "Islamic" },
+        { icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>`, title: "Sukuk & Capital Markets", desc: "Structuring and issuance of Sukuk instruments for sovereign and corporate issuers across MENA.", category: "Islamic" },
+      ],
+    };
+
+    function setTab(key) {
+      document.querySelectorAll('.tab-pill').forEach(p => {
+        p.className = p.dataset.tab === key
+          ? 'tab-pill px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#072447] text-white'
+          : 'tab-pill px-5 py-2.5 rounded-full text-sm font-semibold transition-all bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200';
+      });
+      const area = document.getElementById('content-area');
+      const cards = products[key];
+      area.innerHTML = cards.map((c, i) => `
+        <div class="card-anim bg-[#F4F7FB] border border-gray-100 rounded-2xl p-8 hover:shadow-lg hover:border-[#2765FF]/20 transition-all group" style="animation-delay:${i*0.08}s">
+          <div class="w-12 h-12 rounded-xl bg-[#072447] flex items-center justify-center mb-5">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">${c.icon}</svg>
+          </div>
+          <span class="text-xs font-semibold text-[#2765FF] uppercase tracking-wider">${c.category}</span>
+          <h3 class="text-lg font-normal text-[#072447] mt-2 mb-4">${c.title}</h3>
+          <p class="text-[#3A4B5C]/60 text-sm leading-relaxed mb-4">${c.desc}</p>
+          <a href="#" class="inline-flex items-center gap-1 text-sm font-semibold text-[#2765FF] group-hover:gap-2 transition-all">Learn more <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></a>
+        </div>`).join('');
+    }
+    setTab('all');
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bento Image Cards | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Grid ─────────────────────────────────────────────────────────── */
+    .bento-img-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: 460px;
+      gap: 12px;
+    }
+    .bento-img-grid .card-a { grid-column: span 2; }
+    .bento-img-grid .card-b { grid-column: span 1; }
+    .bento-img-grid .card-c { grid-column: span 1; }
+
+    @media (min-width: 640px) and (max-width: 1023px) {
+      .bento-img-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: 320px 280px;
+        gap: 10px;
+      }
+      .bento-img-grid .card-a { grid-column: 1 / 3; grid-row: 1; }
+      .bento-img-grid .card-b { grid-column: 1;     grid-row: 2; }
+      .bento-img-grid .card-c { grid-column: 2;     grid-row: 2; }
+    }
+
+    @media (max-width: 639px) {
+      .bento-img-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        gap: 10px;
+      }
+      .bento-img-grid .card-a { grid-column: 1; min-height: 280px; }
+      .bento-img-grid .card-b { grid-column: 1; min-height: 300px; }
+      .bento-img-grid .card-c { grid-column: 1; min-height: 300px; }
+    }
+
+    /* Mobile text container — reduce padding so content never overflows */
+    @media (max-width: 639px) {
+      .card-text-inner {
+        padding: 20px;
+      }
+      .card-text-inner .eyebrow { margin-bottom: 8px; }
+      .card-text-inner .card-heading { margin-bottom: 8px; }
+      .card-text-inner .card-body { margin-bottom: 14px; }
+    }
+
+    /* ── Base card ────────────────────────────────────────────────────── */
+    .img-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      transition: box-shadow 0.5s ease;
+      outline: none;
+    }
+    .img-card:hover,
+    .img-card:focus {
+      box-shadow: 0 0 64px 0 rgba(7,36,71,0.28);
+    }
+
+    /* Art background — scales on hover */
+    .card-art {
+      position: absolute;
+      inset: 0;
+      transition: transform 0.7s ease-out;
+    }
+    .img-card:hover .card-art,
+    .img-card:focus  .card-art {
+      transform: scale(1.04);
+    }
+
+    /* Bottom fade for readability */
+    .bottom-fade-dark {
+      position: absolute;
+      inset-inline: 0;
+      bottom: 0;
+      height: 66.6%;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(4,12,30,0.68) 0%, transparent 70%);
+    }
+    .bottom-fade-light {
+      position: absolute;
+      inset-inline: 0;
+      bottom: 0;
+      height: 66.6%;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(255,255,255,0.55) 0%, transparent 70%);
+    }
+
+    /* CardBorder — fades out toward the bottom (slash.com mask style) */
+    .card-border {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      pointer-events: none;
+      border: 1px solid rgba(255,255,255,0.50);
+      -webkit-mask-image: linear-gradient(180deg, white 0%, transparent 100%);
+      mask-image: linear-gradient(180deg, white 0%, transparent 100%);
+      transition: border-color 0.3s ease;
+    }
+    .img-card:hover .card-border,
+    .img-card:focus .card-border {
+      border-color: rgba(255,255,255,0.90);
+    }
+
+    /* Arrow CTA — translates on hover */
+    .card-arrow {
+      transition: transform 0.2s ease;
+    }
+    .img-card:hover .card-arrow,
+    .img-card:focus .card-arrow {
+      transform: translate(2px, -2px);
+    }
+
+    /* ── Entrance animations — CSS keyframes, no JS dependency ──────────
+       Cards are always visible; animation plays once on load.            */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @keyframes fade-up-sm {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .reveal-heading {
+      animation: fade-up-sm 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .reveal-card {
+      animation: fade-up 0.55s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .reveal-card:nth-child(1) { animation-delay: 0s; }
+    .reveal-card:nth-child(2) { animation-delay: 0.07s; }
+    .reveal-card:nth-child(3) { animation-delay: 0.14s; }
+  </style>
+</head>
+<body class="bg-white min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ Bento Image Cards</span>
+  </div>
+
+  <!-- ── Section — matches React BentoImageCards exactly ──────────────── -->
+  <section class="w-full bg-white px-4 md:px-[120px] py-4 md:py-6" aria-labelledby="bento-img-heading">
+    <div class="max-w-[1400px] mx-auto">
+
+      <!-- Section header -->
+      <div class="mb-10 reveal-heading">
+        <p class="text-[11px] md:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4" aria-hidden="true">
+          Emirates NBD · Corporate &amp; Institutional
+        </p>
+        <h2 id="bento-img-heading"
+          class="text-[24px] md:text-[36px] font-normal leading-[150%] tracking-tight text-[#072447] max-w-xl">
+          Three capabilities. One bank.
+        </h2>
+      </div>
+
+      <!-- ── Grid ─────────────────────────────────────────────────────── -->
+      <div class="bento-img-grid" role="list" aria-label="Emirates NBD product categories">
+
+        <!-- ── Card A: Global Payments — col-span-2, dark navy gradient ── -->
+        <div class="card-a reveal-card" style="transition-delay:0s;" role="article">
+          <div class="img-card" style="background:linear-gradient(140deg,#082550 0%,#0F4190 50%,#1659B8 100%);"
+               tabindex="0" aria-label="Move money across 180+ markets">
+
+            <!-- GlobeArt SVG — exact from React -->
+            <div class="card-art" aria-hidden="true">
+              <svg class="absolute inset-0 w-full h-full" viewBox="0 0 600 340" preserveAspectRatio="xMidYMid slice">
+                <!-- Globe sphere -->
+                <circle cx="460" cy="170" r="140" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+                <!-- Meridian rings -->
+                <ellipse cx="460" cy="170" rx="70"  ry="140" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.8"/>
+                <ellipse cx="460" cy="170" rx="115" ry="140" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="0.8"/>
+                <!-- Parallel rings -->
+                <ellipse cx="460" cy="116" rx="106" ry="28"  fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="0.7"/>
+                <ellipse cx="460" cy="170" rx="140" ry="34"  fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="0.7"/>
+                <ellipse cx="460" cy="224" rx="106" ry="28"  fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="0.7"/>
+                <!-- City dots -->
+                <circle cx="508" cy="125" r="3"   fill="rgba(255,255,255,0.65)"/>
+                <circle cx="426" cy="148" r="2.5" fill="rgba(255,255,255,0.50)"/>
+                <circle cx="484" cy="186" r="3.5" fill="rgba(39,101,255,0.95)"/>
+                <circle cx="440" cy="200" r="2"   fill="rgba(255,255,255,0.40)"/>
+                <circle cx="512" cy="168" r="2"   fill="rgba(255,255,255,0.40)"/>
+                <circle cx="470" cy="140" r="2"   fill="rgba(255,255,255,0.35)"/>
+                <!-- Route arcs -->
+                <path d="M 508 125 Q 467 105 426 148" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="0.9"/>
+                <path d="M 426 148 Q 455 167 484 186" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="0.9"/>
+                <path d="M 508 125 Q 496 157 484 186" fill="none" stroke="rgba(39,101,255,0.45)"  stroke-width="0.9"/>
+                <!-- Pulse rings around hub dot -->
+                <circle cx="484" cy="186" r="9"  fill="none" stroke="rgba(39,101,255,0.35)" stroke-width="0.8"/>
+                <circle cx="484" cy="186" r="18" fill="none" stroke="rgba(39,101,255,0.18)" stroke-width="0.7"/>
+              </svg>
+            </div>
+
+            <div class="bottom-fade-dark"></div>
+            <div class="card-border"></div>
+
+            <!-- Text -->
+            <div class="card-text-inner absolute inset-0 z-10 flex flex-col justify-end p-7">
+              <p class="eyebrow text-[10px] font-semibold tracking-[0.22em] uppercase mb-4" style="color:rgba(255,255,255,0.60);" aria-hidden="true">Global Payments</p>
+              <h3 class="card-heading text-[22px] md:text-[28px] font-normal leading-[135%] tracking-tight mb-4" style="color:#ffffff;">
+                Move money across<br>180+ markets.
+              </h3>
+              <p class="card-body text-[13px] leading-relaxed mb-4" style="color:rgba(255,255,255,0.58); max-width:360px;">
+                Same-day settlement, competitive FX, and real-time tracking — across every corridor.
+              </p>
+              <div class="card-arrow" style="color:rgba(255,255,255,0.45);" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6z"/></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Card B: Trade Finance — col-span-1, light blue gradient ── -->
+        <div class="card-b reveal-card" style="transition-delay:0.07s;" role="article">
+          <div class="img-card" style="background:linear-gradient(165deg,#E8F4FF 0%,#C0D8F5 50%,#96BDE8 100%);"
+               tabindex="0" aria-label="Finance the flow of global trade">
+
+            <!-- WaveArt SVG — exact from React -->
+            <div class="card-art" aria-hidden="true">
+              <svg class="absolute inset-0 w-full h-full" viewBox="0 0 300 340" preserveAspectRatio="xMidYMid slice">
+                <path d="M -20 70  Q 80 40  150 70  Q 220 100 320 70"  fill="none" stroke="rgba(7,36,71,0.22)" stroke-width="1.3"/>
+                <path d="M -20 120 Q 80 90  150 120 Q 220 150 320 120" fill="none" stroke="rgba(7,36,71,0.16)" stroke-width="1.1"/>
+                <path d="M -20 175 Q 80 145 150 175 Q 220 205 320 175" fill="none" stroke="rgba(7,36,71,0.12)" stroke-width="0.9"/>
+                <path d="M -20 230 Q 80 200 150 230 Q 220 260 320 230" fill="none" stroke="rgba(7,36,71,0.09)" stroke-width="0.7"/>
+                <path d="M -20 280 Q 80 250 150 280 Q 220 310 320 280" fill="none" stroke="rgba(7,36,71,0.07)" stroke-width="0.6"/>
+              </svg>
+            </div>
+
+            <div class="bottom-fade-light"></div>
+            <div class="card-border"></div>
+
+            <!-- Text — light card: dark text -->
+            <div class="card-text-inner absolute inset-0 z-10 flex flex-col justify-end p-7">
+              <p class="eyebrow text-[10px] font-semibold tracking-[0.22em] uppercase mb-4" style="color:rgba(7,36,71,0.55);" aria-hidden="true">Trade Finance</p>
+              <h3 class="card-heading text-[22px] md:text-[28px] font-normal leading-[135%] tracking-tight mb-4" style="color:#072447;">
+                Finance the flow<br>of global trade.
+              </h3>
+              <p class="card-body text-[13px] leading-relaxed mb-4" style="color:rgba(7,36,71,0.65); max-width:220px;">
+                Letters of credit, guarantees, and supply chain finance — paperless and fast.
+              </p>
+              <div class="card-arrow" style="color:rgba(7,36,71,0.50);" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6z"/></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── Card C: businessONLINE — col-span-1, midnight gradient ─── -->
+        <div class="card-c reveal-card" style="transition-delay:0.14s;" role="article">
+          <div class="img-card" style="background:linear-gradient(145deg,#05101F 0%,#0A2248 50%,#102E65 100%);"
+               tabindex="0" aria-label="One platform. Every transaction.">
+
+            <!-- ConstellationArt SVG — exact from React -->
+            <div class="card-art" aria-hidden="true">
+              <svg class="absolute inset-0 w-full h-full" viewBox="0 0 600 320" preserveAspectRatio="xMidYMid slice">
+                <!-- Connection lines -->
+                <line x1="80"  y1="60"  x2="160" y2="40"  stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="160" y1="40"  x2="260" y2="80"  stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="260" y1="80"  x2="380" y2="50"  stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="380" y1="50"  x2="470" y2="90"  stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="470" y1="90"  x2="540" y2="55"  stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="80"  y1="60"  x2="120" y2="130" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="160" y1="40"  x2="120" y2="130" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="260" y1="80"  x2="220" y2="155" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="380" y1="50"  x2="330" y2="120" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="470" y1="90"  x2="450" y2="145" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="540" y1="55"  x2="520" y2="170" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="120" y1="130" x2="220" y2="155" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="220" y1="155" x2="330" y2="120" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="330" y1="120" x2="450" y2="145" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="450" y1="145" x2="520" y2="170" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="120" y1="130" x2="70"  y2="200" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="220" y1="155" x2="180" y2="220" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="330" y1="120" x2="290" y2="200" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="450" y1="145" x2="410" y2="215" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="520" y1="170" x2="560" y2="195" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="70"  y1="200" x2="140" y2="280" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="180" y1="220" x2="140" y2="280" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="180" y1="220" x2="270" y2="265" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="290" y1="200" x2="270" y2="265" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="290" y1="200" x2="380" y2="290" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="410" y1="215" x2="380" y2="290" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="410" y1="215" x2="490" y2="270" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <line x1="560" y1="195" x2="490" y2="270" stroke="rgba(39,101,255,0.20)" stroke-width="0.6"/>
+                <!-- Nodes: i%5===0 → r=2.5, white 0.55; else → r=1.5, white 0.28 -->
+                <!-- i=0 (0%5=0) --> <circle cx="80"  cy="60"  r="2.5" fill="rgba(255,255,255,0.55)"/>
+                <!-- i=1        --> <circle cx="160" cy="40"  r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=2        --> <circle cx="260" cy="80"  r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=3        --> <circle cx="380" cy="50"  r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=4        --> <circle cx="470" cy="90"  r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=5 (0%5=0)--> <circle cx="540" cy="55"  r="2.5" fill="rgba(255,255,255,0.55)"/>
+                <!-- i=6        --> <circle cx="120" cy="130" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=7        --> <circle cx="220" cy="155" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=8        --> <circle cx="330" cy="120" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=9        --> <circle cx="450" cy="145" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=10(0%5=0)--> <circle cx="520" cy="170" r="2.5" fill="rgba(255,255,255,0.55)"/>
+                <!-- i=11       --> <circle cx="70"  cy="200" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=12       --> <circle cx="180" cy="220" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=13       --> <circle cx="290" cy="200" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=14       --> <circle cx="410" cy="215" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=15(0%5=0)--> <circle cx="560" cy="195" r="2.5" fill="rgba(255,255,255,0.55)"/>
+                <!-- i=16       --> <circle cx="140" cy="280" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=17       --> <circle cx="270" cy="265" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=18       --> <circle cx="380" cy="290" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- i=19       --> <circle cx="490" cy="270" r="1.5" fill="rgba(255,255,255,0.28)"/>
+                <!-- Highlighted hub at node[1] = [160,40] -->
+                <circle cx="160" cy="40" r="4"  fill="rgba(39,101,255,0.9)"/>
+                <circle cx="160" cy="40" r="10" fill="none" stroke="rgba(39,101,255,0.30)" stroke-width="0.8"/>
+                <circle cx="160" cy="40" r="18" fill="none" stroke="rgba(39,101,255,0.14)" stroke-width="0.7"/>
+              </svg>
+            </div>
+
+            <div class="bottom-fade-dark"></div>
+            <div class="card-border"></div>
+
+            <!-- Text -->
+            <div class="card-text-inner absolute inset-0 z-10 flex flex-col justify-end p-7">
+              <p class="eyebrow text-[10px] font-semibold tracking-[0.22em] uppercase mb-4" style="color:rgba(255,255,255,0.60);" aria-hidden="true">businessONLINE</p>
+              <h3 class="card-heading text-[22px] md:text-[28px] font-normal leading-[135%] tracking-tight mb-4" style="color:#ffffff;">
+                One platform.<br>Every transaction.
+              </h3>
+              <p class="card-body text-[13px] leading-relaxed mb-4" style="color:rgba(255,255,255,0.58); max-width:220px;">
+                Payments, FX, approvals, and reporting — all in one intelligent platform.
+              </p>
+              <div class="card-arrow" style="color:rgba(255,255,255,0.45);" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6z"/></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /bento-img-grid -->
+    </div>
+  </section>
+
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

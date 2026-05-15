@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Storytelling — Video BG Tabs | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      /* overflow-x: clip instead of hidden — hidden breaks position:sticky */
+      overflow-x: clip;
+    }
+
+    /* Prevent flash before JS sets positions */
+    #card1, #card2, #card3, #card4,
+    #text1, #text2, #text3, #text4 {
+      opacity: 0;
+    }
+
+    /* Hint buttons — shared styles */
+    .hint-btn {
+      color: rgba(255,255,255,0.5);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hint-inner {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    /* ── Chevron Lottie-style loop ──────────────────────────────────────
+       Pattern: launch → overshoot → spring back → settle → rest → repeat
+       The 75%→100% hold at 0 creates the "pause before next beat" feel.
+    ─────────────────────────────────────────────────────────────────── */
+    @keyframes chevronRight {
+      0%        { transform: translateX(0);    opacity: 1;   }
+      28%       { transform: translateX(7px);  opacity: 0.6; }
+      42%       { transform: translateX(2px);  opacity: 1;   }  /* spring back */
+      56%       { transform: translateX(5px);  opacity: 0.75;}  /* settle */
+      70%, 100% { transform: translateX(0);    opacity: 1;   }  /* rest + hold */
+    }
+    @keyframes chevronLeft {
+      0%        { transform: translateX(0);    opacity: 1;   }
+      28%       { transform: translateX(-7px); opacity: 0.6; }
+      42%       { transform: translateX(-2px); opacity: 1;   }
+      56%       { transform: translateX(-5px); opacity: 0.75;}
+      70%, 100% { transform: translateX(0);    opacity: 1;   }
+    }
+
+    /* Chevron: smooth return when hover ends, animation when hovering */
+    .hint-chevron {
+      display: block;
+      flex-shrink: 0;
+      transition: transform 0.35s ease-out, opacity 0.35s ease-out;
+    }
+    .hint-next:hover .hint-chevron {
+      animation: chevronRight 1.1s ease-in-out infinite;
+      transition: none; /* animation drives it during hover */
+    }
+    .hint-prev:hover .hint-chevron {
+      animation: chevronLeft 1.1s ease-in-out infinite;
+      transition: none;
+    }
+
+    /* Click micro-interaction on the whole inner group */
+    @keyframes hintTap {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(0.80); }
+      100% { transform: scale(1); }
+    }
+    .hint-inner.tapped {
+      animation: hintTap 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+
+    @keyframes scrollTravel {
+      0%   { transform: translateY(-100%); opacity: 0; }
+      15%  { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { transform: translateY(250%); opacity: 0; }
+    }
+
+    /* Hide navigation hints on tablet and mobile */
+    @media (max-width: 1099px) {
+      .hint-btn { display: none !important; }
+    }
+
+    /* Mobile: 16px gutter on both sides, no max-width cap */
+    @media (max-width: 767px) {
+      .card-content {
+        left: 16px !important;
+        right: 16px !important;
+        max-width: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6 gap-2">
+    <a href="../../index.html" style="font-size:13px;color:#6C7A89;text-decoration:none;display:flex;align-items:center;gap:6px;"
+       onmouseover="this.style.color='#072447'" onmouseout="this.style.color='#6C7A89'">
+      ← Component Library
+    </a>
+    <span style="font-size:13px;color:#9CA3AF;">/ Storytelling — Video BG Tabs</span>
+  </div>
+
+
+  <!-- ── Scroll Indicator ─────────────────────────────────────────── -->
+  <div id="scroll-indicator" style="
+    position:fixed;
+    right:clamp(16px,8.33vw,120px);
+    bottom:clamp(32px,5vh,64px);
+    z-index:100;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    transition:opacity 0.6s ease;
+    pointer-events:none;
+  ">
+    <span style="
+      writing-mode:vertical-rl;
+      text-orientation:mixed;
+      transform:rotate(180deg);
+      font-size:10px;
+      font-weight:500;
+      letter-spacing:0.2em;
+      text-transform:uppercase;
+      color:rgba(7,36,71,0.4);
+    ">Scroll</span>
+
+    <!-- Track line -->
+    <div style="position:relative;width:1px;height:56px;background:rgba(7,36,71,0.15);border-radius:1px;overflow:hidden;">
+      <!-- Traveling highlight -->
+      <div style="
+        position:absolute;
+        top:0;left:0;
+        width:1px;
+        height:40%;
+        background:#2765FF;
+        border-radius:1px;
+        animation:scrollTravel 1.6s cubic-bezier(0.4,0,0.6,1) infinite;
+      "></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       PHASE 1 — 400vh  scatter → converge → card-1 full-bleed
+  ══════════════════════════════════════════════════════════════════ -->
+  <div id="c1-container" style="height:400vh;position:relative;">
+    <div style="position:sticky;top:0;height:100vh;overflow:hidden;width:100%;">
+
+      <!-- Soft gradient background -->
+      <div style="position:absolute;inset:0;z-index:0;
+        background:
+          radial-gradient(ellipse at 20% 50%, #cfe0ef 0%, transparent 60%),
+          radial-gradient(ellipse at 80% 30%, #ddeaf5 0%, transparent 60%),
+          linear-gradient(160deg, #e8f3fa 0%, #f2f8fc 40%, #ffffff 100%);"></div>
+
+      <!-- ── Card 4 (back) ─────────────────────────────────── z:10 -->
+      <div id="card4" style="position:absolute;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18);z-index:10;">
+        <video src="assets/card-4.mp4" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+      </div>
+      <div id="text4" style="position:absolute;z-index:15;pointer-events:none;">
+        <div style="font-size:11px;color:#6C7A89;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:3px;">(4)</div>
+        <div style="font-size:13px;font-weight:500;color:#072447;white-space:pre-line;line-height:1.4;">Onboarding &amp;&#10;Digital Efficiency</div>
+      </div>
+
+      <!-- ── Card 3 ──────────────────────────────────────────── z:20 -->
+      <div id="card3" style="position:absolute;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18);z-index:20;">
+        <video src="assets/card-3.mp4" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+      </div>
+      <div id="text3" style="position:absolute;z-index:25;pointer-events:none;">
+        <div style="font-size:11px;color:#6C7A89;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:3px;">(3)</div>
+        <div style="font-size:13px;font-weight:500;color:#072447;white-space:pre-line;line-height:1.4;">Administration &amp;&#10;Entitlements</div>
+      </div>
+
+      <!-- ── Card 2 ──────────────────────────────────────────── z:30 -->
+      <div id="card2" style="position:absolute;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18);z-index:30;">
+        <video src="assets/card-2.mp4" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+      </div>
+      <div id="text2" style="position:absolute;z-index:35;pointer-events:none;">
+        <div style="font-size:11px;color:#6C7A89;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:3px;">(2)</div>
+        <div style="font-size:13px;font-weight:500;color:#072447;white-space:pre-line;line-height:1.4;">Payments &amp;&#10;Collections</div>
+      </div>
+
+      <!-- ── Card 1 (front, expands full-bleed) ─────────────── z:40 -->
+      <div id="card1" style="position:absolute;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.18);z-index:40;">
+        <video src="assets/card-1.mp4" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;"></video>
+
+        <!-- Dark gradient — separate element, no child opacity compounding -->
+        <div id="card1-gradient" style="position:absolute;inset:0;opacity:0;pointer-events:none;
+          background:linear-gradient(to top, rgba(7,36,71,0.88) 0%, rgba(7,36,71,0.45) 45%, rgba(7,36,71,0.10) 75%, transparent 100%);"></div>
+
+        <!-- Content elements — flex column, same layout as cards 2-4 -->
+        <div class="card-content" style="position:absolute;left:clamp(16px,8.33vw,120px);bottom:8%;display:flex;flex-direction:column;gap:0;max-width:560px;pointer-events:none;">
+          <div id="label1" style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);letter-spacing:0.18em;margin-bottom:6px;opacity:0;transform:translateY(16px);">(1)</div>
+          <div id="heading1" style="font-size:clamp(24px,2.5vw,36px);font-weight:400;color:#fff;line-height:1.5;white-space:pre-line;max-width:520px;margin:0 0 24px;opacity:0;transform:translateY(32px);">Total visibility.&#10;Every entity.</div>
+          <div id="bullets1" style="opacity:0;transform:translateY(20px);">
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+              <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+              <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Role-based dashboards tailored for CFOs, Treasurers, and Finance teams.</p>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+              <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+              <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Comprehensive statement and balance reporting across all accounts.</p>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+              <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+              <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Real-time cash flow insights and forward-looking forecasting tools.</p>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+              <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+              <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Cross-entity and cross-currency visibility from a single login.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next hint → (2) -->
+        <div id="next-hint-1" class="hint-btn hint-next" style="position:absolute;right:clamp(16px,8.33vw,120px);bottom:9%;text-align:right;opacity:0;cursor:pointer;pointer-events:auto;">
+          <div class="hint-inner">
+            <svg class="hint-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+            <span style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;white-space:pre-line;text-align:right;">(2) Payments &amp;&#10;Collections</span>
+          </div>
+        </div>
+
+      </div><!-- /card1 -->
+
+      <!-- Text label 1 (below card, outside card element) -->
+      <div id="text1" style="position:absolute;z-index:45;pointer-events:none;">
+        <div style="font-size:11px;color:#6C7A89;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:3px;">(1)</div>
+        <div style="font-size:13px;font-weight:500;color:#072447;white-space:pre-line;line-height:1.4;">Total visibility.&#10;Every entity.</div>
+      </div>
+
+    </div><!-- /sticky -->
+  </div><!-- /c1-container -->
+
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       CARD 2 — Payments & Collections (150vh)
+       Gradient is always-visible; content elements animated directly
+  ══════════════════════════════════════════════════════════════════ -->
+  <div id="c2-container" style="height:150vh;position:relative;">
+    <div style="position:sticky;top:0;height:100vh;overflow:hidden;width:100%;">
+
+      <video src="assets/card-2.mp4" autoplay muted loop playsinline
+        style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+
+      <!-- Always-visible gradient (no opacity animation = no compounding) -->
+      <div style="position:absolute;inset:0;pointer-events:none;
+        background:linear-gradient(to top, rgba(7,36,71,0.88) 0%, rgba(7,36,71,0.45) 45%, rgba(7,36,71,0.10) 75%, transparent 100%);"></div>
+
+      <!-- Content column — no parent opacity wrapper -->
+      <div class="card-content" style="position:absolute;left:clamp(16px,8.33vw,120px);bottom:8%;display:flex;flex-direction:column;gap:0;pointer-events:none;max-width:560px;">
+        <div id="c2-label" style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);letter-spacing:0.18em;margin-bottom:6px;opacity:0;transform:translateY(16px);">(2)</div>
+        <h2 id="c2-heading" style="font-size:clamp(24px,2.5vw,36px);font-weight:400;color:#fff;line-height:1.5;white-space:pre-line;max-width:520px;margin:0 0 24px;opacity:0;transform:translateY(32px);">Payments &amp;&#10;Collections</h2>
+        <p id="c2-suite1" style="font-size:16px;font-weight:700;color:#fff;margin:0 0 8px;opacity:0;transform:translateY(20px);">Payments</p>
+        <div id="c2-bullets1" style="margin-bottom:20px;opacity:0;transform:translateY(20px);">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Process single, bulk, and regulatory payments online — including VAT, GPSSA, and eDirham.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Multi-currency payments and FX conversions across 40+ currencies.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">QuickPay: one-click repeat transactions from your payment history.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Government and utility payments in one place — DEWA, Etisalat, SALIK, and more.</p>
+          </div>
+        </div>
+        <p id="c2-suite2" style="font-size:16px;font-weight:700;color:#fff;margin:0 0 8px;opacity:0;transform:translateY(20px);">Collections</p>
+        <div id="c2-bullets2" style="opacity:0;transform:translateY(20px);">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Automated collections via Virtual Accounts with enhanced reconciliation.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Real-time visibility of all incoming payments.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Digital cash, cheque, and document collection management.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Auto-generated electronic statements and receivables analytics.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prev hint ← (1) -->
+      <div id="c2-prev-hint" class="hint-btn hint-prev" style="position:absolute;right:clamp(16px,8.33vw,120px);bottom:18%;text-align:right;cursor:pointer;pointer-events:auto;opacity:0;">
+        <div class="hint-inner">
+          <svg class="hint-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;white-space:pre-line;text-align:right;">(1) Total visibility.&#10;Every entity.</span>
+        </div>
+      </div>
+      <!-- Next hint → (3) -->
+      <div id="c2-next-hint" class="hint-btn hint-next" style="position:absolute;right:clamp(16px,8.33vw,120px);bottom:9%;text-align:right;cursor:pointer;pointer-events:auto;opacity:0;">
+        <div class="hint-inner">
+          <svg class="hint-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+          <span style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;white-space:pre-line;text-align:right;">(3) Administration &amp;&#10;Entitlements</span>
+        </div>
+      </div>
+
+    </div><!-- /sticky -->
+  </div><!-- /c2-container -->
+
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       CARD 3 — Administration & Entitlements (150vh)
+  ══════════════════════════════════════════════════════════════════ -->
+  <div id="c3-container" style="height:150vh;position:relative;">
+    <div style="position:sticky;top:0;height:100vh;overflow:hidden;width:100%;">
+
+      <video src="assets/card-3.mp4" autoplay muted loop playsinline
+        style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+
+      <div style="position:absolute;inset:0;pointer-events:none;
+        background:linear-gradient(to top, rgba(7,36,71,0.88) 0%, rgba(7,36,71,0.45) 45%, rgba(7,36,71,0.10) 75%, transparent 100%);"></div>
+
+      <div class="card-content" style="position:absolute;left:clamp(16px,8.33vw,120px);bottom:8%;display:flex;flex-direction:column;gap:0;pointer-events:none;max-width:560px;">
+        <div id="c3-label" style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);letter-spacing:0.18em;margin-bottom:6px;opacity:0;transform:translateY(16px);">(3)</div>
+        <h2 id="c3-heading" style="font-size:clamp(24px,2.5vw,36px);font-weight:400;color:#fff;line-height:1.5;white-space:pre-line;max-width:520px;margin:0 0 24px;opacity:0;transform:translateY(32px);">Administration &amp;&#10;Entitlements</h2>
+        <p id="c3-suite1" style="font-size:16px;font-weight:700;color:#fff;margin:0 0 8px;opacity:0;transform:translateY(20px);">Administration</p>
+        <div id="c3-bullets1" style="margin-bottom:20px;opacity:0;transform:translateY(20px);">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Multi-level approval workflows with full, tamper-proof audit trails.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Segregation of duties enforced through role-based access controls.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Delegate authority across limits, channels, and transaction types.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Real-time notifications and approvals from any device, anywhere.</p>
+          </div>
+        </div>
+        <p id="c3-suite2" style="font-size:16px;font-weight:700;color:#fff;margin:0 0 8px;opacity:0;transform:translateY(20px);">Entitlements</p>
+        <div id="c3-bullets2" style="opacity:0;transform:translateY(20px);">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Centralised user management across all entities and accounts.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Customise access down to account, service, and transaction level.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Bulk user provisioning with template-based onboarding.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Compliance-ready entitlement reporting, available on demand.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="c3-prev-hint" class="hint-btn hint-prev" style="position:absolute;right:clamp(16px,8.33vw,120px);bottom:18%;text-align:right;cursor:pointer;pointer-events:auto;opacity:0;">
+        <div class="hint-inner">
+          <svg class="hint-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;white-space:pre-line;text-align:right;">(2) Payments &amp;&#10;Collections</span>
+        </div>
+      </div>
+      <div id="c3-next-hint" class="hint-btn hint-next" style="position:absolute;right:clamp(16px,8.33vw,120px);bottom:9%;text-align:right;cursor:pointer;pointer-events:auto;opacity:0;">
+        <div class="hint-inner">
+          <svg class="hint-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+          <span style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;white-space:pre-line;text-align:right;">(4) Onboarding &amp;&#10;Digital Efficiency</span>
+        </div>
+      </div>
+
+    </div><!-- /sticky -->
+  </div><!-- /c3-container -->
+
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       CARD 4 — Onboarding & Digital Efficiency (150vh, no next hint)
+  ══════════════════════════════════════════════════════════════════ -->
+  <div id="c4-container" style="height:150vh;position:relative;">
+    <div style="position:sticky;top:0;height:100vh;overflow:hidden;width:100%;">
+
+      <video src="assets/card-4.mp4" autoplay muted loop playsinline
+        style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+
+      <div style="position:absolute;inset:0;pointer-events:none;
+        background:linear-gradient(to top, rgba(7,36,71,0.88) 0%, rgba(7,36,71,0.45) 45%, rgba(7,36,71,0.10) 75%, transparent 100%);"></div>
+
+      <div class="card-content" style="position:absolute;left:clamp(16px,8.33vw,120px);bottom:8%;display:flex;flex-direction:column;gap:0;pointer-events:none;max-width:560px;">
+        <div id="c4-label" style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);letter-spacing:0.18em;margin-bottom:6px;opacity:0;transform:translateY(16px);">(4)</div>
+        <h2 id="c4-heading" style="font-size:clamp(24px,2.5vw,36px);font-weight:400;color:#fff;line-height:1.5;white-space:pre-line;max-width:520px;margin:0 0 24px;opacity:0;transform:translateY(32px);">Onboarding &amp;&#10;Digital Efficiency</h2>
+        <p id="c4-suite1" style="font-size:16px;font-weight:700;color:#fff;margin:0 0 8px;opacity:0;transform:translateY(20px);">Onboarding</p>
+        <div id="c4-bullets1" style="margin-bottom:20px;opacity:0;transform:translateY(20px);">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Fully digital account opening with e-signature and document upload.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Pre-filled forms using existing customer data for faster journeys.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Real-time status tracking for every onboarding application.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">A dedicated relationship manager assigned from day one.</p>
+          </div>
+        </div>
+        <p id="c4-suite2" style="font-size:16px;font-weight:700;color:#fff;margin:0 0 8px;opacity:0;transform:translateY(20px);">Digital Efficiency</p>
+        <div id="c4-bullets2" style="opacity:0;transform:translateY(20px);">
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Straight-through processing for routine banking transactions.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Direct ERP connectivity to eliminate manual reconciliation.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Smart alerts and exception management to cut operational risk.</p>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;">
+            <span style="font-size:20px;color:#2765FF;line-height:21px;flex-shrink:0;">+</span>
+            <p style="font-size:14px;color:rgba(255,255,255,0.70);line-height:1.5;max-width:480px;margin:0;">Paperless workflows across payments, trade, and treasury.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prev hint only (no next hint on last card) -->
+      <div id="c4-prev-hint" class="hint-btn hint-prev" style="position:absolute;right:clamp(16px,8.33vw,120px);bottom:9%;text-align:right;cursor:pointer;pointer-events:auto;opacity:0;">
+        <div class="hint-inner">
+          <svg class="hint-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;white-space:pre-line;text-align:right;">(3) Administration &amp;&#10;Entitlements</span>
+        </div>
+      </div>
+
+    </div><!-- /sticky -->
+  </div><!-- /c4-container -->
+
+
+  <script>
+    // ── Reference viewport for scatter coordinates ─────────────────────────
+    const VW = 1366, VH = 768;
+    function p(px, total) { return (px / total) * 100; }
+
+    // Scatter positions (as % of viewport)
+    const isMobile = window.innerWidth < 768;
+    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1100;
+
+    let POS;
+    if (isMobile) {
+      // Mobile-specific scatter: 2×2 loose arrangement with portrait card proportions
+      // Widths/heights tuned for ~390×844 viewport to avoid vertical sticks
+      POS = {
+        c1: { l:  0,  t:  6, w: 28, h: 22 },
+        c2: { l:  4,  t: 44, w: 40, h: 28 },
+        c3: { l: 50,  t:  8, w: 44, h: 30 },
+        c4: { l: 53,  t: 54, w: 36, h: 26 },
+      };
+    } else {
+      const c1BaseW = p(128, VW);
+      const c1W     = isTablet ? c1BaseW * 1.5 : c1BaseW;
+      POS = {
+        c1: { l: p(432,VW), t: p(178,VH), w: c1W,       h: p(198,VH) },
+        c2: { l: p(118,VW), t: p(395,VH), w: p(251,VW), h: p(323,VH) },
+        c3: { l: p(882,VW), t: p(111,VH), w: p(464,VW), h: p(238,VH) },
+        c4: { l: p(820,VW), t: p(420,VH), w: p(333,VW), h: p(238,VH) },
+      };
+    }
+
+    // Centre position card-1 converges to before expanding
+    const CX = (100 - POS.c1.w) / 2;
+    const CY = (100 - POS.c1.h) / 2;
+    const TEXT_GAP = 1.5; // % gap between card bottom and text label
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function inv(v, a, b)  { return Math.min(1, Math.max(0, (v - a) / (b - a))); }
+
+    function s(id, styles) {
+      const el = document.getElementById(id);
+      if (el) Object.assign(el.style, styles);
+    }
+
+    // Returns 0→1 scroll progress through a sticky container
+    function getProgress(container) {
+      const rect  = container.getBoundingClientRect();
+      const total = container.offsetHeight - window.innerHeight;
+      return total <= 0 ? 0 : Math.max(0, Math.min(1, -rect.top / total));
+    }
+
+    // ── Scroll handler ─────────────────────────────────────────────────────
+    function onScroll() {
+      const c1El = document.getElementById('c1-container');
+      const c2El = document.getElementById('c2-container');
+      const c3El = document.getElementById('c3-container');
+      const c4El = document.getElementById('c4-container');
+
+      // ════════════════════════════════════════════════════════════════════
+      // PHASE 1 — scatter → converge → card-1 full-bleed → text reveal
+      // Timeline (v = 0 → 1 over 400vh):
+      //   0.00 → 0.18  All 4 cards fade in at scatter positions, begin converging
+      //   0.00 → 0.35  All 4 cards converge to centre
+      //   0.18 → 0.35  Side cards (2/3/4) fade back out as they reach centre
+      //   0.35 → 0.55  Card-1 expands full-bleed
+      //   0.52 → 0.62  Dark gradient fades in on card-1
+      //   0.58 → 0.80  Label / heading / bullets / hint reveal
+      // ════════════════════════════════════════════════════════════════════
+      const v = getProgress(c1El);
+
+      // Fade-in: all cards 0→1 over first 18% of scroll
+      const fadeIn = inv(v, 0, 0.18);
+
+      // Convergence progress (0→1 over 0→35%)
+      const move = inv(v, 0, 0.35);
+
+      // Side-card opacity: fade in 0→18%, then fade out 18→35%
+      const sideOp = Math.max(0, fadeIn - inv(v, 0.18, 0.35));
+
+      // Card-1 converges then expands
+      const c1Expand = inv(v, 0.35, 0.55);
+
+      const c1L = lerp(lerp(POS.c1.l, CX, move), 0, c1Expand);
+      const c1T = lerp(lerp(POS.c1.t, CY, move), 0, c1Expand);
+      const c1W = lerp(POS.c1.w, 100, c1Expand);
+      const c1H = lerp(POS.c1.h, 100, c1Expand);
+      const c1R = lerp(12, 0, c1Expand);
+
+      s('card1', { opacity:String(fadeIn), left:`${c1L}%`, top:`${c1T}%`, width:`${c1W}%`, height:`${c1H}%`, borderRadius:`${c1R}px` });
+
+      // Text label 1 tracks card, fades in with it then fades out as card expands
+      const text1Op = Math.max(0, fadeIn - inv(v, 0.35, 0.50));
+      s('text1', { opacity:String(text1Op), left:`${c1L}%`, top:`${c1T + c1H + TEXT_GAP}%` });
+
+      // Gradient overlay on card-1 (no compounding — direct child)
+      s('card1-gradient', { opacity: String(inv(v, 0.52, 0.62)) });
+
+      // Staggered text reveal
+      const lP = inv(v, 0.58, 0.66); s('label1',      { opacity:String(lP),  transform:`translateY(${lerp(16,0,lP)}px)` });
+      const hP = inv(v, 0.62, 0.70); s('heading1',    { opacity:String(hP),  transform:`translateY(${lerp(32,0,hP)}px)` });
+      const bP = inv(v, 0.65, 0.74); s('bullets1',    { opacity:String(bP),  transform:`translateY(${lerp(20,0,bP)}px)` });
+      s('next-hint-1',               { opacity:String(inv(v, 0.72, 0.80)) });
+
+      // Side cards: converge, fade in then out, keep 12px radius throughout
+      ['c2','c3','c4'].forEach((key, i) => {
+        const pos = POS[key];
+        const cL = lerp(pos.l, CX, move);
+        const cT = lerp(pos.t, CY, move);
+        const cW = lerp(pos.w, POS.c1.w, move);
+        const cH = lerp(pos.h, POS.c1.h, move);
+        s(`card${i+2}`, { opacity:String(sideOp), left:`${cL}%`, top:`${cT}%`, width:`${cW}%`, height:`${cH}%`, borderRadius:'12px' });
+        s(`text${i+2}`, { opacity:String(sideOp), left:`${cL}%`, top:`${cT + cH + TEXT_GAP}%` });
+      });
+
+      // ════════════════════════════════════════════════════════════════════
+      // CARD 2  (gradient always shown; only content elements animated)
+      // Content fully in by v2 = 0.44  →  44% of 150vh = 66vh
+      // ════════════════════════════════════════════════════════════════════
+      const v2 = getProgress(c2El);
+      const l2  = inv(v2, 0.02, 0.12); s('c2-label',    { opacity:String(l2),  transform:`translateY(${lerp(16,0,l2)}px)` });
+      const h2  = inv(v2, 0.06, 0.18); s('c2-heading',  { opacity:String(h2),  transform:`translateY(${lerp(32,0,h2)}px)` });
+      const s2a = inv(v2, 0.12, 0.22); s('c2-suite1',   { opacity:String(s2a), transform:`translateY(${lerp(20,0,s2a)}px)` });
+      const b2a = inv(v2, 0.18, 0.30); s('c2-bullets1', { opacity:String(b2a), transform:`translateY(${lerp(20,0,b2a)}px)` });
+      const s2b = inv(v2, 0.26, 0.36); s('c2-suite2',   { opacity:String(s2b), transform:`translateY(${lerp(20,0,s2b)}px)` });
+      const b2b = inv(v2, 0.32, 0.44); s('c2-bullets2', { opacity:String(b2b), transform:`translateY(${lerp(20,0,b2b)}px)` });
+      s('c2-prev-hint', { opacity:String(inv(v2, 0.20, 0.30)) });
+      s('c2-next-hint', { opacity:String(inv(v2, 0.28, 0.38)) });
+
+      // ════════════════════════════════════════════════════════════════════
+      // CARD 3
+      // ════════════════════════════════════════════════════════════════════
+      const v3 = getProgress(c3El);
+      const l3  = inv(v3, 0.02, 0.12); s('c3-label',    { opacity:String(l3),  transform:`translateY(${lerp(16,0,l3)}px)` });
+      const h3  = inv(v3, 0.06, 0.18); s('c3-heading',  { opacity:String(h3),  transform:`translateY(${lerp(32,0,h3)}px)` });
+      const s3a = inv(v3, 0.12, 0.22); s('c3-suite1',   { opacity:String(s3a), transform:`translateY(${lerp(20,0,s3a)}px)` });
+      const b3a = inv(v3, 0.18, 0.30); s('c3-bullets1', { opacity:String(b3a), transform:`translateY(${lerp(20,0,b3a)}px)` });
+      const s3b = inv(v3, 0.26, 0.36); s('c3-suite2',   { opacity:String(s3b), transform:`translateY(${lerp(20,0,s3b)}px)` });
+      const b3b = inv(v3, 0.32, 0.44); s('c3-bullets2', { opacity:String(b3b), transform:`translateY(${lerp(20,0,b3b)}px)` });
+      s('c3-prev-hint', { opacity:String(inv(v3, 0.20, 0.30)) });
+      s('c3-next-hint', { opacity:String(inv(v3, 0.28, 0.38)) });
+
+      // ════════════════════════════════════════════════════════════════════
+      // CARD 4
+      // ════════════════════════════════════════════════════════════════════
+      const v4 = getProgress(c4El);
+      const l4  = inv(v4, 0.02, 0.12); s('c4-label',    { opacity:String(l4),  transform:`translateY(${lerp(16,0,l4)}px)` });
+      const h4  = inv(v4, 0.06, 0.18); s('c4-heading',  { opacity:String(h4),  transform:`translateY(${lerp(32,0,h4)}px)` });
+      const s4a = inv(v4, 0.12, 0.22); s('c4-suite1',   { opacity:String(s4a), transform:`translateY(${lerp(20,0,s4a)}px)` });
+      const b4a = inv(v4, 0.18, 0.30); s('c4-bullets1', { opacity:String(b4a), transform:`translateY(${lerp(20,0,b4a)}px)` });
+      const s4b = inv(v4, 0.26, 0.36); s('c4-suite2',   { opacity:String(s4b), transform:`translateY(${lerp(20,0,s4b)}px)` });
+      const b4b = inv(v4, 0.32, 0.44); s('c4-bullets2', { opacity:String(b4b), transform:`translateY(${lerp(20,0,b4b)}px)` });
+      s('c4-prev-hint', { opacity:String(inv(v4, 0.20, 0.30)) });
+    }
+
+    // ── Position all Phase-1 cards at scatter positions, then make visible ─
+    function initCards() {
+      // All cards start at opacity 0 — they fade in as scroll begins
+      const place = (id, pos) => s(id, {
+        opacity:      '0',
+        left:         `${pos.l}%`,
+        top:          `${pos.t}%`,
+        width:        `${pos.w}%`,
+        height:       `${pos.h}%`,
+        borderRadius: '12px',
+      });
+
+      place('card1', POS.c1);
+      place('card2', POS.c2);
+      place('card3', POS.c3);
+      place('card4', POS.c4);
+
+      const placeText = (id, pos) => s(id, {
+        opacity: '0',
+        left: `${pos.l}%`,
+        top:  `${pos.t + pos.h + TEXT_GAP}%`,
+      });
+      placeText('text1', POS.c1);
+      placeText('text2', POS.c2);
+      placeText('text3', POS.c3);
+      placeText('text4', POS.c4);
+    }
+
+    // ── Hint interactions ─────────────────────────────────────────────────
+    // Custom smooth scroll — ease-in-out-quart, duration scales with distance.
+    let _scrollRaf = null;
+    function scrollToCard(containerId, progress) {
+      const el       = document.getElementById(containerId);
+      const scrollable = el.offsetHeight - window.innerHeight;
+      const target   = el.offsetTop + Math.max(0, scrollable * progress);
+      const start    = window.scrollY;
+      const dist     = target - start;
+      if (Math.abs(dist) < 2) return;
+
+      // 0.6 ms per pixel, clamped 700–1400 ms
+      const duration = Math.min(1400, Math.max(700, Math.abs(dist) * 0.6));
+
+      function easeInOutQuart(t) {
+        return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+      }
+
+      if (_scrollRaf) cancelAnimationFrame(_scrollRaf);
+      let startTime = null;
+
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        const t = Math.min((ts - startTime) / duration, 1);
+        window.scrollTo(0, start + dist * easeInOutQuart(t));
+        if (t < 1) { _scrollRaf = requestAnimationFrame(step); }
+        else        { _scrollRaf = null; }
+      }
+      _scrollRaf = requestAnimationFrame(step);
+    }
+
+    // Wire a hint button: click plays tap animation then navigates.
+    function wireHint(id, targetId, progress) {
+      const el  = document.getElementById(id);
+      const inner = el.querySelector('.hint-inner');
+      el.addEventListener('click', () => {
+        inner.classList.remove('tapped');
+        void inner.offsetWidth; // reflow to restart animation
+        inner.classList.add('tapped');
+        inner.addEventListener('animationend', () => inner.classList.remove('tapped'), { once: true });
+        scrollToCard(targetId, progress);
+      });
+    }
+
+    // Next hints (→ forward, 50% = all content visible)
+    wireHint('next-hint-1',  'c2-container', 0.50);
+    wireHint('c2-next-hint', 'c3-container', 0.50);
+    wireHint('c3-next-hint', 'c4-container', 0.50);
+
+    // Prev hints (← back; c1 needs 85% to show full text + next-hint)
+    wireHint('c2-prev-hint', 'c1-container', 0.85);
+    wireHint('c3-prev-hint', 'c2-container', 0.50);
+    wireHint('c4-prev-hint', 'c3-container', 0.50);
+
+    // ── Boot ──────────────────────────────────────────────────────────────
+    initCards();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // run once to set initial state
+
+    // ── Scroll indicator fade-out ─────────────────────────────────────────
+    (function() {
+      const indicator = document.getElementById('scroll-indicator');
+      window.addEventListener('scroll', function() {
+        const c1 = document.getElementById('c1-container');
+        if (!c1 || !indicator) return;
+        const scrollable = c1.offsetHeight - window.innerHeight;
+        const v = scrollable > 0 ? Math.min(1, (window.scrollY - c1.offsetTop) / scrollable) : 0;
+        indicator.style.opacity = v > 0.08 ? '0' : String(1 - v / 0.08);
+      }, { passive: true });
+    })();
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

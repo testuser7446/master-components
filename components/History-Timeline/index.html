@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History Timeline | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Scroll-reveal ───────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.9s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── Timeline track transition ───────────────────────────────────── */
+    #timeline-track {
+      transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+    #progress-line {
+      transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    /* ── Active dot pulse rings ──────────────────────────────────────── */
+    @keyframes pulse-ring-1 {
+      0%   { width: 12px; height: 12px; opacity: 0.8; }
+      100% { width: 32px; height: 32px; opacity: 0; }
+    }
+    @keyframes pulse-ring-2 {
+      0%   { width: 12px; height: 12px; opacity: 0.6; }
+      100% { width: 44px; height: 44px; opacity: 0; }
+    }
+    .pulse-ring-1 {
+      animation: pulse-ring-1 1.4s ease-out infinite;
+      animation-delay: 0s;
+    }
+    .pulse-ring-2 {
+      animation: pulse-ring-2 1.4s ease-out infinite;
+      animation-delay: 0.3s;
+    }
+
+    /* ── Event content fade ──────────────────────────────────────────── */
+    .event-content {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.35s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.35s cubic-bezier(0.16,1,0.3,1);
+      pointer-events: none;
+    }
+    .event-content.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* ── Nav buttons ─────────────────────────────────────────────────── */
+    .nav-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #2765FF; color: white; border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s, opacity 0.2s;
+    }
+    .nav-btn:hover:not(:disabled) { background: #1a50e0; transform: scale(1.05); }
+    .nav-btn:active:not(:disabled) { transform: scale(0.95); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  </style>
+</head>
+<body class="bg-[#EEF2FA] min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ History Timeline</span>
+  </div>
+
+  <!-- ── Section ────────────────────────────────────────────────────── -->
+  <section class="w-full px-8 md:px-16 py-4 md:py-6" style="background: #EEF2FA;">
+    <div class="max-w-[1400px] mx-auto">
+
+      <!-- Heading -->
+      <h2 class="reveal text-[24px] md:text-[36px] font-normal text-[#072447] leading-tight tracking-tight max-w-lg mb-4">
+        Insert claim about ENBD<br />history in the region
+      </h2>
+
+      <!-- Timeline viewport — clips the scrolling track -->
+      <div id="timeline-viewport" class="relative overflow-hidden">
+
+        <!-- Sliding track -->
+        <div id="timeline-track" class="relative" style="height: 300px;">
+
+          <!-- Track background line -->
+          <div id="track-bg-line" class="absolute left-0 h-px" style="top: 260px; background: rgba(7,36,71,0.3);"></div>
+
+          <!-- Progress line -->
+          <div id="progress-line" class="absolute left-0 h-px" style="top: 260px; width: 0; background: #072447;"></div>
+
+          <!-- Items injected by JS -->
+
+        </div>
+      </div>
+
+      <!-- Nav arrows -->
+      <div class="flex justify-end gap-3 mt-4">
+        <button id="prev-btn" class="nav-btn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        </button>
+        <button id="next-btn" class="nav-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    // ── Data ──────────────────────────────────────────────────────────
+    const TIMELINE_ITEMS = [
+      {
+        year: '1997',
+        title: 'Emirates Bank International founded',
+        description: 'Emirates Bank International was established in Dubai, laying the foundation for what would become one of the region\'s most trusted banking institutions.',
+      },
+      {
+        year: '2007',
+        title: 'Historic merger creates Emirates NBD',
+        description: 'Emirates Bank International and National Bank of Dubai merged to form Emirates NBD, creating the UAE\'s largest bank by assets and a regional powerhouse.',
+      },
+      {
+        year: '2013',
+        title: 'Launch of businessONLINE',
+        description: 'Emirates NBD launched businessONLINE, its flagship corporate digital banking platform, enabling businesses to manage payments and liquidity across 180+ countries.',
+      },
+      {
+        year: '2019',
+        title: 'Acquisition of DenizBank',
+        description: 'Emirates NBD completed the landmark acquisition of DenizBank in Turkey, significantly expanding its global presence and customer base to over 14 million.',
+      },
+      {
+        year: '2022',
+        title: 'Digital banking leadership',
+        description: 'Emirates NBD was recognised as the Most Innovative Bank in the Middle East, with over 90% of transactions conducted digitally across its platforms.',
+      },
+      {
+        year: '2024',
+        title: 'AI-powered banking platform',
+        description: 'Launched next-generation AI-driven financial tools including ENBD X and businessONLINE X, delivering personalised banking experiences for millions of customers.',
+      },
+      {
+        year: '2025',
+        title: 'Simpler. Better. Smarter.',
+        description: 'Emirates NBD continues to lead digital transformation in the region with its powerful ecosystem of tools — businessONLINE, smartTRADE, Emirates NBD Pay and smartSCF — serving corporate clients across 13 countries.',
+      },
+    ];
+
+    const DOT_GAP    = 300;   // px between dots
+    const TRACK_Y    = 260;   // px — dot vertical position
+    const TRACK_H    = 300;   // px — track container height
+
+    const CURRENT_YEAR = new Date().getFullYear().toString();
+    const DEFAULT_IDX  = (() => {
+      const i = TIMELINE_ITEMS.findIndex(t => t.year === CURRENT_YEAR);
+      return i >= 0 ? i : TIMELINE_ITEMS.length - 1;
+    })();
+
+    let activeIndex = DEFAULT_IDX;
+
+    const viewport     = document.getElementById('timeline-viewport');
+    const track        = document.getElementById('timeline-track');
+    const trackBgLine  = document.getElementById('track-bg-line');
+    const progressLine = document.getElementById('progress-line');
+    const prevBtn      = document.getElementById('prev-btn');
+    const nextBtn      = document.getElementById('next-btn');
+
+    const totalTrackW  = (TIMELINE_ITEMS.length - 1) * DOT_GAP;
+
+    // ── Build DOM ─────────────────────────────────────────────────────
+    trackBgLine.style.width  = totalTrackW + 'px';
+
+    TIMELINE_ITEMS.forEach((item, i) => {
+      const x = i * DOT_GAP;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'absolute';
+      wrapper.style.cssText = `left: ${x}px; top: 0;`;
+
+      // Year label
+      const yearLabel = document.createElement('div');
+      yearLabel.className = 'absolute text-[18px] md:text-[20px] font-semibold text-[#072447] whitespace-nowrap -translate-x-1/2 text-center';
+      yearLabel.style.cssText = 'top: 0; transform: translateX(-50%);';
+      yearLabel.textContent = item.year;
+
+      // Content block (centered on dot x, above track)
+      const contentWrap = document.createElement('div');
+      contentWrap.className = 'absolute event-content';
+      contentWrap.id = `content-${i}`;
+      contentWrap.style.cssText = `top: 28px; width: 280px; left: -140px;`;
+
+      const contentInner = document.createElement('div');
+      contentInner.className = 'flex flex-col gap-1 text-center';
+
+      const titleEl = document.createElement('p');
+      titleEl.className = 'text-[14px] md:text-[15px] font-bold text-[#072447]';
+      titleEl.textContent = item.title;
+
+      const descEl = document.createElement('p');
+      descEl.className = 'text-[13px] md:text-[14px] font-normal text-[#3A4B5C] leading-relaxed';
+      descEl.textContent = item.description;
+
+      contentInner.appendChild(titleEl);
+      contentInner.appendChild(descEl);
+      contentWrap.appendChild(contentInner);
+
+      // Dot button
+      const dotBtn = document.createElement('button');
+      dotBtn.className = 'absolute focus:outline-none';
+      dotBtn.style.cssText = `top: ${TRACK_Y}px; left: 0; transform: translate(-50%, -50%);`;
+      dotBtn.setAttribute('data-index', i);
+      dotBtn.innerHTML = buildDotHTML(i);
+
+      dotBtn.addEventListener('click', () => {
+        activeIndex = i;
+        updateTimeline();
+      });
+
+      wrapper.appendChild(yearLabel);
+      wrapper.appendChild(contentWrap);
+      wrapper.appendChild(dotBtn);
+      track.appendChild(wrapper);
+    });
+
+    // ── Dot HTML ──────────────────────────────────────────────────────
+    function buildDotHTML(i) {
+      const isActive = i === activeIndex;
+      const isPast   = i < activeIndex;
+
+      if (isActive) {
+        return `
+          <span class="relative flex items-center justify-center" style="width:24px; height:24px;">
+            <span class="pulse-ring-1 absolute rounded-full border border-[#072447]/50" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></span>
+            <span class="pulse-ring-2 absolute rounded-full border border-[#072447]/30" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></span>
+            <span class="absolute inset-0 rounded-full border-2 border-[#072447]"></span>
+            <span style="width:10px;height:10px;border-radius:50%;background:#072447;display:block;"></span>
+          </span>`;
+      } else {
+        const opacity = isPast ? '1' : '0.35';
+        return `<span style="width:12px;height:12px;border-radius:50%;background:#072447;opacity:${opacity};display:block;"></span>`;
+      }
+    }
+
+    // ── Update timeline state ─────────────────────────────────────────
+    function updateTimeline() {
+      const containerW  = viewport.offsetWidth;
+      const trackOffset = containerW / 2 - activeIndex * DOT_GAP;
+
+      // Slide track
+      track.style.transform = `translateX(${trackOffset}px)`;
+
+      // Grow progress line
+      progressLine.style.width = (activeIndex * DOT_GAP) + 'px';
+
+      // Rebuild dots + content visibility
+      TIMELINE_ITEMS.forEach((_, i) => {
+        const dotBtn = track.querySelector(`[data-index="${i}"]`);
+        if (dotBtn) dotBtn.innerHTML = buildDotHTML(i);
+
+        const contentEl = document.getElementById(`content-${i}`);
+        if (contentEl) {
+          if (i === activeIndex) contentEl.classList.add('active');
+          else contentEl.classList.remove('active');
+        }
+      });
+
+      // Nav button states
+      prevBtn.disabled = activeIndex === 0;
+      nextBtn.disabled = activeIndex === TIMELINE_ITEMS.length - 1;
+    }
+
+    // ── Nav buttons ───────────────────────────────────────────────────
+    prevBtn.addEventListener('click', () => {
+      if (activeIndex > 0) { activeIndex--; updateTimeline(); }
+    });
+    nextBtn.addEventListener('click', () => {
+      if (activeIndex < TIMELINE_ITEMS.length - 1) { activeIndex++; updateTimeline(); }
+    });
+
+    // ── Resize ────────────────────────────────────────────────────────
+    window.addEventListener('resize', updateTimeline);
+
+    // ── Initial render ────────────────────────────────────────────────
+    updateTimeline();
+
+    // ── Scroll reveal for heading ─────────────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Globe Feature Section | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-white min-h-screen pt-10">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-white/90 backdrop-blur-sm border-b border-gray-200 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-[#3A4B5C]/60 hover:text-[#072447] transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-[#3A4B5C]/30 text-xs ml-3">/ Globe Feature Section</span>
+  </div>
+
+  <!-- ── Wrapper (matches React mt-48 context replaced with padding) ── -->
+  <div class="p-8 bg-white mt-4">
+
+    <!-- ── Section — matches React Featured_05 exactly ───────────────── -->
+    <section class="relative w-full mx-auto overflow-hidden rounded-3xl bg-gray-100 border border-gray-200 shadow-md px-6 py-16 md:px-16 md:py-24">
+
+      <div class="flex flex-col-reverse items-center justify-between gap-10 md:flex-row">
+
+        <!-- ── Left: Text ── -->
+        <div class="z-10 max-w-xl text-left">
+          <h1 class="text-3xl font-normal text-gray-900">
+            Built for wherever
+            <span class="text-[#072447] font-bold"> business moves next.</span>
+            <span class="text-gray-500"> Empowering teams with fast, elegant, and scalable banking solutions across 180+ markets.</span>
+          </h1>
+          <a href="#"
+            class="mt-4 inline-flex items-center gap-2 rounded-full bg-[#072447] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black">
+            Explore solutions
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </a>
+        </div>
+
+        <!-- ── Right: Globe — matches React layout exactly ── -->
+        <div class="relative w-full max-w-xl" style="height:180px;">
+          <!-- matches: absolute inset-0 mx-auto aspect-[1/1] w-full max-w-[600px]
+                        + className="absolute -bottom-20 -right-40 scale-150" -->
+          <div class="absolute inset-0 mx-auto"
+            style="aspect-ratio:1/1; width:100%; max-width:600px;
+                   position:absolute; bottom:-80px; right:-160px;
+                   transform:scale(1.5); transform-origin:bottom right;">
+            <canvas id="globe-canvas"
+              style="display:block; width:100%; height:100%; cursor:grab;
+                     opacity:0; transition:opacity 0.5s ease;
+                     contain:layout paint size; touch-action:none;">
+            </canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import createGlobe from 'https://esm.sh/cobe@2';
+
+    // ── GLOBE_CONFIG — exact copy from provided React code ────────────
+    const GLOBE_CONFIG = {
+      width:           800,
+      height:          800,
+      onRender:        () => {},
+      devicePixelRatio: 2,
+      phi:             0,
+      theta:           0.3,
+      dark:            0,
+      diffuse:         0.4,
+      mapSamples:      16000,
+      mapBrightness:   1.2,
+      baseColor:       [1, 1, 1],
+      markerColor:     [251 / 255, 100 / 255, 21 / 255],
+      glowColor:       [1, 1, 1],
+      markers: [
+        { location: [ 14.5995,  120.9842], size: 0.03 },
+        { location: [ 19.0760,   72.8777], size: 0.10 },
+        { location: [ 23.8103,   90.4125], size: 0.05 },
+        { location: [ 30.0444,   31.2357], size: 0.07 },
+        { location: [ 39.9042,  116.4074], size: 0.08 },
+        { location: [-23.5505,  -46.6333], size: 0.10 },
+        { location: [ 19.4326,  -99.1332], size: 0.10 },
+        { location: [ 40.7128,  -74.0060], size: 0.10 },
+        { location: [ 34.6937,  135.5022], size: 0.05 },
+        { location: [ 41.0082,   28.9784], size: 0.06 },
+      ],
+    };
+
+    // ── Globe init — mirrors React Globe component exactly ────────────
+    let phi = 0;
+    let width = 0;
+    const canvas = document.getElementById('globe-canvas');
+    let pointerInteracting = null;
+    let pointerInteractionMovement = 0;
+    let r = 0;
+
+    function updatePointerInteraction(value) {
+      pointerInteracting = value;
+      canvas.style.cursor = value !== null ? 'grabbing' : 'grab';
+    }
+
+    function updateMovement(clientX) {
+      if (pointerInteracting !== null) {
+        const delta = clientX - pointerInteracting;
+        pointerInteractionMovement = delta;
+        r = delta / 200;
+      }
+    }
+
+    function onRender(state) {
+      if (pointerInteracting === null) phi += 0.005;
+      state.phi    = phi + r;
+      state.width  = width * 2;
+      state.height = width * 2;
+    }
+
+    function onResize() {
+      if (canvas) width = canvas.offsetWidth;
+    }
+    window.addEventListener('resize', onResize);
+    onResize();
+
+    const globe = createGlobe(canvas, {
+      ...GLOBE_CONFIG,
+      width:    width * 2,
+      height:   width * 2,
+      onRender,
+    });
+
+    // Fade in once ready (matches React setTimeout(() => opacity = "1"))
+    setTimeout(() => { canvas.style.opacity = '1'; });
+
+    // ── Pointer events — mirrors React canvas event handlers ──────────
+    canvas.addEventListener('pointerdown', (e) => {
+      updatePointerInteraction(e.clientX - pointerInteractionMovement);
+    });
+    canvas.addEventListener('pointerup',  () => updatePointerInteraction(null));
+    canvas.addEventListener('pointerout', () => updatePointerInteraction(null));
+    canvas.addEventListener('mousemove',  (e) => updateMovement(e.clientX));
+    canvas.addEventListener('touchmove',  (e) => {
+      if (e.touches[0]) updateMovement(e.touches[0].clientX);
+    });
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

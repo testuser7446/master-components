@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hero — Animation BG Left | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in-1 { opacity:0; animation: fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s forwards; }
+    .fade-in-2 { opacity:0; animation: fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.38s forwards; }
+    .fade-in-3 { opacity:0; animation: fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.54s forwards; }
+    .fade-in-4 { opacity:0; animation: fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.68s forwards; }
+    #threads-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
+    .btn-primary  { transition: transform 0.2s, background 0.2s; }
+    .btn-primary:hover  { transform: scale(1.02); background: #0a3060; }
+    .btn-secondary { transition: background 0.2s, border-color 0.2s; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.3); }
+    @media (max-width: 767px) {
+      .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+      .fade-in-4 { position: fixed; bottom: 2rem; left: 1.5rem; right: 1.5rem; justify-content: center; z-index: 40; }
+    }
+  </style>
+</head>
+<body class="bg-[#030b18] overflow-x-hidden">
+
+  <!-- Back nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 flex items-center h-10 px-4 bg-black/60 backdrop-blur-sm border-b border-white/10">
+    <a href="../../index.html" class="text-white/60 hover:text-white text-xs flex items-center gap-2 transition-colors">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-white/30 text-xs ml-3">/ Hero — Animation BG (Left)</span>
+  </div>
+
+  <!-- Hero -->
+  <section id="hero" class="relative min-h-screen flex items-center overflow-hidden bg-[#030b18]">
+
+    <!-- WebGL threads canvas -->
+    <canvas id="threads-canvas"></canvas>
+
+    <!-- Top vignette -->
+    <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to bottom,rgba(3,11,24,0.92) 0%,transparent 12%);"></div>
+    <!-- Bottom vignette -->
+    <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to top,rgba(3,11,24,0.7) 0%,transparent 30%);"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 w-full px-6 md:px-[48px] lg:px-[120px] md:pt-28 md:pb-24">
+      <div class="max-w-3xl">
+        <p class="fade-in-1 text-[11px] md:text-[13px] font-normal tracking-[0.22em] uppercase text-white/50 mb-4">
+          Emirates NBD · Trade Finance
+        </p>
+        <h1 class="fade-in-2 text-[36px] md:text-[48px] font-normal tracking-tight leading-[1.5] text-white mb-4">
+          Full-featured product suite<br />that supports your working capital requirements
+        </h1>
+        <p class="fade-in-3 text-[14px] md:text-[16px] font-normal text-white/55 mb-4 leading-[1.5]">
+          Finance your off-plan home with confidence — exclusive partner pricing on every live release from 13 of Dubai's most established developers, including Emaar, Nakheel, Sobha, DAMAC, Meraas,<br />Aldar and more.
+        </p>
+        <div class="fade-in-4 flex flex-wrap items-center gap-4">
+          <button class="btn-primary px-8 py-3.5 text-sm font-semibold text-white bg-[#072447] rounded-xl">
+            Get started
+          </button>
+          <button class="btn-secondary px-8 py-3.5 text-sm font-medium text-white/70 border border-white/15 rounded-xl inline-flex items-center gap-2">
+            Explore Trade Finance
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" class="opacity-50"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+  (function () {
+    // ── Config ────────────────────────────────────────────────────────────────
+    const COLOR     = [1.0, 1.0, 1.0];   // RGB 0–1
+    const AMPLITUDE = 1.2;
+    const DISTANCE  = 0.0;
+    const MOUSE_ON  = true;
+
+    // ── Shaders ───────────────────────────────────────────────────────────────
+    const vert = `
+attribute vec2 position;
+attribute vec2 uv;
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = vec4(position, 0.0, 1.0);
+}`;
+
+    const frag = `
+precision highp float;
+uniform float iTime;
+uniform vec3  iResolution;
+uniform vec3  uColor;
+uniform float uAmplitude;
+uniform float uDistance;
+uniform vec2  uMouse;
+
+#define PI 3.1415926538
+const int   u_line_count = 40;
+const float u_line_width = 7.0;
+const float u_line_blur  = 10.0;
+
+float Perlin2D(vec2 P) {
+  vec2 Pi = floor(P);
+  vec4 Pf_Pfmin1 = P.xyxy - vec4(Pi, Pi + 1.0);
+  vec4 Pt = vec4(Pi.xy, Pi.xy + 1.0);
+  Pt = Pt - floor(Pt * (1.0/71.0)) * 71.0;
+  Pt += vec2(26.0,161.0).xyxy;
+  Pt *= Pt;
+  Pt = Pt.xzxz * Pt.yyww;
+  vec4 hx = fract(Pt * (1.0/951.135664));
+  vec4 hy = fract(Pt * (1.0/642.949883));
+  vec4 gx = hx - 0.49999;
+  vec4 gy = hy - 0.49999;
+  vec4 gr = inversesqrt(gx*gx + gy*gy) * (gx*Pf_Pfmin1.xzxz + gy*Pf_Pfmin1.yyww);
+  gr *= 1.4142135623730950;
+  vec2 blend = Pf_Pfmin1.xy*Pf_Pfmin1.xy*Pf_Pfmin1.xy*(Pf_Pfmin1.xy*(Pf_Pfmin1.xy*6.0-15.0)+10.0);
+  vec4 b = vec4(blend, vec2(1.0-blend));
+  return dot(gr, b.zxzx * b.wwyy);
+}
+
+float pixel(float count, vec2 res) { return (1.0/max(res.x,res.y))*count; }
+
+float lineFn(vec2 st, float width, float perc, float offset, vec2 mouse, float time, float amplitude, float distance) {
+  float split_offset = perc * 0.4;
+  float split_point  = 0.1 + split_offset;
+  float amp_normal   = smoothstep(split_point, 0.7, st.x);
+  float finalAmp     = amp_normal * 0.5 * amplitude * (1.0 + (mouse.y-0.5)*0.2);
+  float t_scaled     = time/10.0 + (mouse.x-0.5)*1.0;
+  float blur         = smoothstep(split_point, split_point+0.05, st.x) * perc;
+  float xnoise       = mix(
+    Perlin2D(vec2(t_scaled, st.x+perc)*2.5),
+    Perlin2D(vec2(t_scaled, st.x+t_scaled)*3.5)/1.5,
+    st.x*0.3
+  );
+  float y = 0.5 + (perc-0.5)*distance + xnoise/2.0*finalAmp;
+  float ls = smoothstep(y+(width/2.0)+(u_line_blur*pixel(1.0,iResolution.xy)*blur), y, st.y);
+  float le = smoothstep(y, y-(width/2.0)-(u_line_blur*pixel(1.0,iResolution.xy)*blur), st.y);
+  return clamp((ls-le)*(1.0-smoothstep(0.0,1.0,pow(perc,0.3))), 0.0, 1.0);
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / iResolution.xy;
+  float strength = 1.0;
+  for (int i = 0; i < u_line_count; i++) {
+    float p = float(i) / float(u_line_count);
+    strength *= (1.0 - lineFn(uv, u_line_width*pixel(1.0,iResolution.xy)*(1.0-p), p, PI*p, uMouse, iTime, uAmplitude, uDistance));
+  }
+  float c = 1.0 - strength;
+  gl_FragColor = vec4(uColor * c, c);
+}`;
+
+    // ── WebGL setup ───────────────────────────────────────────────────────────
+    const canvas = document.getElementById('threads-canvas');
+    const gl     = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return;
+
+    gl.clearColor(0, 0, 0, 0);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    function mkShader(type, src) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      return s;
+    }
+    const prog = gl.createProgram();
+    gl.attachShader(prog, mkShader(gl.VERTEX_SHADER, vert));
+    gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, frag));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    // Fullscreen triangle
+    const posBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    const posLoc = gl.getAttribLocation(prog, 'position');
+    gl.enableVertexAttribArray(posLoc);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const uvBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, uvBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0,0, 2,0, 0,2]), gl.STATIC_DRAW);
+    const uvLoc = gl.getAttribLocation(prog, 'uv');
+    gl.enableVertexAttribArray(uvLoc);
+    gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 0, 0);
+
+    // Uniforms
+    const uTime  = gl.getUniformLocation(prog, 'iTime');
+    const uRes   = gl.getUniformLocation(prog, 'iResolution');
+    const uColor = gl.getUniformLocation(prog, 'uColor');
+    const uAmp   = gl.getUniformLocation(prog, 'uAmplitude');
+    const uDist  = gl.getUniformLocation(prog, 'uDistance');
+    const uMouse = gl.getUniformLocation(prog, 'uMouse');
+
+    gl.uniform3f(uColor, COLOR[0], COLOR[1], COLOR[2]);
+    gl.uniform1f(uAmp, AMPLITUDE);
+    gl.uniform1f(uDist, DISTANCE);
+    gl.uniform2f(uMouse, 0.5, 0.5);
+
+    // Resize
+    function resize() {
+      const w = canvas.offsetWidth, h = canvas.offsetHeight;
+      canvas.width  = w;
+      canvas.height = h;
+      gl.viewport(0, 0, w, h);
+      gl.uniform3f(uRes, w, h, w / h);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Mouse
+    let cur = [0.5, 0.5], tgt = [0.5, 0.5];
+    if (MOUSE_ON) {
+      const hero = document.getElementById('hero');
+      hero.addEventListener('mousemove', e => {
+        const r = hero.getBoundingClientRect();
+        tgt = [(e.clientX - r.left) / r.width, 1 - (e.clientY - r.top) / r.height];
+      });
+      hero.addEventListener('mouseleave', () => { tgt = [0.5, 0.5]; });
+    }
+
+    // Render loop
+    function render(t) {
+      if (MOUSE_ON) {
+        cur[0] += 0.05 * (tgt[0] - cur[0]);
+        cur[1] += 0.05 * (tgt[1] - cur[1]);
+        gl.uniform2f(uMouse, cur[0], cur[1]);
+      }
+      gl.uniform1f(uTime, t * 0.001);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+  }());
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

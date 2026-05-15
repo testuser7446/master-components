@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Focus Rail — 3D Carousel (Dark) | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    #rail-wrapper {
+      perspective: 1200px;
+      perspective-origin: center center;
+    }
+    .rail-card {
+      position: absolute;
+      width: 260px;
+      aspect-ratio: 3 / 4;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #171717;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.16,1,0.3,1),
+                  opacity 0.4s ease,
+                  filter 0.4s ease,
+                  box-shadow 0.4s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    @media (min-width: 768px) {
+      .rail-card { width: 300px; }
+    }
+
+    /* Ambience layers crossfade */
+    .ambience-layer {
+      position: absolute;
+      inset: 0;
+      transition: opacity 0.8s ease;
+      pointer-events: none;
+    }
+
+    /* Info block fade-in animation */
+    @keyframes infoIn {
+      from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+      to   { opacity: 1; transform: translateY(0);    filter: blur(0px); }
+    }
+    .info-anim { animation: infoIn 0.3s ease forwards; }
+
+    /* Drag cursor */
+    #rail-wrapper.dragging { cursor: grabbing; }
+  </style>
+</head>
+<body class="bg-[#030a16] min-h-screen">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-black/40 backdrop-blur-sm border-b border-white/10 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-white/60 hover:text-white transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-white/30 text-xs ml-3">/ Focus Rail — 3D Carousel (Dark)</span>
+  </div>
+
+  <!-- Component Root -->
+  <div class="relative w-full min-h-screen overflow-hidden bg-[#030a16] text-white outline-none select-none" id="root">
+
+    <!-- Ambience Background -->
+    <div class="absolute inset-0 z-0 pointer-events-none" id="ambience-container">
+      <div class="ambience-layer" id="ambience-a"></div>
+      <div class="ambience-layer" id="ambience-b" style="opacity:0"></div>
+    </div>
+
+    <!-- Main Stage -->
+    <div class="relative z-10 flex flex-col px-4 md:px-[48px] lg:px-[120px] pt-20 pb-10">
+
+      <!-- Rail -->
+      <div id="rail-wrapper"
+        class="relative mx-auto flex items-center justify-center w-full max-w-6xl cursor-grab"
+        style="height:360px;">
+        <!-- Cards injected by JS -->
+      </div>
+
+      <!-- Info & Controls -->
+      <div class="mx-auto mt-4 flex w-full max-w-4xl flex-col items-start justify-between gap-6 md:flex-row">
+
+        <!-- Info text (left) -->
+        <div class="flex flex-col items-center text-center md:items-start md:text-left justify-start" style="min-height:128px; flex:1;">
+          <div id="info-block" class="space-y-2 info-anim"></div>
+        </div>
+
+        <!-- Controls (right) — tablet: stacked vertically, equal width; desktop: horizontal row -->
+        <div class="flex items-center gap-4 self-center md:self-auto mt-0 md:mt-[22px] md:flex-col md:items-stretch lg:flex-row lg:items-center">
+          <!-- Glass nav pill -->
+          <div class="flex items-center justify-center gap-1 rounded-xl px-2 h-11 backdrop-blur-2xl border bg-white/10 border-white/20 md:w-full lg:w-auto"
+            style="box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15);">
+            <button onclick="handlePrev()" aria-label="Previous"
+              class="rounded-lg p-2 transition active:scale-95 text-white/60 hover:bg-white/15 hover:text-white">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
+            </button>
+            <span id="counter" class="min-w-[36px] text-center text-xs font-medium tracking-wide text-white/50"></span>
+            <button onclick="handleNext()" aria-label="Next"
+              class="rounded-lg p-2 transition active:scale-95 text-white/60 hover:bg-white/15 hover:text-white">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+            </button>
+          </div>
+
+          <!-- Explore button -->
+          <a id="explore-btn" href="#"
+            class="flex items-center justify-center gap-2 rounded-xl bg-[#2765FF] pl-5 pr-4 h-11 text-sm font-semibold text-white transition-all hover:bg-[#1a4fd6] hover:scale-105 active:scale-95 md:w-full lg:w-auto"
+            style="box-shadow: 0 8px 24px rgba(39,101,255,0.3);">
+            Explore
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ITEMS = [
+      {
+        id: 1,
+        title: "businessONLINE",
+        description: "A powerful digital banking platform for corporates — manage payments, collections, and liquidity across 180+ countries.",
+        meta: "Corporate • Digital",
+        imageSrc: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1000&q=80&auto=format&fit=crop",
+        href: "#business-online",
+      },
+      {
+        id: 2,
+        title: "Trade Finance",
+        description: "End-to-end trade solutions including Letters of Credit, guarantees, and supply chain financing for global businesses.",
+        meta: "Trade • Global",
+        imageSrc: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=1000&q=80&auto=format&fit=crop",
+        href: "#trade-finance",
+      },
+      {
+        id: 3,
+        title: "Wealth Management",
+        description: "Tailored investment strategies, structured products and private banking services for high-net-worth individuals.",
+        meta: "Priority • Wealth",
+        imageSrc: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1000&q=80&auto=format&fit=crop",
+        href: "#wealth",
+      },
+      {
+        id: 4,
+        title: "Emirates NBD App",
+        description: "Award-winning mobile banking — transfers, bill payments, investments, and more at your fingertips, 24/7.",
+        meta: "Digital • Mobile",
+        imageSrc: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=1000&q=80&auto=format&fit=crop",
+        href: "#app",
+      },
+      {
+        id: 5,
+        title: "Treasury & Markets",
+        description: "Sophisticated FX, rates, and structured solutions designed for corporates and financial institutions.",
+        meta: "Markets • FX",
+        imageSrc: "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=1000&q=80&auto=format&fit=crop",
+        href: "#treasury",
+      },
+    ];
+
+    const count = ITEMS.length;
+    let active = 0;
+    let ambienceSlot = 'a'; // which layer is currently visible
+
+    function wrap(v) {
+      return ((v % count) + count) % count;
+    }
+
+    // ── Ambience background ──────────────────────────────────────────────
+    function updateAmbience(item) {
+      const next = ambienceSlot === 'a' ? 'b' : 'a';
+      const curr = ambienceSlot;
+      const layerNext = document.getElementById('ambience-' + next);
+      const layerCurr = document.getElementById('ambience-' + curr);
+
+      layerNext.innerHTML = `
+        <img src="${item.imageSrc}" alt="" class="h-full w-full object-cover"
+          style="filter:blur(80px) saturate(2); transform:scale(1.1);" />
+        <div class="absolute inset-0"
+          style="background: linear-gradient(to top, #030a16 0%, rgba(3,10,22,0.5) 50%, transparent 100%)"></div>
+      `;
+      layerNext.style.opacity = '0.4';
+      layerCurr.style.opacity = '0';
+      ambienceSlot = next;
+    }
+
+    // ── Render cards ─────────────────────────────────────────────────────
+    function renderCards() {
+      const wrapper = document.getElementById('rail-wrapper');
+
+      // Remove old cards
+      wrapper.querySelectorAll('.rail-card').forEach(el => el.remove());
+
+      const isMobile = window.innerWidth < 768;
+      const xStep = isMobile ? 200 : 320;
+
+      ITEMS.forEach((item, index) => {
+        const raw   = ((index - active + count) % count);
+        const half  = Math.floor(count / 2);
+        const offset = raw > half ? raw - count : raw;
+        const dist  = Math.abs(offset);
+        const isCenter = offset === 0;
+        const isVisible = dist <= 2;
+
+        if (!isVisible) return;
+
+        const xOffset  = offset * xStep;
+        const zOffset  = -dist * 180;
+        const scale    = isCenter ? 1 : 0.82;
+        const rotateY  = offset * -20;
+        const opacity  = isCenter ? 1 : Math.max(0.15, 1 - dist * 0.45);
+        const blur     = isCenter ? 0 : dist * 5;
+        const bright   = isCenter ? 1 : 0.5;
+        const zIndex   = isCenter ? 20 : Math.max(2, 10 - dist * 4);
+
+        const card = document.createElement('div');
+        card.className = 'rail-card';
+        card.style.cssText = `
+          transform: translateX(${xOffset}px) translateZ(${zOffset}px) scale(${scale}) rotateY(${rotateY}deg);
+          opacity: ${opacity};
+          filter: blur(${blur}px) brightness(${bright});
+          z-index: ${zIndex};
+          ${isCenter ? 'box-shadow: 0 25px 50px rgba(255,255,255,0.1);' : ''}
+          pointer-events: ${isVisible ? 'auto' : 'none'};
+        `;
+        card.innerHTML = `
+          <img src="${item.imageSrc}" alt="${item.title}"
+            class="h-full w-full object-cover pointer-events-none"
+            draggable="false" />
+          <div class="absolute inset-0 rounded-2xl pointer-events-none"
+            style="background: linear-gradient(to bottom, rgba(255,255,255,0.08) 0%, transparent 50%)"></div>
+          <div class="absolute inset-0 rounded-2xl pointer-events-none"
+            style="background: rgba(0,0,0,0.08); mix-blend-mode: multiply;"></div>
+        `;
+
+        if (!isCenter) {
+          card.addEventListener('click', () => {
+            setActive(active + offset);
+          });
+        }
+
+        wrapper.appendChild(card);
+      });
+    }
+
+    // ── Info block ───────────────────────────────────────────────────────
+    function renderInfo() {
+      const item = ITEMS[wrap(active)];
+      const block = document.getElementById('info-block');
+      block.classList.remove('info-anim');
+      void block.offsetWidth; // reflow to restart animation
+      block.classList.add('info-anim');
+      block.innerHTML = `
+        ${item.meta ? `<span class="text-xs font-medium uppercase tracking-wider text-[#2765FF]">${item.meta}</span>` : ''}
+        <h3 class="text-[22px] md:text-[28px] font-normal tracking-tight leading-[150%] text-white">${item.title}</h3>
+        ${item.description ? `<p class="text-sm md:text-base leading-relaxed text-neutral-400 max-w-md">${item.description}</p>` : ''}
+      `;
+      document.getElementById('counter').textContent = `${wrap(active) + 1}/${count}`;
+      const btn = document.getElementById('explore-btn');
+      if (item.href) {
+        btn.href = item.href;
+        btn.style.display = '';
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+
+    // ── Set active ───────────────────────────────────────────────────────
+    function setActive(idx) {
+      active = idx;
+      const item = ITEMS[wrap(active)];
+      updateAmbience(item);
+      renderCards();
+      renderInfo();
+    }
+
+    function handlePrev() { setActive(active - 1); }
+    function handleNext() { setActive(active + 1); }
+
+    // ── Drag / swipe ─────────────────────────────────────────────────────
+    const wrapper = document.getElementById('rail-wrapper');
+    let dragStartX = null;
+    let isDragging = false;
+
+    wrapper.addEventListener('mousedown', e => {
+      dragStartX = e.clientX;
+      isDragging = true;
+      wrapper.classList.add('dragging');
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+    });
+    window.addEventListener('mouseup', e => {
+      if (!isDragging) return;
+      isDragging = false;
+      wrapper.classList.remove('dragging');
+      const diff = e.clientX - dragStartX;
+      if (Math.abs(diff) > 50) {
+        diff < 0 ? handleNext() : handlePrev();
+      }
+      dragStartX = null;
+    });
+
+    // Touch
+    wrapper.addEventListener('touchstart', e => { dragStartX = e.touches[0].clientX; }, { passive: true });
+    wrapper.addEventListener('touchend', e => {
+      const diff = e.changedTouches[0].clientX - dragStartX;
+      if (Math.abs(diff) > 50) { diff < 0 ? handleNext() : handlePrev(); }
+      dragStartX = null;
+    }, { passive: true });
+
+    // Wheel
+    let lastWheel = 0;
+    document.getElementById('root').addEventListener('wheel', e => {
+      const now = Date.now();
+      if (now - lastWheel < 400) return;
+      const isHoriz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+      const delta = isHoriz ? e.deltaX : e.deltaY;
+      if (Math.abs(delta) > 20) {
+        delta > 0 ? handleNext() : handlePrev();
+        lastWheel = now;
+      }
+    }, { passive: true });
+
+    // Keyboard
+    document.getElementById('root').setAttribute('tabindex', '0');
+    document.getElementById('root').addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') handlePrev();
+      if (e.key === 'ArrowRight') handleNext();
+    });
+
+    // Resize
+    window.addEventListener('resize', () => renderCards());
+
+    // ── Init ─────────────────────────────────────────────────────────────
+    setActive(0);
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

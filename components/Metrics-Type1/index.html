@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metrics — Type 1 | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+    .reveal { opacity:0; transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1); transform: translateY(28px); }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+  </style>
+</head>
+<body class="bg-white min-h-screen">
+  <div class="fixed top-0 left-0 right-0 z-50 flex items-center h-10 px-4 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+    <a href="../../index.html" class="text-[#072447]/60 hover:text-[#072447] text-xs flex items-center gap-2 transition-colors">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-gray-300 text-xs ml-3">/ Metrics — Type 1</span>
+  </div>
+
+  <section class="bg-white w-full px-6 md:px-12 py-4 md:py-6">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-12 md:mb-20 gap-4 md:gap-6 max-w-[1400px] mx-auto">
+      <h2 class="reveal text-[24px] md:text-[36px] font-normal leading-[150%] md:leading-[1.15] text-[#072447] max-w-lg">
+        Trusted by businesses.<br />
+        <span class="text-[#072447]">Proven by numbers.</span>
+      </h2>
+      <p class="reveal text-[12px] md:text-[14px] font-light text-[#3A4B5C] max-w-sm md:text-right" style="transition-delay:0.15s">
+        From single-entity SMEs to Fortune 500 groups operating across 180+ markets — businessONLINE delivers at every scale, every day.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 max-w-[1400px] mx-auto">
+      <div class="reveal border-b border-r border-[#E5E7EB] py-8 md:py-12 px-4 md:px-0 md:pr-12" style="transition-delay:0s">
+        <div class="text-[44px] md:text-[96px] font-semibold leading-none text-[#072447] tracking-tight mb-4">
+          <span class="counter" data-end="99.4" data-decimals="1">0</span><span class="text-[26px] md:text-[56px]">%</span>
+        </div>
+        <p class="text-[12px] md:text-[16px] font-normal tracking-widest uppercase text-[#3A4B5C]">On-Time Payment<br />Processing Rate</p>
+      </div>
+      <div class="reveal border-b border-[#E5E7EB] py-8 md:py-12 px-4 md:px-0 md:pl-12" style="transition-delay:0.1s">
+        <div class="text-[44px] md:text-[96px] font-semibold leading-none text-[#072447] tracking-tight mb-4">
+          <span class="counter" data-end="180" data-decimals="0">0</span><span class="text-[26px] md:text-[56px]">+</span>
+        </div>
+        <p class="text-[12px] md:text-[16px] font-normal tracking-widest uppercase text-[#3A4B5C]">Countries Covered<br />With Live Transfers</p>
+      </div>
+      <div class="reveal border-r border-[#E5E7EB] py-8 md:py-12 px-4 md:px-0 md:pr-12" style="transition-delay:0.2s">
+        <div class="text-[44px] md:text-[96px] font-semibold leading-none text-[#072447] tracking-tight mb-4">
+          1M<span class="text-[26px] md:text-[56px]">+</span>
+        </div>
+        <p class="text-[12px] md:text-[16px] font-normal tracking-widest uppercase text-[#3A4B5C]">Transactions<br />Processed Daily</p>
+      </div>
+      <div class="reveal py-8 md:py-12 px-4 md:px-0 md:pl-12" style="transition-delay:0.3s">
+        <div class="text-[44px] md:text-[96px] font-semibold leading-none text-[#072447] tracking-tight mb-4">
+          <span class="counter" data-end="30" data-decimals="0">0</span><span class="text-[26px] md:text-[56px]">+</span>
+        </div>
+        <p class="text-[12px] md:text-[16px] font-normal tracking-widest uppercase text-[#3A4B5C]">Years of Banking<br />Excellence</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          if (e.target.querySelector('.counter')) {
+            e.target.querySelectorAll('.counter').forEach(startCount);
+          }
+          if (e.target.classList.contains('counter')) startCount(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '-60px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    function startCount(el) {
+      const end = parseFloat(el.dataset.end);
+      const dec = parseInt(el.dataset.decimals)||0;
+      const dur = 1800;
+      const start = performance.now();
+      function tick(now) {
+        const p = Math.min((now-start)/dur, 1);
+        const ease = 1 - Math.pow(1-p, 3);
+        el.textContent = (end*ease).toFixed(dec);
+        if (p<1) requestAnimationFrame(tick);
+        else el.textContent = end.toFixed(dec);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    // Trigger on load too
+    setTimeout(() => {
+      document.querySelectorAll('.reveal').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+          el.classList.add('visible');
+          el.querySelectorAll('.counter').forEach(startCount);
+        }
+      });
+    }, 200);
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>

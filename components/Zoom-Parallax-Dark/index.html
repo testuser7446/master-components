@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zoom Parallax — Scroll Scale (Dark) | Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* Each item is a full-viewport flex-centering layer */
+    .px-item {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      will-change: transform;
+      transform-origin: center center;
+    }
+
+    /* Inner image card — position/size overridden per item */
+    .px-card {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      flex-shrink: 0;
+      height: 25vh;
+      width: 25vw;
+    }
+
+    .px-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ── Mobile collage — 3-row magazine layout, pixel-precise ─────── */
+    @media (max-width: 767px) {
+      /* ROW 1 — single large card, upper right with empty left gap */
+      .px-card-1 { width: 56vw !important; height: 48vw !important; top: -34vh !important; left: 0 !important; }
+
+      /* ROW 2 — three cards across, gaps ~10px, left & right bleed ~12px */
+      .px-card-2 { width: 35vw !important; height: 53vw !important; top: -4vh !important; left: -36vw !important; }
+      .px-card-0 { width: 34vw !important; height: 53vw !important; top: -4vh !important; left: 1vw !important; }
+      .px-card-3 { width: 33vw !important; height: 53vw !important; top: -4vh !important; left: 37vw !important; }
+
+      /* ROW 3 — three cards, left bleeds ~9px, right bleeds ~21px */
+      .px-card-5 { width: 45vw !important; height: 61vw !important; top: 27vh !important; left: -30vw !important; }
+      .px-card-4 { width: 27vw !important; height: 61vw !important; top: 27vh !important; left: 8vw !important; }
+      .px-card-6 { width: 31vw !important; height: 53vw !important; top: 27vh !important; left: 40vw !important; }
+    }
+
+    /* Footer fade-up */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up-footer {
+      opacity: 0;
+    }
+    .fade-up-footer.visible {
+      animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-[#030303]">
+
+  <!-- Back Nav -->
+  <div class="fixed top-0 left-0 right-0 z-50 h-10 bg-black/40 backdrop-blur-sm border-b border-white/10 flex items-center px-6">
+    <a href="../../index.html" class="text-xs text-white/60 hover:text-white transition-colors flex items-center gap-2">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Component Library
+    </a>
+    <span class="text-white/30 text-xs ml-3">/ Zoom Parallax — Scroll Scale (Dark)</span>
+  </div>
+
+  <!-- ── Header (50vh) ───────────────────────────────────────────────── -->
+  <div class="w-full bg-[#030303]">
+    <div class="relative flex items-center justify-center overflow-hidden" style="height:50vh;">
+
+      <!-- Radial blue glow -->
+      <div aria-hidden="true" class="pointer-events-none absolute left-1/2 -translate-x-1/2 rounded-full"
+        style="top:-50%; height:120vmin; width:120vmin;
+               background:radial-gradient(ellipse at center, rgba(39,101,255,0.15), transparent 50%);
+               filter:blur(30px);"></div>
+
+      <!-- Header text -->
+      <div class="text-center z-10 px-4 max-w-2xl">
+        <span class="text-[#2765FF] text-xs font-semibold uppercase tracking-widest block mb-4">
+          Emirates NBD
+        </span>
+        <h2 class="text-[24px] md:text-[36px] font-normal text-white tracking-tight mb-4">
+          Powering Progress Across<br />Every Horizon
+        </h2>
+        <p class="text-white/60 text-base md:text-lg font-light leading-relaxed">
+          From personal banking to global trade, we deliver world-class financial solutions
+          that move with you — across 13 countries and 180+ markets.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Zoom Parallax (300vh sticky) ──────────────────────────────── -->
+    <div id="parallax-container" style="height:300vh; position:relative;">
+      <div style="position:sticky; top:0; height:100vh; overflow:hidden;">
+
+        <!--
+          Each .px-item is a full-viewport absolute layer scaled from its centre.
+          The .px-card inside is positioned via flexbox centering + relative top/left offsets,
+          exactly matching the React motion.div > div layout.
+
+          Scale ranges (matching React):
+            img 0 → scale 1..4   img 1 → 1..5   img 2 → 1..6
+            img 3 → 1..5         img 4 → 1..6   img 5 → 1..8   img 6 → 1..9
+        -->
+
+        <!-- Image 0 — Emirates NBD HQ — centered, 25vh×25vw, scale 1→4 -->
+        <div class="px-item" data-scale-max="4">
+          <div class="px-card px-card-0">
+            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=3840&fit=crop&auto=format&q=95"
+                 alt="Emirates NBD headquarters" />
+          </div>
+        </div>
+
+        <!-- Image 1 — Mobile banking — top:-30vh left:5vw 30vh×35vw, scale 1→5 -->
+        <div class="px-item" data-scale-max="5">
+          <div class="px-card px-card-1" style="height:30vh; width:35vw; top:-30vh; left:5vw;">
+            <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?w=3840&fit=crop&auto=format&q=95"
+                 alt="Mobile banking" />
+          </div>
+        </div>
+
+        <!-- Image 2 — Wealth management — top:-10vh left:-25vw 45vh×20vw, scale 1→6 -->
+        <div class="px-item" data-scale-max="6">
+          <div class="px-card px-card-2" style="height:45vh; width:20vw; top:-10vh; left:-25vw;">
+            <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=3000&h=3000&fit=crop&auto=format&q=95"
+                 alt="Wealth management" />
+          </div>
+        </div>
+
+        <!-- Image 3 — Trade finance — left:27.5vw 25vh×25vw, scale 1→5 -->
+        <div class="px-item" data-scale-max="5">
+          <div class="px-card px-card-3" style="height:25vh; width:25vw; left:27.5vw;">
+            <img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?w=3840&fit=crop&auto=format&q=95"
+                 alt="Trade finance" />
+          </div>
+        </div>
+
+        <!-- Image 4 — Contactless payments — top:27.5vh left:5vw 25vh×20vw, scale 1→6 -->
+        <div class="px-item" data-scale-max="6">
+          <div class="px-card px-card-4" style="height:25vh; width:20vw; top:27.5vh; left:5vw;">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=3000&h=3000&fit=crop&auto=format&q=95"
+                 alt="Contactless payments" />
+          </div>
+        </div>
+
+        <!-- Image 5 — Cybersecurity — top:27.5vh left:-22.5vw 25vh×30vw, scale 1→8 -->
+        <div class="px-item" data-scale-max="8">
+          <div class="px-card px-card-5" style="height:25vh; width:30vw; top:27.5vh; left:-22.5vw;">
+            <img src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=3840&fit=crop&auto=format&q=95"
+                 alt="Cybersecurity" />
+          </div>
+        </div>
+
+        <!-- Image 6 — Treasury & markets — top:22.5vh left:25vw 15vh×15vw, scale 1→9 -->
+        <div class="px-item" data-scale-max="9">
+          <div class="px-card px-card-6" style="height:15vh; width:15vw; top:22.5vh; left:25vw;">
+            <img src="https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=3840&fit=crop&auto=format&q=95"
+                 alt="Treasury & markets" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Footer body text ───────────────────────────────────────────── -->
+    <div class="relative flex items-center justify-center pb-24 pt-4">
+      <div class="fade-up-footer text-center px-6 max-w-3xl">
+        <p class="text-white/50 font-light leading-relaxed pt-12 md:pt-16"
+           style="font-size: clamp(15px, 1.2vw, 17px);">
+          Every transaction tells a story — of ambition met with precision, of capital moving
+          where it's needed most. We don't just execute deals. We build the relationships,
+          the structures, and the confidence that make them possible.
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /bg wrapper -->
+
+  <script>
+    // ── Scroll progress through the sticky container ──────────────────
+    const container = document.getElementById('parallax-container');
+    const items     = document.querySelectorAll('.px-item');
+
+    function getProgress() {
+      const rect     = container.getBoundingClientRect();
+      const scrollable = container.offsetHeight - window.innerHeight;
+      return scrollable <= 0 ? 0 : Math.max(0, Math.min(1, -rect.top / scrollable));
+    }
+
+    // ── Apply scale transforms on scroll ─────────────────────────────
+    function update() {
+      const p = getProgress();
+      items.forEach(item => {
+        const maxScale = parseFloat(item.dataset.scaleMax);
+        const scale    = 1 + (maxScale - 1) * p;
+        item.style.transform = `scale(${scale})`;
+      });
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update(); // run once on load
+
+    // ── Footer fade-up via IntersectionObserver ───────────────────────
+    const footerEl = document.querySelector('.fade-up-footer');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { footerEl.classList.add('visible'); obs.disconnect(); } });
+    }, { threshold: 0.3, rootMargin: '-60px' });
+    obs.observe(footerEl);
+  </script>
+  <script src="../../assets/js/copy-bridge.js"></script>
+</body>
+</html>
