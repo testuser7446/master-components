@@ -10,6 +10,7 @@
     *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
     @keyframes progress { from{width:0} to{width:100%} }
     .progress-bar { animation: progress 4s linear forwards; }
+    @media (max-width: 1023px) { .progress-bar { animation-duration: 10s; } }
     .feature-img { transition: opacity 0.4s ease, transform 0.4s ease; }
     .feature-img.fade { opacity:0; transform:translateY(16px); }
     @keyframes cardFadeIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
@@ -188,10 +189,11 @@
 
       renderTabs();
 
+      const interval = window.innerWidth < 1024 ? 10000 : 4000;
       timer = setInterval(() => {
         const next = (active + 1) % FEATURES.length;
         selectTab(next, 'next');
-      }, 4000);
+      }, interval);
     }
 
     function scrollPrev() {
