@@ -254,7 +254,7 @@
       block.innerHTML = `
         ${item.meta ? `<span class="text-xs font-medium uppercase tracking-wider text-[#2765FF]">${item.meta}</span>` : ''}
         <h3 class="text-[22px] md:text-[28px] font-normal tracking-tight leading-[150%] text-[#072447]">${item.title}</h3>
-        ${item.description ? `<p class="text-sm md:text-base leading-relaxed text-[#3A4B5C] max-w-md">${item.description}</p>` : ''}
+        ${item.description ? `<p class="text-[14px] md:text-[16px] leading-[150%] text-[#3A4B5C] max-w-md">${item.description}</p>` : ''}
       `;
       document.getElementById('counter').textContent = `${wrap(active) + 1}/${count}`;
       const btn = document.getElementById('explore-btn');
