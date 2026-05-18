@@ -87,7 +87,7 @@
     <div class="max-w-[1400px] mx-auto">
 
       <!-- Heading -->
-      <h2 class="reveal text-[24px] md:text-[36px] font-normal text-[#072447] leading-tight tracking-tight max-w-lg mb-4">
+      <h2 class="reveal text-[24px] lg:text-[36px] font-normal text-[#072447] leading-tight tracking-tight max-w-lg mb-4">
         Insert claim about ENBD<br />history in the region
       </h2>
 
@@ -194,7 +194,7 @@
 
       // Year label
       const yearLabel = document.createElement('div');
-      yearLabel.className = 'absolute text-[18px] md:text-[20px] font-semibold text-[#072447] whitespace-nowrap -translate-x-1/2 text-center';
+      yearLabel.className = 'absolute text-[18px] lg:text-[20px] font-semibold text-[#072447] whitespace-nowrap -translate-x-1/2 text-center';
       yearLabel.style.cssText = 'top: 0; transform: translateX(-50%);';
       yearLabel.textContent = item.year;
 
@@ -208,11 +208,11 @@
       contentInner.className = 'flex flex-col gap-1 text-center';
 
       const titleEl = document.createElement('p');
-      titleEl.className = 'text-[14px] md:text-[15px] font-bold text-[#072447]';
+      titleEl.className = 'text-[14px] lg:text-[15px] font-bold text-[#072447]';
       titleEl.textContent = item.title;
 
       const descEl = document.createElement('p');
-      descEl.className = 'text-[13px] md:text-[14px] font-normal text-[#3A4B5C] leading-relaxed';
+      descEl.className = 'text-[13px] lg:text-[14px] font-normal text-[#3A4B5C] leading-relaxed';
       descEl.textContent = item.description;
 
       contentInner.appendChild(titleEl);
