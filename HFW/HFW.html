@@ -138,11 +138,7 @@
     .card-anim:nth-child(2) { animation-delay: 0.08s; opacity: 0; }
     .card-anim:nth-child(3) { animation-delay: 0.16s; opacity: 0; }
 
-    /* ── Nav ────────────────────────────────────────────────────────── */
-    #site-nav { transition: background 0.3s, box-shadow 0.3s; }
-    #site-nav.scrolled { background: rgba(255,255,255,0.96) !important; box-shadow: 0 2px 20px rgba(7,36,71,0.08); }
-
-    /* ── World Map ──────────────────────────────────────────────────── */
+/* ── World Map ──────────────────────────────────────────────────── */
     .map-container { aspect-ratio: 2 / 1; }
     @media (min-width: 768px) { .map-container { aspect-ratio: 2.5 / 1; } }
     @media (min-width: 1024px) { .map-container { aspect-ratio: 2 / 1; } }
@@ -159,38 +155,6 @@
 </head>
 <body class="bg-white overflow-x-hidden">
 
-<!-- ═══════════════════════════════════════════════════════════════
-     TOP NAVIGATION
-     ═══════════════════════════════════════════════════════════════ -->
-<nav id="site-nav" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-16 px-6 lg:px-[120px] bg-transparent">
-  <!-- Logo -->
-  <a href="#" class="flex items-center gap-2.5 text-[#072447]">
-    <div class="w-8 h-8 rounded-lg bg-[#2765FF] flex items-center justify-center">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-    </div>
-    <span class="text-[15px] font-bold tracking-tight">Emirates NBD</span>
-  </a>
-
-  <!-- Nav links — desktop -->
-  <div class="hidden lg:flex items-center gap-8 text-[13px] font-medium text-[#072447]/60">
-    <a href="#" class="hover:text-[#072447] transition-colors">Corporate Banking</a>
-    <a href="#" class="hover:text-[#072447] transition-colors">Markets</a>
-    <a href="#" class="hover:text-[#072447] transition-colors">Solutions</a>
-    <a href="#" class="hover:text-[#072447] transition-colors">Insights</a>
-    <a href="#" class="hover:text-[#072447] transition-colors">About</a>
-  </div>
-
-  <!-- CTA -->
-  <a href="#" class="hidden lg:inline-flex items-center gap-2 px-5 py-2.5 bg-[#2765FF] text-white text-[13px] font-semibold rounded-lg hover:bg-[#1a54e8] transition-colors">
-    Get in touch
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-  </a>
-
-  <!-- Mobile menu button -->
-  <button class="lg:hidden text-[#072447] p-2">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-  </button>
-</nav>
 
 
 <!-- ═══════════════════════════════════════════════════════════════
@@ -943,11 +907,6 @@
      JAVASCRIPT — All sections consolidated
      ═══════════════════════════════════════════════════════════════ -->
 <script>
-/* ── Nav scroll effect ────────────────────────────────────────── */
-window.addEventListener('scroll', () => {
-  document.getElementById('site-nav').classList.toggle('scrolled', window.scrollY > 60);
-});
-
 /* ── Global Scroll Reveal ─────────────────────────────────────── */
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => {
