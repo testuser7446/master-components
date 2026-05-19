@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HFW — Emirates NBD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ── Hero Animation ─────────────────────────────────────────────── */
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in-1 { opacity:0; animation: fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s forwards; }
+    .fade-in-2 { opacity:0; animation: fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.38s forwards; }
+    .fade-in-3 { opacity:0; animation: fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.54s forwards; }
+    .fade-in-4 { opacity:0; animation: fadeInUp 0.9s cubic-bezier(0.16,1,0.3,1) 0.68s forwards; }
+    #threads-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
+    .btn-primary  { transition: transform 0.2s, background 0.2s; }
+    .btn-primary:hover  { transform: scale(1.02); background: #0a3060; }
+    .btn-secondary { transition: background 0.2s, border-color 0.2s; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.3); }
+    @media (max-width: 767px) {
+      .hero-btns .btn-primary, .hero-btns .btn-secondary { width: 100%; justify-content: center; }
+    }
+
+    /* ── Scroll Reveal ──────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.from-y    { transform: translateY(28px); }
+    .reveal.from-y-sm { transform: translateY(20px); }
+    .reveal.from-y-md { transform: translateY(36px); }
+    .reveal.visible   { opacity: 1 !important; transform: none !important; }
+    .reveal-fade { opacity:0; transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1); }
+    .reveal-fade.visible { opacity:1; }
+    .delay-1 { transition-delay: 0.10s; }
+    .delay-2 { transition-delay: 0.20s; }
+    .delay-3 { transition-delay: 0.30s; }
+
+    /* ── VideoTab Animation ─────────────────────────────────────────── */
+    @keyframes vtFadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes vtProgress { from{width:0} to{width:100%} }
+    .vt-progress-bar { animation: vtProgress 6s linear forwards; }
+
+    /* ── Features AutoProgress ──────────────────────────────────────── */
+    @keyframes apProgress { from{width:0} to{width:100%} }
+    .ap-progress-bar { animation: apProgress 4s linear forwards; }
+    @media (max-width: 1023px) { .ap-progress-bar { animation-duration: 10s; } }
+    .ap-feature-img { transition: opacity 0.4s ease, transform 0.4s ease; }
+    .ap-feature-img.fade { opacity:0; transform:translateY(16px); }
+    @keyframes apCardIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes apCardInPrev { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+    .ap-card-enter { animation: apCardIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
+    .ap-card-enter-prev { animation: apCardInPrev 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+    /* ── Zoom Parallax Light ────────────────────────────────────────── */
+    @keyframes zoomIn { from{transform:scale(1)} to{transform:scale(1.18)} }
+    .zp-img { will-change: transform; }
+
+    /* ── Download App Cinematic ─────────────────────────────────────── */
+    @keyframes daFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    .da-float { animation: daFloat 4s ease-in-out infinite; }
+    @keyframes daFadeInUp { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
+    .da-reveal { opacity:0; }
+    .da-reveal.visible { animation: daFadeInUp 1s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+    /* ── Marquee ────────────────────────────────────────────────────── */
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .marquee-inner { animation: marquee 30s linear infinite; display:flex; width:max-content; }
+    .marquee-group:hover .marquee-inner { animation-play-state: paused; }
+
+    /* ── Accordion ──────────────────────────────────────────────────── */
+    .acc-body { overflow:hidden; transition: height 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease; }
+    .icon-bar { position:absolute; background:#2765FF; border-radius:2px; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .icon-bar-h { width:12px; height:2px; }
+    .icon-bar-v { width:2px; height:12px; }
+    .icon-bar-v.is-open  { transform: rotate(90deg); opacity:0; }
+    .icon-bar-v.is-closed { transform: rotate(0deg); opacity:1; }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    @keyframes ftFadeInUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── Tab content ────────────────────────────────────────────────── */
+    .tab-content { display: none; }
+    .tab-content.active { display: grid; }
+    @keyframes fade-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .card-anim { animation: fade-up 0.4s ease forwards; }
+    .card-anim:nth-child(2) { animation-delay: 0.08s; opacity: 0; }
+    .card-anim:nth-child(3) { animation-delay: 0.16s; opacity: 0; }
+
+    /* ── Nav ────────────────────────────────────────────────────────── */
+    #site-nav { transition: background 0.3s, box-shadow 0.3s; }
+    #site-nav.scrolled { background: rgba(7,36,71,0.98) !important; box-shadow: 0 2px 24px rgba(0,0,0,0.25); }
+  </style>
+</head>
+<body class="bg-white overflow-x-hidden">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TOP NAVIGATION
+     ═══════════════════════════════════════════════════════════════ -->
+<nav id="site-nav" class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-16 px-6 lg:px-[120px] bg-transparent">
+  <!-- Logo -->
+  <a href="#" class="flex items-center gap-2.5 text-white">
+    <div class="w-8 h-8 rounded-lg bg-[#2765FF] flex items-center justify-center">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <span class="text-[15px] font-bold tracking-tight">Emirates NBD</span>
+  </a>
+
+  <!-- Nav links — desktop -->
+  <div class="hidden lg:flex items-center gap-8 text-[13px] font-medium text-white/70">
+    <a href="#" class="hover:text-white transition-colors">Corporate Banking</a>
+    <a href="#" class="hover:text-white transition-colors">Markets</a>
+    <a href="#" class="hover:text-white transition-colors">Solutions</a>
+    <a href="#" class="hover:text-white transition-colors">Insights</a>
+    <a href="#" class="hover:text-white transition-colors">About</a>
+  </div>
+
+  <!-- CTA -->
+  <a href="#" class="hidden lg:inline-flex items-center gap-2 px-5 py-2.5 bg-[#2765FF] text-white text-[13px] font-semibold rounded-lg hover:bg-[#1a54e8] transition-colors">
+    Get in touch
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+  </a>
+
+  <!-- Mobile menu button -->
+  <button class="lg:hidden text-white p-2">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+  </button>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     1. HERO — Animation BG Left
+     "The network behind your ambition"
+     ═══════════════════════════════════════════════════════════════ -->
+<section id="hero" class="relative min-h-screen flex items-center overflow-hidden bg-[#030b18]">
+  <canvas id="threads-canvas"></canvas>
+  <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to bottom,rgba(3,11,24,0.92) 0%,transparent 12%);"></div>
+  <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(to top,rgba(3,11,24,0.7) 0%,transparent 30%);"></div>
+
+  <div class="relative z-10 w-full px-6 md:px-[48px] lg:px-[120px] pt-24 pb-20 md:pt-28 md:pb-24">
+    <div class="max-w-3xl">
+      <p class="fade-in-1 text-[11px] lg:text-[13px] font-normal tracking-[0.22em] uppercase text-white/50 mb-4">
+        Emirates NBD · Financial Institutions
+      </p>
+      <h1 class="fade-in-2 text-[36px] lg:text-[48px] font-normal tracking-tight leading-[1.5] text-white mb-4">
+        The network behind<br />your ambition.
+      </h1>
+      <p class="fade-in-3 text-[14px] lg:text-[16px] font-normal text-white/55 mb-8 leading-[1.5] max-w-xl">
+        Payments, liquidity, trade finance, and capital markets expertise — delivered through one of the region's most connected banking networks.
+      </p>
+      <div class="hero-btns fade-in-4 flex flex-wrap items-center gap-4">
+        <button class="btn-primary px-8 py-3.5 text-sm font-semibold text-white bg-[#072447] rounded-xl">
+          Get started
+        </button>
+        <button class="btn-secondary px-8 py-3.5 text-sm font-medium text-white/70 border border-white/15 rounded-xl inline-flex items-center gap-2">
+          Explore our solutions
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" class="opacity-50"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     2. VIDEOTAB ANIMATION
+     "What's your next strategic move?"
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-[#040d1c] w-full overflow-hidden" id="vt-section">
+  <div class="max-w-[1400px] mx-auto px-6 lg:px-[120px] py-16 md:py-24">
+
+    <!-- Header -->
+    <div class="mb-10 md:mb-14">
+      <p class="text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4">Our Solutions</p>
+      <h2 class="text-[24px] lg:text-[36px] font-normal text-white leading-[150%]">What's your next strategic move?</h2>
+    </div>
+
+    <!-- Tab pills -->
+    <div class="flex flex-wrap gap-2 mb-10" id="vt-tabs">
+      <button onclick="vtSelectTab(0)" data-vt="0" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-[#2765FF] text-white">Overview</button>
+      <button onclick="vtSelectTab(1)" data-vt="1" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-white/10 text-white/60 hover:bg-white/15">Payments</button>
+      <button onclick="vtSelectTab(2)" data-vt="2" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-white/10 text-white/60 hover:bg-white/15">Collections</button>
+      <button onclick="vtSelectTab(3)" data-vt="3" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-white/10 text-white/60 hover:bg-white/15">Administration</button>
+      <button onclick="vtSelectTab(4)" data-vt="4" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-white/10 text-white/60 hover:bg-white/15">Onboarding</button>
+    </div>
+
+    <!-- Content grid -->
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+      <!-- Left: feature list -->
+      <div id="vt-items" class="flex flex-col gap-0"></div>
+
+      <!-- Right: image -->
+      <div class="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#0a1628]">
+        <img id="vt-image" src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&h=600&fit=crop" alt="" class="w-full h-full object-cover opacity-80 transition-opacity duration-500" />
+        <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(4,13,28,0.7) 0%, transparent 60%)"></div>
+        <!-- Progress bar -->
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10">
+          <div id="vt-progress" class="h-full bg-[#2765FF] vt-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     3. CONTENT BLOCK — Side By Side
+     "Your relationship with us..."
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-white w-full px-6 lg:px-[120px] py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start">
+
+    <!-- Image -->
+    <div class="reveal from-y relative rounded-2xl overflow-hidden min-h-[400px] md:max-w-[480px] w-full">
+      <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&h=600&fit=crop" alt="Relationship Manager" class="absolute inset-0 w-full h-full object-cover" />
+    </div>
+
+    <!-- Content -->
+    <div class="reveal from-y delay-1 md:pt-8">
+      <p class="text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-6">Relationship Banking</p>
+      <h2 class="text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%] mb-10">
+        Your relationship with us is expertly managed, led by one dedicated point of contact and backed by a team of specialists.
+      </h2>
+
+      <div class="flex flex-col divide-y divide-[#E5E7EB]">
+        <div class="py-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 class="text-[16px] font-semibold text-[#072447] mb-2">Dedicated Relationship Manager</h3>
+              <p class="text-[14px] lg:text-[16px] text-[#3A4B5C] leading-[150%]">One senior relationship manager who knows your business — and coordinates across our entire network on your behalf.</p>
+            </div>
+            <a href="#" class="shrink-0 mt-1 w-8 h-8 rounded-full border border-[#072447]/20 flex items-center justify-center hover:bg-[#072447] hover:text-white transition-all group">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="py-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 class="text-[16px] font-semibold text-[#072447] mb-2">Product Specialists</h3>
+              <p class="text-[14px] lg:text-[16px] text-[#3A4B5C] leading-[150%]">Deep experts in trade finance, treasury, and structured lending — available when your deal demands more than a standard solution.</p>
+            </div>
+            <a href="#" class="shrink-0 mt-1 w-8 h-8 rounded-full border border-[#072447]/20 flex items-center justify-center hover:bg-[#072447] hover:text-white transition-all">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="py-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 class="text-[16px] font-semibold text-[#072447] mb-2">Client Experience Desk</h3>
+              <p class="text-[14px] lg:text-[16px] text-[#3A4B5C] leading-[150%]">24/7 support for day-to-day queries, transactions, and service requests — so nothing holds your business up.</p>
+            </div>
+            <a href="#" class="shrink-0 mt-1 w-8 h-8 rounded-full border border-[#072447]/20 flex items-center justify-center hover:bg-[#072447] hover:text-white transition-all">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     4. DOWNLOAD APP CINEMATIC
+     "Simpler. Better. Smarter."
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="relative w-full overflow-hidden bg-[#040d1c] py-20 md:py-32">
+  <!-- Background gradient -->
+  <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse 80% 60% at 60% 50%, rgba(39,101,255,0.12) 0%, transparent 70%);"></div>
+
+  <div class="max-w-[1400px] mx-auto px-6 lg:px-[120px] flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+
+    <!-- Left: Text -->
+    <div class="flex-1 max-w-xl">
+      <p class="da-reveal text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-6">Digital Platform</p>
+      <h2 class="da-reveal text-[36px] lg:text-[48px] font-normal text-white leading-[1.5] mb-6" style="animation-delay:0.1s">
+        Simpler.<br />Better.<br />Smarter.
+      </h2>
+      <p class="da-reveal text-[14px] lg:text-[16px] text-white/60 leading-[1.65] mb-10" style="animation-delay:0.2s">
+        businessONLINE X puts full account control in your pocket — approve payments, monitor positions, and raise service requests securely from your phone, wherever business takes you.
+      </p>
+      <div class="da-reveal flex flex-col sm:flex-row gap-4" style="animation-delay:0.3s">
+        <a href="#" class="inline-flex items-center gap-3 px-6 py-3.5 bg-white text-[#072447] text-[14px] font-bold rounded-xl hover:bg-[#EEF4FB] transition-colors">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          App Store
+        </a>
+        <a href="#" class="inline-flex items-center gap-3 px-6 py-3.5 bg-white/10 text-white text-[14px] font-semibold rounded-xl border border-white/20 hover:bg-white/15 transition-colors">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.28.15.61.14.89-.01l11.71-6.44-2.46-2.46-10.14 8.91zM.9 1.24C.34 1.56 0 2.12 0 2.79v18.42c0 .67.34 1.23.9 1.55l.1.06 10.32-10.32v-.24L1 1.18l-.1.06zM20.54 8.37l-2.96-1.63-2.75 2.75 2.75 2.75 2.97-1.63c.85-.47.85-1.77-.01-2.24zM3.18.24l11.71 6.44-2.46 2.46L2.29.23l.89.01z"/></svg>
+          Google Play
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: Phone mockup -->
+    <div class="flex-1 flex items-center justify-center">
+      <div class="da-float relative w-[240px] md:w-[280px]">
+        <div class="rounded-[2.5rem] overflow-hidden border-4 border-white/10 shadow-2xl" style="background:linear-gradient(135deg,#0a1628,#0d1f3c)">
+          <div class="flex flex-col p-5 gap-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-white/50 text-[10px] font-semibold tracking-widest uppercase">businessONLINE</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            </div>
+            <div class="bg-white/5 rounded-2xl p-4">
+              <p class="text-white/40 text-[9px] font-semibold tracking-widest uppercase mb-1">Total Balance</p>
+              <p class="text-white text-[22px] font-bold leading-none mb-1">$4.82M</p>
+              <p class="text-emerald-400 text-[11px] font-medium">+2.4% this week</p>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-white/5 rounded-xl p-3 text-center">
+                <p class="text-white/40 text-[8px] uppercase tracking-wider mb-1">Payments</p>
+                <p class="text-white text-[13px] font-bold">1,420</p>
+              </div>
+              <div class="bg-white/5 rounded-xl p-3 text-center">
+                <p class="text-white/40 text-[8px] uppercase tracking-wider mb-1">Markets</p>
+                <p class="text-white text-[13px] font-bold">180+</p>
+              </div>
+              <div class="bg-[#2765FF]/30 rounded-xl p-3 text-center">
+                <p class="text-white/60 text-[8px] uppercase tracking-wider mb-1">FX</p>
+                <p class="text-white text-[13px] font-bold">3.67</p>
+              </div>
+            </div>
+            <div class="bg-[#2765FF] rounded-xl py-3 text-center">
+              <p class="text-white text-[12px] font-semibold">Approve Payment</p>
+            </div>
+          </div>
+        </div>
+        <!-- Metric badge -->
+        <div class="absolute -right-8 top-1/3 bg-white rounded-xl px-4 py-3 shadow-xl">
+          <p class="text-[#072447] text-[20px] font-bold leading-none">180</p>
+          <p class="text-[#3A4B5C] text-[10px]">Countries</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     5. DIGITAL TOOLS SHOWCASE
+     "Make your business smarter..."
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-[#F4F7FB] w-full px-6 lg:px-[120px] py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto">
+    <div class="mb-12 md:mb-16">
+      <p class="reveal text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4">Digital Ecosystem</p>
+      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%] max-w-lg">
+        Make your business smarter with our powerful ecosystem of digital tools.
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- businessONLINE -->
+      <div class="reveal from-y bg-[#072447] rounded-2xl p-6 flex flex-col gap-4 min-h-[280px] relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+        <div class="absolute inset-0 opacity-10" style="background:radial-gradient(circle at 80% 20%, #2765FF, transparent 60%);"></div>
+        <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-white text-[18px] font-semibold mb-2">businessONLINE</h3>
+          <p class="text-white/60 text-[13px] leading-relaxed">Complete corporate banking platform for payments, cash management, and multi-entity control.</p>
+        </div>
+        <a href="#" class="inline-flex items-center gap-2 text-[#2765FF] text-[13px] font-semibold">Explore <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
+      </div>
+
+      <!-- smartTRADE -->
+      <div class="reveal from-y bg-white rounded-2xl p-6 flex flex-col gap-4 min-h-[280px] shadow-sm border border-[#E5E7EB] group cursor-pointer hover:scale-[1.02] transition-transform duration-300" style="transition-delay:0.08s">
+        <div class="w-10 h-10 rounded-xl bg-[#EEF4FB] flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#072447"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/></svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-[#072447] text-[18px] font-semibold mb-2">smartTRADE</h3>
+          <p class="text-[#3A4B5C] text-[13px] leading-relaxed">End-to-end digital trade finance — from LC issuance to document presentation, fully paperless.</p>
+        </div>
+        <a href="#" class="inline-flex items-center gap-2 text-[#2765FF] text-[13px] font-semibold">Explore <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
+      </div>
+
+      <!-- Emirates NBD Pay -->
+      <div class="reveal from-y bg-white rounded-2xl p-6 flex flex-col gap-4 min-h-[280px] shadow-sm border border-[#E5E7EB] group cursor-pointer hover:scale-[1.02] transition-transform duration-300" style="transition-delay:0.16s">
+        <div class="w-10 h-10 rounded-xl bg-[#EEF4FB] flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#072447"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-[#072447] text-[18px] font-semibold mb-2">Emirates NBD Pay</h3>
+          <p class="text-[#3A4B5C] text-[13px] leading-relaxed">Seamless payment acceptance across all channels — in-store, online, and mobile for your business.</p>
+        </div>
+        <a href="#" class="inline-flex items-center gap-2 text-[#2765FF] text-[13px] font-semibold">Explore <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
+      </div>
+
+      <!-- smartSCF -->
+      <div class="reveal from-y bg-white rounded-2xl p-6 flex flex-col gap-4 min-h-[280px] shadow-sm border border-[#E5E7EB] group cursor-pointer hover:scale-[1.02] transition-transform duration-300" style="transition-delay:0.24s">
+        <div class="w-10 h-10 rounded-xl bg-[#EEF4FB] flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#072447"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-[#072447] text-[18px] font-semibold mb-2">smartSCF</h3>
+          <p class="text-[#3A4B5C] text-[13px] leading-relaxed">Supply chain finance platform connecting buyers and suppliers for early payment and extended terms.</p>
+        </div>
+        <a href="#" class="inline-flex items-center gap-2 text-[#2765FF] text-[13px] font-semibold">Explore <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     6. WORLD MAP
+     "Leaders in the capital markets space"
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-[#072447] w-full px-6 lg:px-[120px] py-16 md:py-24 overflow-hidden">
+  <div class="max-w-[1400px] mx-auto">
+    <div class="mb-10">
+      <p class="reveal text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4">Global Reach</p>
+      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-white leading-[150%] max-w-lg">
+        Leaders in the capital markets space.
+      </h2>
+    </div>
+    <div class="relative w-full" style="min-height:340px;">
+      <!-- SVG World Map (simplified) -->
+      <div class="reveal opacity-40 w-full" style="transition-delay:0.2s">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/1280px-World_map_-_low_resolution.svg.png" alt="World Map" class="w-full object-contain opacity-30 select-none pointer-events-none" style="filter:invert(1) brightness(0.4);" />
+      </div>
+      <!-- Pins -->
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="relative w-full h-full max-w-3xl mx-auto">
+          <div class="absolute w-3 h-3 rounded-full bg-[#2765FF] shadow-lg shadow-blue-500/50" style="top:38%;left:55%"></div>
+          <div class="absolute w-3 h-3 rounded-full bg-[#2765FF] shadow-lg shadow-blue-500/50" style="top:35%;left:48%"></div>
+          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:42%;left:52%"></div>
+          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:30%;left:45%"></div>
+          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:40%;left:60%"></div>
+          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:45%;left:70%"></div>
+          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:40%;left:25%"></div>
+          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:38%;left:18%"></div>
+        </div>
+      </div>
+      <!-- Stats overlay -->
+      <div class="absolute bottom-0 left-0 flex gap-8 md:gap-12">
+        <div>
+          <p class="text-[36px] lg:text-[52px] font-bold text-white leading-none">180<span class="text-[#2765FF]">+</span></p>
+          <p class="text-white/50 text-[13px] mt-1">Countries</p>
+        </div>
+        <div>
+          <p class="text-[36px] lg:text-[52px] font-bold text-white leading-none">50<span class="text-[#2765FF]">+</span></p>
+          <p class="text-white/50 text-[13px] mt-1">Years of Banking</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     7. CONTENT BLOCK — No Numbers
+     "Supporting the industries of tomorrow"
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-white w-full px-6 lg:px-[120px] py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row md:gap-16 items-start">
+    <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%] tracking-tight md:w-1/2 flex-shrink-0">
+      Supporting the industries<br />of tomorrow.
+    </h2>
+    <p class="reveal from-y-sm delay-1 text-[14px] lg:text-[16px] font-normal text-[#3A4B5C] leading-[150%] md:w-1/2 md:pt-3">
+      From energy and infrastructure to technology and healthcare — Emirates NBD brings sector-specific expertise, global connectivity, and deep local knowledge to the clients shaping the UAE's next chapter.
+    </p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     8. FEATURE TAB CARDS
+     "Global Markets reach with sophisticated local intelligence"
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-[#F4F7FB] w-full px-6 lg:px-[120px] py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto">
+    <div class="mb-12">
+      <p class="reveal text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4">Capital Markets</p>
+      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%] max-w-2xl">
+        Global Markets reach with<br />sophisticated local intelligence.
+      </h2>
+    </div>
+
+    <!-- Tab pills -->
+    <div class="flex flex-wrap gap-2 mb-10" id="ft-tabs">
+      <button onclick="ftSelectTab(0)" data-ft="0" class="ft-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#072447] text-white transition-all">Digital first access</button>
+      <button onclick="ftSelectTab(1)" data-ft="1" class="ft-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#E5ECF5] text-[#3A4B5C] hover:bg-[#D1DCE9] transition-all">Regional multi-bank access</button>
+      <button onclick="ftSelectTab(2)" data-ft="2" class="ft-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#E5ECF5] text-[#3A4B5C] hover:bg-[#D1DCE9] transition-all">Digital risk execution</button>
+      <button onclick="ftSelectTab(3)" data-ft="3" class="ft-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#E5ECF5] text-[#3A4B5C] hover:bg-[#D1DCE9] transition-all">Private money leadership</button>
+    </div>
+
+    <!-- Cards grid -->
+    <div id="ft-cards" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     9. TRUSTED PARTNERS — Grid
+     "Partnerships that deliver"
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-white w-full px-6 lg:px-[120px] py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%]">
+        Partnerships that deliver.
+      </h2>
+      <p class="reveal from-y-md delay-1 text-[14px] lg:text-[16px] font-normal text-[#3A4B5C] leading-[150%] max-w-sm lg:text-right">
+        Trusted by leading institutions and corporates across the MENAT region and beyond.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-[#E5E7EB] rounded-2xl overflow-hidden">
+      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">PARTNER</span></div>
+      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">SWIFT</span></div>
+      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">VISA</span></div>
+      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">Mastercard</span></div>
+      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">Bloomberg</span></div>
+      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">REFINITIV</span></div>
+      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">SAP</span></div>
+      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">ORACLE</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     10. METRICS — Type 1
+     Dark rankings metrics
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-[#072447] w-full px-6 lg:px-12 py-16 md:py-24">
+  <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-16 gap-6 max-w-[1400px] mx-auto">
+    <h2 class="reveal text-[24px] lg:text-[36px] font-normal leading-[150%] text-white max-w-lg">
+      Trusted by businesses.<br />
+      <span class="text-white/50">Proven by numbers.</span>
+    </h2>
+    <p class="reveal text-[12px] lg:text-[14px] font-light text-white/50 max-w-sm lg:text-right" style="transition-delay:0.15s">
+      From single-entity SMEs to Fortune 500 groups operating across 180+ markets — Emirates NBD delivers at every scale, every day.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-2 max-w-[1400px] mx-auto">
+    <div class="reveal border-b border-r border-white/10 py-8 md:py-12 px-4 md:pr-12" style="transition-delay:0s">
+      <div class="text-[44px] lg:text-[96px] font-semibold leading-none text-white tracking-tight mb-4">
+        <span class="metrics-counter" data-end="99.4" data-decimals="1">0</span><span class="text-[26px] lg:text-[56px]">%</span>
+      </div>
+      <p class="text-[12px] lg:text-[16px] font-normal tracking-widest uppercase text-white/50">On-Time Payment<br />Processing Rate</p>
+    </div>
+    <div class="reveal border-b border-white/10 py-8 md:py-12 px-4 md:pl-12" style="transition-delay:0.1s">
+      <div class="text-[44px] lg:text-[96px] font-semibold leading-none text-white tracking-tight mb-4">
+        <span class="metrics-counter" data-end="180" data-decimals="0">0</span><span class="text-[26px] lg:text-[56px]">+</span>
+      </div>
+      <p class="text-[12px] lg:text-[16px] font-normal tracking-widest uppercase text-white/50">Countries Covered<br />With Live Transfers</p>
+    </div>
+    <div class="reveal border-r border-white/10 py-8 md:py-12 px-4 md:pr-12" style="transition-delay:0.2s">
+      <div class="text-[44px] lg:text-[96px] font-semibold leading-none text-white tracking-tight mb-4">
+        1M<span class="text-[26px] lg:text-[56px]">+</span>
+      </div>
+      <p class="text-[12px] lg:text-[16px] font-normal tracking-widest uppercase text-white/50">Transactions<br />Processed Daily</p>
+    </div>
+    <div class="reveal py-8 md:py-12 px-4 md:pl-12" style="transition-delay:0.3s">
+      <div class="text-[44px] lg:text-[96px] font-semibold leading-none text-white tracking-tight mb-4">
+        <span class="metrics-counter" data-end="30" data-decimals="0">0</span><span class="text-[26px] lg:text-[56px]">+</span>
+      </div>
+      <p class="text-[12px] lg:text-[16px] font-normal tracking-widest uppercase text-white/50">Years of Banking<br />Excellence</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     11. ACCORDION — Single Row
+     "At the centre of insight and exchange"
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-white w-full px-6 lg:px-[120px] py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto">
+    <div class="mb-12">
+      <p class="reveal text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4">Product Suite</p>
+      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%]">
+        At the centre of insight and exchange.
+      </h2>
+    </div>
+
+    <div class="flex flex-wrap gap-2 justify-start mb-10" id="sr-tab-pills">
+      <button onclick="srSetTab('all')" data-tab="all" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#072447] text-white transition-all">All</button>
+      <button onclick="srSetTab('corporate')" data-tab="corporate" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200 transition-all">Corporate Banking</button>
+      <button onclick="srSetTab('trade')" data-tab="trade" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200 transition-all">Trade Finance</button>
+      <button onclick="srSetTab('treasury')" data-tab="treasury" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200 transition-all">Treasury</button>
+      <button onclick="srSetTab('digital')" data-tab="digital" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200 transition-all">Digital</button>
+    </div>
+
+    <div id="sr-content-area" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 tab-content active"></div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     12. CONTENT BLOCK — Numbers
+     "Our track record of delivery"
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-[#F4F7FB] w-full px-6 lg:px-12 py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto">
+    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-16 mb-10 md:mb-14">
+      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-tight tracking-tight shrink-0">
+        Our track record of delivery.
+      </h2>
+      <div class="reveal from-y-md delay-1 flex items-stretch gap-8 md:gap-12 shrink-0">
+        <div class="flex flex-col gap-1">
+          <span class="text-[40px] lg:text-[52px] font-bold text-[#072447] leading-none tracking-tight">USD 1.8bn</span>
+          <span class="text-[13px] lg:text-[14px] font-normal text-[#3A4B5C]">DEWA IPO — Largest UAE IPO</span>
+        </div>
+        <div class="w-px self-stretch bg-[#D1D9E0]"></div>
+        <div class="flex flex-col gap-1">
+          <span class="text-[40px] lg:text-[52px] font-bold text-[#072447] leading-none tracking-tight">USD 1.2bn</span>
+          <span class="text-[13px] lg:text-[14px] font-normal text-[#3A4B5C]">Sovereign Sukuk issuance</span>
+        </div>
+        <div class="w-px self-stretch bg-[#D1D9E0]"></div>
+        <div class="flex flex-col gap-1">
+          <span class="text-[40px] lg:text-[52px] font-bold text-[#072447] leading-none tracking-tight">USD 59mn</span>
+          <span class="text-[13px] lg:text-[14px] font-normal text-[#3A4B5C]">Digital bond issuance</span>
+        </div>
+      </div>
+    </div>
+    <div class="w-full h-px bg-[#E5E7EB] mb-10 md:mb-14"></div>
+    <div class="flex flex-col gap-5 max-w-4xl">
+      <p class="reveal from-y-sm delay-2 text-[14px] lg:text-[16px] font-normal text-[#3A4B5C] leading-[150%]">
+        Emirates NBD Capital has established itself as a regional leader in debt and equity capital markets, consistently delivering landmark transactions that define the UAE's financial landscape.
+      </p>
+      <p class="reveal from-y-sm delay-3 text-[14px] lg:text-[16px] font-normal text-[#3A4B5C] leading-[150%]">
+        From sovereign sukuk to landmark IPOs, our track record reflects deep market knowledge, trusted relationships, and execution excellence across the full capital structure.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     13. ACCORDION — Offerings
+     "Unlock new possibilities..."
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="bg-white w-full px-6 lg:px-[120px] py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto">
+    <div class="mb-12">
+      <p class="reveal text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4">Our Solutions</p>
+      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%]">
+        Unlock new possibilities with our<br />comprehensive range of solutions.
+      </h2>
+    </div>
+    <div class="border-t border-[#E5E7EB]" id="hfw-accordion"></div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     14. FOOTER — Option 2
+     "Let's move forward, together."
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="w-full px-4 md:px-6 pb-6 bg-white">
+  <footer class="w-full bg-[#0f2340] rounded-2xl mx-auto px-12 md:px-20 py-14 md:py-16">
+    <div class="max-w-[1400px] mx-auto">
+      <h2 class="reveal text-[48px] lg:text-[72px] font-bold text-white leading-tight tracking-tight mb-12 max-w-2xl">
+        Let's move forward, together.
+      </h2>
+      <div class="reveal flex items-stretch gap-3 mb-16 max-w-2xl" style="transition-delay:0.1s">
+        <input type="text" placeholder="How was your experience?" class="flex-1 px-5 py-3.5 rounded-lg bg-transparent border border-white/20 text-white placeholder-white/40 text-[14px] focus:outline-none focus:border-white/50 transition-colors duration-200" />
+        <button class="px-6 py-3.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-[14px] font-medium transition-colors duration-200 whitespace-nowrap">Talk to an advisor</button>
+      </div>
+      <div class="reveal-fade flex flex-col md:flex-row items-start md:items-center justify-between gap-6" style="transition-delay:0.2s">
+        <div class="flex items-center gap-4 text-[13px] text-white/60">
+          <span class="font-medium text-white/70">Website Settings</span>
+          <span class="flex items-center gap-1.5"><span>🇦🇪</span><span>Arabic :</span><span class="text-white/80 font-medium">عربي</span></span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-[13px] text-white/60">Emirates NBD on Social</span>
+          <div class="flex items-center gap-3">
+            <a href="#" class="text-white/60 hover:text-white transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+            <a href="#" class="text-white/60 hover:text-white transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="#" class="text-white/60 hover:text-white transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg></a>
+            <a href="#" class="text-white/60 hover:text-white transition-colors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+            <a href="#" class="text-white/60 hover:text-white transition-colors"><svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT — All sections consolidated
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+/* ── Nav scroll effect ────────────────────────────────────────── */
+window.addEventListener('scroll', () => {
+  document.getElementById('site-nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+/* ── Global Scroll Reveal ─────────────────────────────────────── */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '-40px' });
+document.querySelectorAll('.reveal, .reveal-fade').forEach(el => revealObserver.observe(el));
+setTimeout(() => {
+  document.querySelectorAll('.reveal, .reveal-fade').forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('visible');
+  });
+}, 200);
+
+/* ── DA reveal ─────────────────────────────────────────────────── */
+const daObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); daObserver.unobserve(e.target); } });
+}, { threshold: 0.15 });
+document.querySelectorAll('.da-reveal').forEach(el => daObserver.observe(el));
+
+/* ── Metrics Counter ──────────────────────────────────────────── */
+function startMetricCount(el) {
+  if (el._started) return; el._started = true;
+  const end = parseFloat(el.dataset.end), dec = parseInt(el.dataset.decimals)||0, dur = 1800, start = performance.now();
+  function tick(now) {
+    const p = Math.min((now-start)/dur, 1), ease = 1 - Math.pow(1-p, 3);
+    el.textContent = (end*ease).toFixed(dec);
+    if (p<1) requestAnimationFrame(tick); else el.textContent = end.toFixed(dec);
+  }
+  requestAnimationFrame(tick);
+}
+const metricObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); e.target.querySelectorAll('.metrics-counter').forEach(startMetricCount); }
+  });
+}, { threshold: 0.2 });
+document.querySelectorAll('.reveal').forEach(el => {
+  if (el.querySelector('.metrics-counter')) metricObserver.observe(el);
+});
+setTimeout(() => {
+  document.querySelectorAll('.metrics-counter').forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight) startMetricCount(el);
+  });
+}, 300);
+
+/* ── Hero WebGL Threads ───────────────────────────────────────── */
+(function () {
+  const COLOR = [1.0,1.0,1.0], AMPLITUDE = 1.2, DISTANCE = 0.0, MOUSE_ON = true;
+  const vert = `attribute vec2 position;attribute vec2 uv;varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position,0.0,1.0);}`;
+  const frag = `precision highp float;uniform float iTime;uniform vec3 iResolution;uniform vec3 uColor;uniform float uAmplitude;uniform float uDistance;uniform vec2 uMouse;
+#define PI 3.1415926538
+const int u_line_count=40;const float u_line_width=7.0;const float u_line_blur=10.0;
+float Perlin2D(vec2 P){vec2 Pi=floor(P);vec4 Pf_Pfmin1=P.xyxy-vec4(Pi,Pi+1.0);vec4 Pt=vec4(Pi.xy,Pi.xy+1.0);Pt=Pt-floor(Pt*(1.0/71.0))*71.0;Pt+=vec2(26.0,161.0).xyxy;Pt*=Pt;Pt=Pt.xzxz*Pt.yyww;vec4 hx=fract(Pt*(1.0/951.135664));vec4 hy=fract(Pt*(1.0/642.949883));vec4 gx=hx-0.49999;vec4 gy=hy-0.49999;vec4 gr=inversesqrt(gx*gx+gy*gy)*(gx*Pf_Pfmin1.xzxz+gy*Pf_Pfmin1.yyww);gr*=1.4142135623730950;vec2 blend=Pf_Pfmin1.xy*Pf_Pfmin1.xy*Pf_Pfmin1.xy*(Pf_Pfmin1.xy*(Pf_Pfmin1.xy*6.0-15.0)+10.0);vec4 b=vec4(blend,vec2(1.0-blend));return dot(gr,b.zxzx*b.wwyy);}
+float pixel(float count,vec2 res){return(1.0/max(res.x,res.y))*count;}
+float lineFn(vec2 st,float width,float perc,float offset,vec2 mouse,float time,float amplitude,float distance){float split_offset=perc*0.4;float split_point=0.1+split_offset;float amp_normal=smoothstep(split_point,0.7,st.x);float finalAmp=amp_normal*0.5*amplitude*(1.0+(mouse.y-0.5)*0.2);float t_scaled=time/10.0+(mouse.x-0.5)*1.0;float blur=smoothstep(split_point,split_point+0.05,st.x)*perc;float xnoise=mix(Perlin2D(vec2(t_scaled,st.x+perc)*2.5),Perlin2D(vec2(t_scaled,st.x+t_scaled)*3.5)/1.5,st.x*0.3);float y=0.5+(perc-0.5)*distance+xnoise/2.0*finalAmp;float ls=smoothstep(y+(width/2.0)+(u_line_blur*pixel(1.0,iResolution.xy)*blur),y,st.y);float le=smoothstep(y,y-(width/2.0)-(u_line_blur*pixel(1.0,iResolution.xy)*blur),st.y);return clamp((ls-le)*(1.0-smoothstep(0.0,1.0,pow(perc,0.3))),0.0,1.0);}
+void main(){vec2 uv=gl_FragCoord.xy/iResolution.xy;float strength=1.0;for(int i=0;i<u_line_count;i++){float p=float(i)/float(u_line_count);strength*=(1.0-lineFn(uv,u_line_width*pixel(1.0,iResolution.xy)*(1.0-p),p,PI*p,uMouse,iTime,uAmplitude,uDistance));}float c=1.0-strength;gl_FragColor=vec4(uColor*c,c);}`;
+  const canvas = document.getElementById('threads-canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  gl.clearColor(0,0,0,0); gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  function mkShader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  const prog=gl.createProgram();gl.attachShader(prog,mkShader(gl.VERTEX_SHADER,vert));gl.attachShader(prog,mkShader(gl.FRAGMENT_SHADER,frag));gl.linkProgram(prog);gl.useProgram(prog);
+  const posBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const posLoc=gl.getAttribLocation(prog,'position');gl.enableVertexAttribArray(posLoc);gl.vertexAttribPointer(posLoc,2,gl.FLOAT,false,0,0);
+  const uvBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,uvBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([0,0,2,0,0,2]),gl.STATIC_DRAW);
+  const uvLoc=gl.getAttribLocation(prog,'uv');gl.enableVertexAttribArray(uvLoc);gl.vertexAttribPointer(uvLoc,2,gl.FLOAT,false,0,0);
+  const uTime=gl.getUniformLocation(prog,'iTime'),uRes=gl.getUniformLocation(prog,'iResolution'),uCol=gl.getUniformLocation(prog,'uColor'),uAmp=gl.getUniformLocation(prog,'uAmplitude'),uDist=gl.getUniformLocation(prog,'uDistance'),uMouse=gl.getUniformLocation(prog,'uMouse');
+  gl.uniform3f(uCol,COLOR[0],COLOR[1],COLOR[2]);gl.uniform1f(uAmp,AMPLITUDE);gl.uniform1f(uDist,DISTANCE);gl.uniform2f(uMouse,0.5,0.5);
+  function resize(){const w=canvas.offsetWidth,h=canvas.offsetHeight;canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);gl.uniform3f(uRes,w,h,w/h);}
+  window.addEventListener('resize',resize);resize();
+  let cur=[0.5,0.5],tgt=[0.5,0.5];
+  const hero=document.getElementById('hero');
+  hero.addEventListener('mousemove',e=>{const r=hero.getBoundingClientRect();tgt=[(e.clientX-r.left)/r.width,1-(e.clientY-r.top)/r.height];});
+  hero.addEventListener('mouseleave',()=>{tgt=[0.5,0.5];});
+  function render(t){cur[0]+=0.05*(tgt[0]-cur[0]);cur[1]+=0.05*(tgt[1]-cur[1]);gl.uniform2f(uMouse,cur[0],cur[1]);gl.uniform1f(uTime,t*0.001);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);requestAnimationFrame(render);}
+  requestAnimationFrame(render);
+}());
+
+/* ── VideoTab ─────────────────────────────────────────────────── */
+const VT_DATA = [
+  { tab:'Overview', items:[{title:'Full platform overview',body:'Unified access to payments, FX, collections, and approvals from a single dashboard built for corporate treasury.'},{title:'Real-time cash visibility',body:'Monitor cash positions across all entities, accounts, and currencies — updated in real time, 24/7.'},{title:'Multi-entity management',body:'Group-wide cash and payment oversight with consolidated reporting across all subsidiaries.'}], image:'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&h=600&fit=crop' },
+  { tab:'Payments', items:[{title:'Domestic & international',body:'Process single, bulk, and regulatory payments online — including VAT, GPSSA, and eDirham.'},{title:'Multi-currency FX',body:'Multi-currency payments and FX conversions across 40+ currencies.'},{title:'QuickPay',body:'One-click repeat transactions from your payment history.'}], image:'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=600&fit=crop' },
+  { tab:'Collections', items:[{title:'Virtual Accounts',body:'Automated collections via Virtual Accounts with enhanced reconciliation.'},{title:'Real-time visibility',body:'Real-time visibility of all incoming payments across your accounts.'},{title:'Digital collection',body:'Digital cash, cheque, and document collection management.'}], image:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop' },
+  { tab:'Administration', items:[{title:'Approval workflows',body:'Multi-level approval workflows with full, tamper-proof audit trails.'},{title:'Access controls',body:'Segregation of duties enforced through role-based access controls.'},{title:'User management',body:'Centralised user management across all entities and accounts.'}], image:'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&h=600&fit=crop' },
+  { tab:'Onboarding', items:[{title:'Digital account opening',body:'Fully digital account opening with e-signature and document upload.'},{title:'Pre-filled journeys',body:'Pre-filled forms using existing customer data for faster onboarding.'},{title:'Status tracking',body:'Real-time status tracking for every onboarding application.'}], image:'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop' },
+];
+let vtActive = 0, vtTimer = null;
+
+function vtRender() {
+  const data = VT_DATA[vtActive];
+  const itemsEl = document.getElementById('vt-items');
+  itemsEl.innerHTML = data.items.map((item, i) => `
+    <div class="border-b border-white/10 py-6 ${i===0?'border-t border-white/10':''}">
+      <h3 class="text-[16px] lg:text-[18px] font-semibold text-white mb-2">${item.title}</h3>
+      <p class="text-[14px] lg:text-[16px] text-white/60 leading-[1.5]">${item.body}</p>
+    </div>
+  `).join('');
+  document.getElementById('vt-image').src = data.image;
+  // Reset progress bar
+  const pb = document.getElementById('vt-progress');
+  pb.style.animation = 'none';
+  pb.offsetHeight;
+  pb.style.animation = '';
+  // Update tabs
+  document.querySelectorAll('.vt-tab-btn').forEach((btn, i) => {
+    btn.className = `vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all ${i===vtActive?'bg-[#2765FF] text-white':'bg-white/10 text-white/60 hover:bg-white/15'}`;
+  });
+}
+
+function vtSelectTab(idx) {
+  clearInterval(vtTimer);
+  vtActive = idx;
+  vtRender();
+  vtTimer = setInterval(() => { vtActive = (vtActive+1) % VT_DATA.length; vtRender(); }, 6000);
+}
+
+vtSelectTab(0);
+
+/* ── Feature Tab Cards ────────────────────────────────────────── */
+const FT_DATA = [
+  { tab:'Digital first access', cards:[
+    {title:'Digital first access',body:'Seamless connectivity to markets through our award-winning digital platforms for rates, FX, and fixed income.',img:'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=280&fit=crop'},
+    {title:'Regional multi-bank access',body:'Access to the broadest liquidity pool in the MENAT region through our extensive network.',img:'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400&h=280&fit=crop'},
+    {title:'Private money leadership',body:'Market-leading expertise in private placements and alternative financing structures.',img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=280&fit=crop'},
+  ]},
+  { tab:'Regional multi-bank access', cards:[
+    {title:'Regional connectivity',body:'Direct access to 180+ correspondent banks across MENAT and global markets.',img:'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=400&h=280&fit=crop'},
+    {title:'Multi-bank pooling',body:'Centralise your banking relationships through a single platform.',img:'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=280&fit=crop'},
+    {title:'Local expertise',body:'On-the-ground specialists in every key market across the region.',img:'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400&h=280&fit=crop'},
+  ]},
+  { tab:'Digital risk execution', cards:[
+    {title:'FX execution',body:'Real-time FX pricing and execution across 40+ currency pairs with tight spreads.',img:'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=280&fit=crop'},
+    {title:'Rate hedging',body:'Interest rate swaps, caps and floors to protect your funding costs.',img:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=280&fit=crop'},
+    {title:'Structured products',body:'Bespoke hedging solutions tailored to your specific risk profile.',img:'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=400&h=280&fit=crop'},
+  ]},
+  { tab:'Private money leadership', cards:[
+    {title:'Private placements',body:'Access to the deepest private credit markets in the region.',img:'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=280&fit=crop'},
+    {title:'Sukuk origination',body:'Islamic capital markets expertise for sukuk structuring and distribution.',img:'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=280&fit=crop'},
+    {title:'Infrastructure finance',body:'Long-term financing solutions for major capital projects.',img:'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400&h=280&fit=crop'},
+  ]},
+];
+let ftActive = 0;
+
+function ftRender() {
+  const cards = FT_DATA[ftActive].cards;
+  document.getElementById('ft-cards').innerHTML = cards.map(c => `
+    <div class="bg-white rounded-2xl overflow-hidden border border-[#E5E7EB] hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+      <div class="aspect-[4/3] overflow-hidden"><img src="${c.img}" alt="${c.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" /></div>
+      <div class="p-6">
+        <h3 class="text-[16px] font-semibold text-[#072447] mb-2">${c.title}</h3>
+        <p class="text-[14px] text-[#3A4B5C] leading-relaxed">${c.body}</p>
+        <a href="#" class="inline-flex items-center gap-1 mt-4 text-[#2765FF] text-[13px] font-semibold">Learn more <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
+      </div>
+    </div>
+  `).join('');
+  document.querySelectorAll('.ft-tab-btn').forEach((btn, i) => {
+    btn.className = `ft-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all ${i===ftActive?'bg-[#072447] text-white':'bg-[#E5ECF5] text-[#3A4B5C] hover:bg-[#D1DCE9]'}`;
+  });
+}
+
+function ftSelectTab(idx) { ftActive = idx; ftRender(); }
+ftRender();
+
+/* ── Single Row Accordion (products) ─────────────────────────── */
+const SR_PRODUCTS = {
+  all: [
+    {icon:'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',title:'businessONLINE',desc:'Complete digital banking platform for corporate treasury and payments management across all entities.',cat:'Corporate Banking'},
+    {icon:'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064',title:'Letters of Credit',desc:'Secure, fully digital LC issuance and management with guaranteed settlement and risk protection.',cat:'Trade Finance'},
+    {icon:'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',title:'FX Solutions',desc:'Spot, forward and options strategies to manage your currency exposure with precision.',cat:'Treasury'},
+    {icon:'M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z',title:'smartTRADE',desc:'End-to-end digital trade finance platform for paperless processing of all trade instruments.',cat:'Digital'},
+    {icon:'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',title:'Trade Guarantees',desc:'Bank guarantees, bid bonds and performance bonds for domestic and international transactions.',cat:'Trade Finance'},
+    {icon:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',title:'Money Markets',desc:'Short-term investment and borrowing solutions to efficiently deploy idle cash.',cat:'Treasury'},
+  ],
+  corporate:[
+    {icon:'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',title:'businessONLINE',desc:'Complete digital banking platform for corporate treasury and payments management.',cat:'Corporate Banking'},
+    {icon:'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z',title:'Cash Pooling',desc:'Physical and notional cash pooling to optimise liquidity and reduce inter-company funding costs.',cat:'Corporate Banking'},
+    {icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',title:'Payroll Services',desc:'Automated WPS-compliant payroll processing for UAE and GCC workforce management.',cat:'Corporate Banking'},
+  ],
+  trade:[
+    {icon:'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945',title:'Letters of Credit',desc:'Secure, fully digital LC issuance and management with guaranteed settlement.',cat:'Trade Finance'},
+    {icon:'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944',title:'Trade Guarantees',desc:'Bank guarantees, bid bonds and performance bonds for all transaction types.',cat:'Trade Finance'},
+    {icon:'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5',title:'Supply Chain Finance',desc:'Extend payment terms while enabling suppliers to receive early payment.',cat:'Trade Finance'},
+  ],
+  treasury:[
+    {icon:'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',title:'FX Solutions',desc:'Spot, forward and options strategies to manage your currency exposure.',cat:'Treasury'},
+    {icon:'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z',title:'Rates & Derivatives',desc:'Interest rate swaps, caps and structured products to optimise funding cost.',cat:'Treasury'},
+    {icon:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1',title:'Money Markets',desc:'Short-term investment and borrowing solutions to deploy idle cash efficiently.',cat:'Treasury'},
+  ],
+  digital:[
+    {icon:'M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z',title:'smartTRADE',desc:'End-to-end digital trade finance for paperless LC, collections, and guarantees.',cat:'Digital'},
+    {icon:'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',title:'businessONLINE X',desc:'Full corporate banking control from your mobile device, wherever you are.',cat:'Digital'},
+    {icon:'M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z',title:'Emirates NBD Pay',desc:'Seamless payment acceptance across all channels for your business.',cat:'Digital'},
+  ],
+};
+let srCurrentTab = 'all';
+
+function srSetTab(tab) {
+  srCurrentTab = tab;
+  document.querySelectorAll('.sr-pill').forEach(btn => {
+    const isActive = btn.dataset.tab === tab;
+    btn.className = `sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all ${isActive?'bg-[#072447] text-white':'bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200'}`;
+  });
+  const area = document.getElementById('sr-content-area');
+  area.innerHTML = SR_PRODUCTS[tab].map((p, i) => `
+    <div class="bg-[#F4F7FB] rounded-2xl p-6 flex flex-col gap-3 card-anim hover:bg-[#EEF4FB] transition-colors cursor-pointer" style="animation-delay:${i*0.08}s">
+      <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
+        <svg class="w-5 h-5 text-[#072447]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${p.icon}"/></svg>
+      </div>
+      <div>
+        <p class="text-[14px] font-semibold text-[#072447] mb-1">${p.title}</p>
+        <p class="text-[12px] text-[#3A4B5C] leading-relaxed">${p.desc}</p>
+      </div>
+      <span class="text-[11px] font-semibold text-[#2765FF] tracking-wide">${p.cat}</span>
+    </div>
+  `).join('');
+}
+srSetTab('all');
+
+/* ── HFW Accordion (Offerings) ────────────────────────────────── */
+const HFW_ACC = [
+  { title:'Corporate Solutions', items:['businessONLINE digital banking platform','Cash management and liquidity solutions','Trade finance and working capital','FX and risk management','Payroll and corporate cards'] },
+  { title:'Capital Markets', items:['Equity capital markets (ECM)','Debt capital markets (DCM)','Sukuk origination and distribution','Syndicated loans and project finance','Private placements'] },
+  { title:'Support & Relationships', items:['Dedicated relationship managers','24/7 client experience desk','Product specialists on demand','Onboarding and implementation support'] },
+];
+const hfwOpenState = HFW_ACC.map((_, i) => i === 0);
+
+function buildHFWAccordion() {
+  const container = document.getElementById('hfw-accordion');
+  container.innerHTML = '';
+  HFW_ACC.forEach((item, i) => {
+    const isOpen = hfwOpenState[i];
+    const row = document.createElement('div');
+    row.className = 'border-b border-[#E5E7EB]';
+    row.innerHTML = `
+      <button class="hfw-acc-btn w-full flex items-center gap-4 py-5 text-left" data-idx="${i}">
+        <span class="icon-box w-8 h-8 rounded border-2 border-[#2765FF] shrink-0 relative" style="display:flex;align-items:center;justify-content:center;">
+          <span class="icon-bar icon-bar-h"></span>
+          <span class="icon-bar icon-bar-v ${isOpen?'is-open':'is-closed'}"></span>
+        </span>
+        <span class="text-[16px] lg:text-[18px] font-semibold text-[#2765FF]">${item.title}</span>
+      </button>
+      <div class="hfw-acc-body" style="height:${isOpen?'auto':'0px'};opacity:${isOpen?'1':'0'};overflow:hidden;transition:height 0.35s cubic-bezier(0.16,1,0.3,1),opacity 0.35s ease;">
+        <div class="pb-8 pl-12 flex flex-col">
+          ${item.items.map(entry=>`<div class="flex items-start gap-3 py-2"><span class="mt-[6px] rounded-full bg-[#072447] shrink-0" style="width:6px;height:6px;min-width:6px;"></span><p class="text-[14px] lg:text-[15px] font-medium text-[#072447]">${entry}</p></div>`).join('')}
+        </div>
+      </div>`;
+    container.appendChild(row);
+  });
+  container.querySelectorAll('.hfw-acc-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      hfwOpenState[idx] = !hfwOpenState[idx];
+      const isOpen = hfwOpenState[idx];
+      const row = container.querySelectorAll(':scope > div')[idx];
+      const body = row.querySelector('.hfw-acc-body');
+      const vBar = row.querySelector('.icon-bar-v');
+      const inner = body.querySelector('div');
+      if (isOpen) {
+        body.style.height='0px'; body.style.opacity='0';
+        requestAnimationFrame(()=>{ body.style.height=inner.scrollHeight+'px'; body.style.opacity='1'; });
+        body.addEventListener('transitionend',()=>{ body.style.height='auto'; },{once:true});
+      } else {
+        body.style.height=body.scrollHeight+'px';
+        requestAnimationFrame(()=>{ body.style.height='0px'; body.style.opacity='0'; });
+      }
+      vBar.classList.toggle('is-open', isOpen);
+      vBar.classList.toggle('is-closed', !isOpen);
+    });
+  });
+}
+buildHFWAccordion();
+</script>
+</body>
+</html>
