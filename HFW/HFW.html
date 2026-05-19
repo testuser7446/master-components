@@ -39,21 +39,16 @@
     .delay-2 { transition-delay: 0.20s; }
     .delay-3 { transition-delay: 0.30s; }
 
-    /* ── VideoTab Animation ─────────────────────────────────────────── */
-    @keyframes vtFadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes vtProgress { from{width:0} to{width:100%} }
-    .vt-progress-bar { animation: vtProgress 6s linear forwards; }
-
-    /* ── Features AutoProgress ──────────────────────────────────────── */
-    @keyframes apProgress { from{width:0} to{width:100%} }
-    .ap-progress-bar { animation: apProgress 4s linear forwards; }
-    @media (max-width: 1023px) { .ap-progress-bar { animation-duration: 10s; } }
-    .ap-feature-img { transition: opacity 0.4s ease, transform 0.4s ease; }
-    .ap-feature-img.fade { opacity:0; transform:translateY(16px); }
-    @keyframes apCardIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
-    @keyframes apCardInPrev { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
-    .ap-card-enter { animation: apCardIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
-    .ap-card-enter-prev { animation: apCardInPrev 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
+    /* ── Features — Auto-Progress Tabs ─────────────────────────────── */
+    @keyframes progress { from{width:0} to{width:100%} }
+    .progress-bar { animation: progress 4s linear forwards; }
+    @media (max-width: 1023px) { .progress-bar { animation-duration: 10s; } }
+    .feature-img { transition: opacity 0.4s ease, transform 0.4s ease; }
+    .feature-img.fade { opacity:0; transform:translateY(16px); }
+    @keyframes cardFadeIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes cardFadeInPrev { from { opacity:0; transform:translateX(-20px); } to { opacity:1; transform:translateX(0); } }
+    .card-enter { animation: cardFadeIn 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
+    .card-enter-prev { animation: cardFadeInPrev 0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
 
     /* ── Zoom Parallax Light ────────────────────────────────────────── */
     @keyframes zoomIn { from{transform:scale(1)} to{transform:scale(1.18)} }
@@ -166,41 +161,50 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     2. VIDEOTAB ANIMATION
+     2. FEATURES — AUTO-PROGRESS TABS
      "What's your next strategic move?"
      ═══════════════════════════════════════════════════════════════ -->
-<section class="bg-[#040d1c] w-full overflow-hidden" id="vt-section">
-  <div class="max-w-[1400px] mx-auto px-6 lg:px-[120px] py-16 md:py-24">
+<section class="bg-white w-full px-6 md:px-[48px] lg:px-[120px] py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto">
 
     <!-- Header -->
-    <div class="mb-10 md:mb-14">
-      <p class="text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4">Our Solutions</p>
-      <h2 class="text-[24px] lg:text-[36px] font-normal text-white leading-[150%]">What's your next strategic move?</h2>
+    <div class="text-center mb-12 md:mb-16">
+      <span class="text-[#2765FF] font-normal text-[11px] lg:text-[13px] uppercase tracking-wider leading-[150%]">Our Solutions</span>
+      <h2 class="text-[24px] lg:text-[36px] font-normal text-[#072447] mt-4">What's your next strategic move?</h2>
     </div>
 
-    <!-- Tab pills -->
-    <div class="flex flex-wrap gap-2 mb-10" id="vt-tabs">
-      <button onclick="vtSelectTab(0)" data-vt="0" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-[#2765FF] text-white">Overview</button>
-      <button onclick="vtSelectTab(1)" data-vt="1" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-white/10 text-white/60 hover:bg-white/15">Payments</button>
-      <button onclick="vtSelectTab(2)" data-vt="2" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-white/10 text-white/60 hover:bg-white/15">Collections</button>
-      <button onclick="vtSelectTab(3)" data-vt="3" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-white/10 text-white/60 hover:bg-white/15">Administration</button>
-      <button onclick="vtSelectTab(4)" data-vt="4" class="vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all bg-white/10 text-white/60 hover:bg-white/15">Onboarding</button>
-    </div>
+    <!-- 2-col grid -->
+    <div class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-stretch">
 
-    <!-- Content grid -->
-    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-      <!-- Left: feature list -->
-      <div id="vt-items" class="flex flex-col gap-0"></div>
+      <!-- Left -->
+      <div class="order-2 lg:order-1">
 
-      <!-- Right: image -->
-      <div class="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#0a1628]">
-        <img id="vt-image" src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&h=600&fit=crop" alt="" class="w-full h-full object-cover opacity-80 transition-opacity duration-500" />
-        <div class="absolute inset-0" style="background:linear-gradient(to top, rgba(4,13,28,0.7) 0%, transparent 60%)"></div>
-        <!-- Progress bar -->
-        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10">
-          <div id="vt-progress" class="h-full bg-[#2765FF] vt-progress-bar"></div>
+        <!-- Mobile: single card + counter -->
+        <div class="lg:hidden">
+          <div id="mobile-card" class="w-full"></div>
+          <div class="flex items-center justify-center gap-5 mt-4">
+            <button onclick="scrollPrev()"
+              class="w-11 h-11 rounded-full border border-gray-300 text-gray-400 bg-transparent flex items-center justify-center hover:bg-gray-100 transition-colors">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <span id="mob-counter" class="text-sm font-semibold text-[#072447] tabular-nums min-w-[36px] text-center"></span>
+            <button onclick="scrollNext()"
+              class="w-11 h-11 rounded-full border border-gray-300 text-gray-400 bg-transparent flex items-center justify-center hover:bg-gray-100 transition-colors">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          </div>
         </div>
+
+        <!-- Desktop: stacked tabs -->
+        <div id="tabs-desktop" class="hidden lg:flex flex-col gap-6"></div>
+
       </div>
+
+      <!-- Right — image -->
+      <div class="relative order-1 lg:order-2 min-h-[260px] md:min-h-[380px]">
+        <img id="feature-img" src="" alt="" class="feature-img rounded-2xl border border-gray-100 shadow-lg w-full h-full object-cover" />
+      </div>
+
     </div>
   </div>
 </section>
@@ -776,45 +780,112 @@ void main(){vec2 uv=gl_FragCoord.xy/iResolution.xy;float strength=1.0;for(int i=
   requestAnimationFrame(render);
 }());
 
-/* ── VideoTab ─────────────────────────────────────────────────── */
-const VT_DATA = [
-  { tab:'Overview', items:[{title:'Full platform overview',body:'Unified access to payments, FX, collections, and approvals from a single dashboard built for corporate treasury.'},{title:'Real-time cash visibility',body:'Monitor cash positions across all entities, accounts, and currencies — updated in real time, 24/7.'},{title:'Multi-entity management',body:'Group-wide cash and payment oversight with consolidated reporting across all subsidiaries.'}], image:'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=800&h=600&fit=crop' },
-  { tab:'Payments', items:[{title:'Domestic & international',body:'Process single, bulk, and regulatory payments online — including VAT, GPSSA, and eDirham.'},{title:'Multi-currency FX',body:'Multi-currency payments and FX conversions across 40+ currencies.'},{title:'QuickPay',body:'One-click repeat transactions from your payment history.'}], image:'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=600&fit=crop' },
-  { tab:'Collections', items:[{title:'Virtual Accounts',body:'Automated collections via Virtual Accounts with enhanced reconciliation.'},{title:'Real-time visibility',body:'Real-time visibility of all incoming payments across your accounts.'},{title:'Digital collection',body:'Digital cash, cheque, and document collection management.'}], image:'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop' },
-  { tab:'Administration', items:[{title:'Approval workflows',body:'Multi-level approval workflows with full, tamper-proof audit trails.'},{title:'Access controls',body:'Segregation of duties enforced through role-based access controls.'},{title:'User management',body:'Centralised user management across all entities and accounts.'}], image:'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&h=600&fit=crop' },
-  { tab:'Onboarding', items:[{title:'Digital account opening',body:'Fully digital account opening with e-signature and document upload.'},{title:'Pre-filled journeys',body:'Pre-filled forms using existing customer data for faster onboarding.'},{title:'Status tracking',body:'Real-time status tracking for every onboarding application.'}], image:'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&h=600&fit=crop' },
+/* ── Features — Auto-Progress Tabs ───────────────────────────── */
+const ICONS = {
+  dashboard: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>`,
+  insight:   `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2.5 2.1h-15V5h15v14.1zm0-16.1h-15c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>`,
+  payments:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>`,
+  mobile:    `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>`,
+};
+
+const FEATURES = [
+  {
+    icon: 'dashboard',
+    title: "Full platform visibility",
+    desc: "Unified access to payments, FX, collections, and approvals from a single dashboard built for corporate treasury — with real-time cash positions across all entities.",
+    image: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=900&h=600&fit=crop&auto=format&q=80",
+  },
+  {
+    icon: 'payments',
+    title: "Every payment, handled",
+    desc: "Process domestic, international, bulk, and regulatory payments from a single hub. Full multi-currency support, real-time status tracking, and QuickPay for repeat transactions.",
+    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=900&h=600&fit=crop&auto=format&q=80",
+  },
+  {
+    icon: 'insight',
+    title: "Insight when it matters",
+    desc: "Access real-time account data and cash flow analytics across every entity. Build, download, and share interactive reports — so your finance team always has a clear picture.",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=900&h=600&fit=crop&auto=format&q=80",
+  },
+  {
+    icon: 'mobile',
+    title: "Banking on the move",
+    desc: "Approve transactions, monitor balances, and manage your business from any device. businessONLINE X gives you complete control from your phone — securely, wherever you are.",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=900&h=600&fit=crop&auto=format&q=80",
+  },
 ];
-let vtActive = 0, vtTimer = null;
 
-function vtRender() {
-  const data = VT_DATA[vtActive];
-  const itemsEl = document.getElementById('vt-items');
-  itemsEl.innerHTML = data.items.map((item, i) => `
-    <div class="border-b border-white/10 py-6 ${i===0?'border-t border-white/10':''}">
-      <h3 class="text-[16px] lg:text-[18px] font-semibold text-white mb-2">${item.title}</h3>
-      <p class="text-[14px] lg:text-[16px] text-white/60 leading-[1.5]">${item.body}</p>
-    </div>
-  `).join('');
-  document.getElementById('vt-image').src = data.image;
-  // Reset progress bar
-  const pb = document.getElementById('vt-progress');
-  pb.style.animation = 'none';
-  pb.offsetHeight;
-  pb.style.animation = '';
-  // Update tabs
-  document.querySelectorAll('.vt-tab-btn').forEach((btn, i) => {
-    btn.className = `vt-tab-btn px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all ${i===vtActive?'bg-[#2765FF] text-white':'bg-white/10 text-white/60 hover:bg-white/15'}`;
-  });
+let active = 0;
+let timer;
+let direction = 'next';
+
+function mobileCardHTML(f, dir) {
+  const animClass = dir === 'prev' ? 'card-enter-prev' : 'card-enter';
+  return `
+    <div class="w-full ${animClass}">
+      <div class="flex flex-col gap-3 p-5 rounded-xl bg-white shadow-xl border border-gray-200 h-[200px] overflow-hidden">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 rounded-full bg-[#072447] text-white flex-shrink-0">${ICONS[f.icon]}</div>
+          <h3 class="text-base font-normal text-gray-900">${f.title}</h3>
+        </div>
+        <p class="text-[12px] leading-[150%] text-gray-600 flex-1 overflow-hidden">${f.desc}</p>
+        <div class="bg-gray-100 rounded-sm h-1 overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-[#072447] to-[#2765FF] rounded-sm progress-bar"></div>
+        </div>
+      </div>
+    </div>`;
 }
 
-function vtSelectTab(idx) {
-  clearInterval(vtTimer);
-  vtActive = idx;
-  vtRender();
-  vtTimer = setInterval(() => { vtActive = (vtActive+1) % VT_DATA.length; vtRender(); }, 6000);
+function desktopCardHTML(f, i) {
+  const isActive = i === active;
+  return `
+    <div onclick="selectTab(${i})" class="cursor-pointer w-full">
+      <div class="flex lg:flex-row flex-col items-start gap-4 p-5 rounded-xl transition-all duration-300
+        ${isActive ? 'bg-white shadow-xl border border-gray-200' : 'bg-gray-50/60 hover:bg-gray-100/60'}">
+        <div class="flex p-2.5 rounded-full flex-shrink-0 transition-all duration-300
+          ${isActive ? 'bg-[#072447] text-white' : 'bg-[#072447]/10 text-[#072447]'}">
+          ${ICONS[f.icon]}
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-lg font-normal mb-4 transition-colors duration-300
+            ${isActive ? 'text-gray-900' : 'text-gray-500'}">${f.title}</h3>
+          <p class="text-[14px] lg:text-[16px] leading-[150%] transition-colors duration-300
+            ${isActive ? 'text-gray-600' : 'text-gray-400'}">${f.desc}</p>
+          <div class="mt-4 bg-gray-100 rounded-sm h-1 overflow-hidden">
+            ${isActive ? `<div class="h-full bg-gradient-to-r from-[#072447] to-[#2765FF] rounded-sm progress-bar"></div>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`;
 }
 
-vtSelectTab(0);
+function renderTabs() {
+  const f = FEATURES[active];
+  document.getElementById('mobile-card').innerHTML = mobileCardHTML(f, direction);
+  document.getElementById('mob-counter').textContent = `${active + 1} / ${FEATURES.length}`;
+  document.getElementById('tabs-desktop').innerHTML = FEATURES.map((feat, i) => desktopCardHTML(feat, i)).join('');
+}
+
+function selectTab(idx, dir) {
+  clearInterval(timer);
+  direction = dir || (idx > active ? 'next' : 'prev');
+  active = idx;
+  const img = document.getElementById('feature-img');
+  img.classList.add('fade');
+  setTimeout(() => {
+    img.src = FEATURES[idx].image;
+    img.alt = FEATURES[idx].title;
+    img.classList.remove('fade');
+  }, 400);
+  renderTabs();
+  const interval = window.innerWidth < 1024 ? 10000 : 4000;
+  timer = setInterval(() => { const next = (active + 1) % FEATURES.length; selectTab(next, 'next'); }, interval);
+}
+
+function scrollPrev() { selectTab((active - 1 + FEATURES.length) % FEATURES.length, 'prev'); }
+function scrollNext() { selectTab((active + 1) % FEATURES.length, 'next'); }
+
+selectTab(0, 'next');
 
 /* ── Feature Tab Cards ────────────────────────────────────────── */
 const FT_DATA = [
