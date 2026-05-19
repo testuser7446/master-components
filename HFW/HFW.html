@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HFW — Emirates NBD</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -71,12 +73,23 @@
     @keyframes zoomIn { from{transform:scale(1)} to{transform:scale(1.18)} }
     .zp-img { will-change: transform; }
 
-    /* ── Download App Cinematic ─────────────────────────────────────── */
-    @keyframes daFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-    .da-float { animation: daFloat 4s ease-in-out infinite; }
-    @keyframes daFadeInUp { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
-    .da-reveal { opacity:0; }
-    .da-reveal.visible { animation: daFadeInUp 1s cubic-bezier(0.16,1,0.3,1) forwards; }
+    /* ── Download App Cinematic (GSAP) ──────────────────────────────── */
+    .gsap-reveal { visibility: hidden; }
+    .film-grain { position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:50;opacity:0.05;mix-blend-mode:overlay; }
+    .bg-grid-theme { background-size:60px 60px;background-image:linear-gradient(to right,rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,0.05) 1px,transparent 1px);mask-image:radial-gradient(ellipse at center,black 0%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse at center,black 0%,transparent 70%); }
+    .text-3d-matte { color:#ffffff;text-shadow:0 0 40px rgba(255,255,255,0.4),0 4px 12px rgba(255,255,255,0.3),0 2px 4px rgba(255,255,255,0.2); }
+    .text-silver-matte { color:#ffffff;text-shadow:0 0 40px rgba(255,255,255,0.5),0 4px 12px rgba(255,255,255,0.3),0 2px 4px rgba(255,255,255,0.2); }
+    .premium-depth-card { background:linear-gradient(145deg,#0d2d6b 0%,#050f1f 100%);box-shadow:0 40px 100px -20px rgba(0,0,0,0.9),0 20px 40px -20px rgba(0,0,0,0.8),inset 0 1px 2px rgba(255,255,255,0.2),inset 0 -2px 4px rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.04);position:relative; }
+    .card-sheen { position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:50;background:radial-gradient(800px circle at var(--mouse-x,50%) var(--mouse-y,50%),rgba(255,255,255,0.06) 0%,transparent 40%);mix-blend-mode:screen;transition:opacity 0.3s ease; }
+    .iphone-bezel { background-color:#111;box-shadow:inset 0 0 0 2px #52525B,inset 0 0 0 7px #000,0 40px 80px -15px rgba(0,0,0,0.9),0 15px 25px -5px rgba(0,0,0,0.7);backface-visibility:hidden;-webkit-backface-visibility:hidden; }
+    .hardware-btn { background:linear-gradient(90deg,#404040 0%,#171717 100%);box-shadow:-2px 0 5px rgba(0,0,0,0.8),inset -1px 0 1px rgba(255,255,255,0.15),inset 1px 0 2px rgba(0,0,0,0.8);border-left:1px solid rgba(255,255,255,0.05); }
+    .screen-glare { background:linear-gradient(110deg,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0) 45%); }
+    .floating-ui-badge { background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,rgba(255,255,255,0.01) 100%);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 0 0 1px rgba(255,255,255,0.1),0 25px 50px -12px rgba(0,0,0,0.8),inset 0 1px 1px rgba(255,255,255,0.2),inset 0 -1px 1px rgba(0,0,0,0.5); }
+    .btn-modern-light { transition:all 0.4s cubic-bezier(0.25,1,0.5,1);background:linear-gradient(180deg,#FFFFFF 0%,#F1F5F9 100%);color:#0F172A;box-shadow:0 0 0 1px rgba(0,0,0,0.05),0 2px 4px rgba(0,0,0,0.1),0 12px 24px -4px rgba(0,0,0,0.3),inset 0 1px 1px rgba(255,255,255,1),inset 0 -3px 6px rgba(0,0,0,0.06); }
+    .btn-modern-light:hover { transform:translateY(-3px); }
+    .btn-modern-dark { transition:all 0.4s cubic-bezier(0.25,1,0.5,1);background:linear-gradient(180deg,#27272A 0%,#18181B 100%);color:#FFFFFF;box-shadow:0 0 0 1px rgba(255,255,255,0.1),0 2px 4px rgba(0,0,0,0.6),0 12px 24px -4px rgba(0,0,0,0.9),inset 0 1px 1px rgba(255,255,255,0.15),inset 0 -3px 6px rgba(0,0,0,0.8); }
+    .btn-modern-dark:hover { transform:translateY(-3px);background:linear-gradient(180deg,#3F3F46 0%,#27272A 100%); }
+    .transform-style-3d { transform-style:preserve-3d; }
 
     /* ── Marquee ────────────────────────────────────────────────────── */
     @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
@@ -105,6 +118,20 @@
     /* ── Nav ────────────────────────────────────────────────────────── */
     #site-nav { transition: background 0.3s, box-shadow 0.3s; }
     #site-nav.scrolled { background: rgba(255,255,255,0.96) !important; box-shadow: 0 2px 20px rgba(7,36,71,0.08); }
+
+    /* ── World Map ──────────────────────────────────────────────────── */
+    .map-container { aspect-ratio: 2 / 1; }
+    @media (min-width: 768px) { .map-container { aspect-ratio: 2.5 / 1; } }
+    @media (min-width: 1024px) { .map-container { aspect-ratio: 2 / 1; } }
+
+    /* ── Trusted Partners Logo Grid ─────────────────────────────────── */
+    .logo-wrap { width:170px;height:72px;filter:grayscale(100%);transition:filter 0.4s cubic-bezier(0.16,1,0.3,1),transform 0.4s cubic-bezier(0.16,1,0.3,1);cursor:pointer; }
+    .logo-cell:hover .logo-wrap { filter:grayscale(0%);transform:scale(1.08); }
+    .logo-cell { opacity:0;transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1); }
+    .logo-cell.visible { opacity:1; }
+    .cta-btn svg { transition:transform 0.3s ease; }
+    .cta-btn:hover svg { transform:translateX(4px); }
+    .cta-btn { transition:border-color 0.3s ease; }
   </style>
 </head>
 <body class="bg-white overflow-x-hidden">
@@ -308,137 +335,119 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     3. CONTENT BLOCK — Side By Side
+     3. CONTENT BLOCK — No Numbers (Side by Side)
      "Your relationship with us..."
      ═══════════════════════════════════════════════════════════════ -->
-<section class="bg-white w-full px-6 lg:px-[120px] py-16 md:py-24">
-  <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start">
+<section class="bg-white w-full px-4 md:px-[120px] py-16 md:py-24">
+  <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row md:gap-16 items-start">
 
-    <!-- Image -->
-    <div class="reveal from-y relative rounded-2xl overflow-hidden min-h-[400px] md:max-w-[480px] w-full">
-      <img src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&h=600&fit=crop" alt="Relationship Manager" class="absolute inset-0 w-full h-full object-cover" />
-    </div>
+    <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%] tracking-tight md:w-1/2 flex-shrink-0">
+      Your relationship with us is expertly managed, led by one dedicated point of contact.
+    </h2>
 
-    <!-- Content -->
-    <div class="reveal from-y delay-1 md:pt-8">
-      <p class="text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-6">Relationship Banking</p>
-      <h2 class="text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%] mb-10">
-        Your relationship with us is expertly managed, led by one dedicated point of contact and backed by a team of specialists.
-      </h2>
+    <p class="reveal from-y-sm delay-1 text-[14px] lg:text-[16px] font-normal text-[#3A4B5C] leading-[150%] md:w-1/2 md:pt-3">
+      One senior relationship manager who knows your business — backed by product specialists in trade finance, treasury, and structured lending, and a 24/7 Client Experience Desk so nothing holds your business up.
+    </p>
 
-      <div class="flex flex-col divide-y divide-[#E5E7EB]">
-        <div class="py-6">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h3 class="text-[16px] font-semibold text-[#072447] mb-2">Dedicated Relationship Manager</h3>
-              <p class="text-[14px] lg:text-[16px] text-[#3A4B5C] leading-[150%]">One senior relationship manager who knows your business — and coordinates across our entire network on your behalf.</p>
-            </div>
-            <a href="#" class="shrink-0 mt-1 w-8 h-8 rounded-full border border-[#072447]/20 flex items-center justify-center hover:bg-[#072447] hover:text-white transition-all group">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-            </a>
-          </div>
-        </div>
-        <div class="py-6">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h3 class="text-[16px] font-semibold text-[#072447] mb-2">Product Specialists</h3>
-              <p class="text-[14px] lg:text-[16px] text-[#3A4B5C] leading-[150%]">Deep experts in trade finance, treasury, and structured lending — available when your deal demands more than a standard solution.</p>
-            </div>
-            <a href="#" class="shrink-0 mt-1 w-8 h-8 rounded-full border border-[#072447]/20 flex items-center justify-center hover:bg-[#072447] hover:text-white transition-all">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-            </a>
-          </div>
-        </div>
-        <div class="py-6">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h3 class="text-[16px] font-semibold text-[#072447] mb-2">Client Experience Desk</h3>
-              <p class="text-[14px] lg:text-[16px] text-[#3A4B5C] leading-[150%]">24/7 support for day-to-day queries, transactions, and service requests — so nothing holds your business up.</p>
-            </div>
-            <a href="#" class="shrink-0 mt-1 w-8 h-8 rounded-full border border-[#072447]/20 flex items-center justify-center hover:bg-[#072447] hover:text-white transition-all">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     4. DOWNLOAD APP CINEMATIC
-     "Simpler. Better. Smarter."
+     4. DOWNLOAD APP — GSAP Scroll Cinematic
      ═══════════════════════════════════════════════════════════════ -->
-<section class="relative w-full overflow-hidden bg-[#040d1c] py-20 md:py-32">
-  <!-- Background gradient -->
-  <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse 80% 60% at 60% 50%, rgba(39,101,255,0.12) 0%, transparent 70%);"></div>
+<div
+  id="gsap-container"
+  class="relative w-screen h-screen overflow-hidden flex items-center justify-center bg-[#030303] text-white antialiased"
+  style="perspective: 1500px;"
+>
+  <div class="film-grain" aria-hidden="true"></div>
+  <div class="bg-grid-theme absolute inset-0 z-0 pointer-events-none opacity-50" aria-hidden="true"></div>
 
-  <div class="max-w-[1400px] mx-auto px-6 lg:px-[120px] flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+  <div class="hero-text-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-screen px-4 will-change-transform transform-style-3d">
+    <h1 class="text-track gsap-reveal text-3d-matte text-4xl md:text-6xl lg:text-7xl font-normal tracking-tight leading-normal mb-4">Banking built for</h1>
+    <h1 class="text-days gsap-reveal text-silver-matte text-4xl md:text-6xl lg:text-7xl font-normal tracking-tight leading-normal">every ambition.</h1>
+  </div>
 
-    <!-- Left: Text -->
-    <div class="flex-1 max-w-xl">
-      <p class="da-reveal text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-6">Digital Platform</p>
-      <h2 class="da-reveal text-[36px] lg:text-[48px] font-normal text-white leading-[1.5] mb-6" style="animation-delay:0.1s">
-        Simpler.<br />Better.<br />Smarter.
-      </h2>
-      <p class="da-reveal text-[14px] lg:text-[16px] text-white/60 leading-[1.65] mb-10" style="animation-delay:0.2s">
-        businessONLINE X puts full account control in your pocket — approve payments, monitor positions, and raise service requests securely from your phone, wherever business takes you.
-      </p>
-      <div class="da-reveal flex flex-col sm:flex-row gap-4" style="animation-delay:0.3s">
-        <a href="#" class="inline-flex items-center gap-3 px-6 py-3.5 bg-white text-[#072447] text-[14px] font-bold rounded-xl hover:bg-[#EEF4FB] transition-colors">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          App Store
-        </a>
-        <a href="#" class="inline-flex items-center gap-3 px-6 py-3.5 bg-white/10 text-white text-[14px] font-semibold rounded-xl border border-white/20 hover:bg-white/15 transition-colors">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.28.15.61.14.89-.01l11.71-6.44-2.46-2.46-10.14 8.91zM.9 1.24C.34 1.56 0 2.12 0 2.79v18.42c0 .67.34 1.23.9 1.55l.1.06 10.32-10.32v-.24L1 1.18l-.1.06zM20.54 8.37l-2.96-1.63-2.75 2.75 2.75 2.75 2.97-1.63c.85-.47.85-1.77-.01-2.24zM3.18.24l11.71 6.44-2.46 2.46L2.29.23l.89.01z"/></svg>
-          Google Play
-        </a>
-      </div>
+  <div class="cta-wrapper absolute z-10 flex flex-col items-center justify-center text-center w-screen px-4 gsap-reveal pointer-events-auto will-change-transform">
+    <h2 class="text-4xl md:text-6xl lg:text-7xl font-normal mb-4 tracking-tight text-silver-matte">Start your journey.</h2>
+    <p class="text-white/50 text-[14px] lg:text-[16px] mb-4 max-w-xl mx-auto font-light leading-[150%]">Join millions of customers who trust Emirates NBD to power their financial ambitions across 180+ markets worldwide.</p>
+    <div class="flex flex-col sm:flex-row gap-6">
+      <a href="#" class="btn-modern-light flex items-center justify-center gap-3 px-8 py-4 rounded-[1.25rem]">
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+        <div class="text-left"><div class="text-[10px] font-bold tracking-wider text-neutral-500 uppercase mb-[-2px]">Download on the</div><div class="text-xl font-bold leading-none tracking-tight">App Store</div></div>
+      </a>
+      <a href="#" class="btn-modern-dark flex items-center justify-center gap-3 px-8 py-4 rounded-[1.25rem]">
+        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 512 512"><path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/></svg>
+        <div class="text-left"><div class="text-[10px] font-bold tracking-wider text-neutral-400 uppercase mb-[-2px]">Get it on</div><div class="text-xl font-bold leading-none tracking-tight">Google Play</div></div>
+      </a>
     </div>
+  </div>
 
-    <!-- Right: Phone mockup -->
-    <div class="flex-1 flex items-center justify-center">
-      <div class="da-float relative w-[240px] md:w-[280px]">
-        <div class="rounded-[2.5rem] overflow-hidden border-4 border-white/10 shadow-2xl" style="background:linear-gradient(135deg,#0a1628,#0d1f3c)">
-          <div class="flex flex-col p-5 gap-4">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-white/50 text-[10px] font-semibold tracking-widest uppercase">businessONLINE</span>
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-            </div>
-            <div class="bg-white/5 rounded-2xl p-4">
-              <p class="text-white/40 text-[9px] font-semibold tracking-widest uppercase mb-1">Total Balance</p>
-              <p class="text-white text-[22px] font-bold leading-none mb-1">$4.82M</p>
-              <p class="text-emerald-400 text-[11px] font-medium">+2.4% this week</p>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <div class="bg-white/5 rounded-xl p-3 text-center">
-                <p class="text-white/40 text-[8px] uppercase tracking-wider mb-1">Payments</p>
-                <p class="text-white text-[13px] font-bold">1,420</p>
+  <div class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none" style="perspective:1500px;">
+    <div id="main-card" class="main-card premium-depth-card relative overflow-hidden gsap-reveal flex items-center justify-center pointer-events-auto w-[92vw] md:w-[85vw] h-[92vh] md:h-[85vh] rounded-[32px] md:rounded-[40px]">
+      <div class="card-sheen" aria-hidden="true"></div>
+      <div class="relative w-full h-full max-w-7xl mx-auto px-4 lg:px-12 flex flex-col justify-evenly lg:grid lg:grid-cols-3 items-center lg:gap-8 z-10 py-6 lg:py-0">
+
+        <div class="card-right-text gsap-reveal order-1 lg:order-3 flex justify-center lg:justify-end z-20 w-full">
+          <div class="text-white/60 text-[13px] font-semibold tracking-widest uppercase">businessONLINE X</div>
+        </div>
+
+        <div class="mockup-scroll-wrapper order-2 lg:order-2 relative w-full h-[380px] lg:h-[600px] flex items-center justify-center z-10">
+          <div class="relative w-full h-full flex items-center justify-center" style="transform:scale(0.65);transform-origin:center;">
+            <div id="mockup-device" class="relative w-[280px] h-[580px] rounded-[3rem] iphone-bezel flex flex-col">
+              <div class="absolute top-[120px] hardware-btn rounded-l-md z-0" style="left:-3px;width:3px;height:25px;"></div>
+              <div class="absolute top-[160px] hardware-btn rounded-l-md z-0" style="left:-3px;width:3px;height:45px;"></div>
+              <div class="absolute top-[220px] hardware-btn rounded-l-md z-0" style="left:-3px;width:3px;height:45px;"></div>
+              <div class="absolute top-[170px] hardware-btn rounded-r-md z-0" style="right:-3px;width:3px;height:70px;transform:scaleX(-1);"></div>
+              <div class="absolute bg-[#050914] text-white z-10 overflow-hidden" style="inset:7px;border-radius:2.5rem;box-shadow:inset 0 0 15px rgba(0,0,0,1);">
+                <div class="absolute inset-0 screen-glare z-40 pointer-events-none"></div>
+                <div class="absolute left-1/2 -translate-x-1/2 bg-black rounded-full z-50 flex items-center justify-end px-3" style="top:5px;width:100px;height:28px;">
+                  <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                </div>
+                <div class="phone-widget gsap-reveal absolute inset-0 flex items-center justify-center overflow-hidden" style="border-radius:2.5rem;">
+                  <div id="app-screen-placeholder" class="flex flex-col items-center justify-center gap-4 p-6 text-center">
+                    <div class="bg-white/5 rounded-2xl p-5 w-full">
+                      <p class="text-white/40 text-[9px] font-semibold tracking-widest uppercase mb-1">Total Balance</p>
+                      <p class="text-white text-[22px] font-bold leading-none mb-1">$4.82M</p>
+                      <p class="text-emerald-400 text-[11px] font-medium">+2.4% this week</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 w-full">
+                      <div class="bg-white/5 rounded-xl p-3 text-center"><p class="text-white/40 text-[8px] uppercase mb-1">Payments</p><p class="text-white text-[13px] font-bold">1,420</p></div>
+                      <div class="bg-[#2765FF]/30 rounded-xl p-3 text-center"><p class="text-white/60 text-[8px] uppercase mb-1">Markets</p><p class="text-white text-[13px] font-bold">180+</p></div>
+                    </div>
+                    <div class="bg-[#2765FF] rounded-xl py-2.5 text-center w-full"><p class="text-white text-[12px] font-semibold">Approve Payment</p></div>
+                  </div>
+                </div>
               </div>
-              <div class="bg-white/5 rounded-xl p-3 text-center">
-                <p class="text-white/40 text-[8px] uppercase tracking-wider mb-1">Markets</p>
-                <p class="text-white text-[13px] font-bold">180+</p>
-              </div>
-              <div class="bg-[#2765FF]/30 rounded-xl p-3 text-center">
-                <p class="text-white/60 text-[8px] uppercase tracking-wider mb-1">FX</p>
-                <p class="text-white text-[13px] font-bold">3.67</p>
-              </div>
             </div>
-            <div class="bg-[#2765FF] rounded-xl py-3 text-center">
-              <p class="text-white text-[12px] font-semibold">Approve Payment</p>
+            <div class="floating-badge gsap-reveal absolute flex floating-ui-badge rounded-xl lg:rounded-2xl p-3 lg:p-4 items-center gap-3 z-30" style="top:1.5rem;left:-15px;">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background:linear-gradient(180deg,rgba(59,130,246,0.2),rgba(30,58,138,0.1));border:1px solid rgba(96,165,250,0.3);">
+                <span style="font-size:1.25rem;">🔒</span>
+              </div>
+              <div><p class="text-white text-xs font-bold">Secure Transactions</p><p class="text-blue-200/50 text-[10px]">Bank-grade encryption</p></div>
+            </div>
+            <div class="floating-badge gsap-reveal absolute flex floating-ui-badge rounded-xl lg:rounded-2xl p-3 lg:p-4 items-center gap-3 z-30" style="bottom:5rem;right:-15px;">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background:linear-gradient(180deg,rgba(99,102,241,0.2),rgba(55,48,163,0.1));border:1px solid rgba(129,140,248,0.3);">
+                <span style="font-size:1.125rem;">⚡</span>
+              </div>
+              <div><p class="text-white text-xs font-bold">Real-time Approvals</p><p class="text-blue-200/50 text-[10px]">Instant authorisation</p></div>
             </div>
           </div>
         </div>
-        <!-- Metric badge -->
-        <div class="absolute -right-8 top-1/3 bg-white rounded-xl px-4 py-3 shadow-xl">
-          <p class="text-[#072447] text-[20px] font-bold leading-none">180</p>
-          <p class="text-[#3A4B5C] text-[10px]">Countries</p>
+
+        <div class="card-left-text gsap-reveal order-3 lg:order-1 flex flex-col justify-center text-center lg:text-left z-20 w-full lg:max-w-none px-4 lg:px-0">
+          <h3 class="text-white text-[22px] lg:text-[28px] font-normal mb-4 tracking-tight">businessONLINE X</h3>
+          <p class="hidden md:block text-blue-100/70 text-[14px] lg:text-[16px] font-normal leading-[150%] mx-auto lg:mx-0 max-w-sm lg:max-w-none">
+            <span class="text-white font-semibold">businessONLINE X</span> puts full account control in your pocket — approve payments, monitor positions, and raise service requests securely from your phone, wherever business takes you.
+          </p>
         </div>
+
       </div>
     </div>
   </div>
-</section>
+</div>
+<div style="height:1px;background:#030303;"></div>
 
 
 <!-- ═══════════════════════════════════════════════════════════════
@@ -509,48 +518,41 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     6. WORLD MAP
+     6. WORLD MAP — Animated Routes
      "Leaders in the capital markets space"
      ═══════════════════════════════════════════════════════════════ -->
-<section class="bg-[#072447] w-full px-6 lg:px-[120px] py-16 md:py-24 overflow-hidden">
-  <div class="max-w-[1400px] mx-auto">
-    <div class="mb-10">
-      <p class="reveal text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4">Global Reach</p>
-      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-white leading-[150%] max-w-lg">
-        Leaders in the capital markets space.
-      </h2>
-    </div>
-    <div class="relative w-full" style="min-height:340px;">
-      <!-- SVG World Map (simplified) -->
-      <div class="reveal opacity-40 w-full" style="transition-delay:0.2s">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/World_map_-_low_resolution.svg/1280px-World_map_-_low_resolution.svg.png" alt="World Map" class="w-full object-contain opacity-30 select-none pointer-events-none" style="filter:invert(1) brightness(0.4);" />
-      </div>
-      <!-- Pins -->
-      <div class="absolute inset-0 flex items-center justify-center">
-        <div class="relative w-full h-full max-w-3xl mx-auto">
-          <div class="absolute w-3 h-3 rounded-full bg-[#2765FF] shadow-lg shadow-blue-500/50" style="top:38%;left:55%"></div>
-          <div class="absolute w-3 h-3 rounded-full bg-[#2765FF] shadow-lg shadow-blue-500/50" style="top:35%;left:48%"></div>
-          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:42%;left:52%"></div>
-          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:30%;left:45%"></div>
-          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:40%;left:60%"></div>
-          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:45%;left:70%"></div>
-          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:40%;left:25%"></div>
-          <div class="absolute w-2 h-2 rounded-full bg-white/60" style="top:38%;left:18%"></div>
-        </div>
-      </div>
-      <!-- Stats overlay -->
-      <div class="absolute bottom-0 left-0 flex gap-8 md:gap-12">
-        <div>
-          <p class="text-[36px] lg:text-[52px] font-bold text-white leading-none">180<span class="text-[#2765FF]">+</span></p>
-          <p class="text-white/50 text-[13px] mt-1">Countries</p>
-        </div>
-        <div>
-          <p class="text-[36px] lg:text-[52px] font-bold text-white leading-none">50<span class="text-[#2765FF]">+</span></p>
-          <p class="text-white/50 text-[13px] mt-1">Years of Banking</p>
-        </div>
-      </div>
-    </div>
+<section class="bg-white w-full py-16 md:py-24">
+
+  <div class="max-w-[1400px] mx-auto px-4 md:px-[120px] mb-12 text-center">
+    <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%] tracking-tight mb-4">
+      180+ markets. One banking relationship.
+    </h2>
+    <p class="reveal from-y delay-1 text-[14px] lg:text-[16px] font-normal text-[#3A4B5C] max-w-2xl mx-auto leading-[150%]">
+      Payments, liquidity, trade finance, and capital markets expertise — delivered through one of the region's most connected banking networks across 180+ markets.
+    </p>
   </div>
+
+  <div class="map-container w-full rounded-lg relative overflow-hidden bg-white" id="map-wrap">
+    <img src="../components/World-Map/dotted-map.svg" alt="world map" draggable="false"
+      class="h-full w-full pointer-events-none select-none object-cover"
+      style="-webkit-mask-image:linear-gradient(to bottom,transparent,white 10%,white 90%,transparent);mask-image:linear-gradient(to bottom,transparent,white 10%,white 90%,transparent);" />
+    <svg id="map-svg" viewBox="0 0 800 400" class="w-full h-full absolute inset-0 select-none" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="path-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="white" stop-opacity="0" />
+          <stop offset="5%" stop-color="#2765FF" stop-opacity="1" />
+          <stop offset="95%" stop-color="#2765FF" stop-opacity="1" />
+          <stop offset="100%" stop-color="white" stop-opacity="0" />
+        </linearGradient>
+        <filter id="glow">
+          <feMorphology operator="dilate" radius="0.5" />
+          <feGaussianBlur stdDeviation="1" result="coloredBlur" />
+          <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+    </svg>
+  </div>
+
 </section>
 
 
@@ -598,30 +600,121 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     9. TRUSTED PARTNERS — Grid
+     9. TRUSTED PARTNERS — Logo Grid
      "Partnerships that deliver"
      ═══════════════════════════════════════════════════════════════ -->
-<section class="bg-white w-full px-6 lg:px-[120px] py-16 md:py-24">
+<section class="bg-white w-full px-4 md:px-[120px] py-16 md:py-24">
   <div class="max-w-[1400px] mx-auto">
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
-      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-[150%]">
+
+    <div class="flex flex-col lg:flex-row gap-8 mb-16 md:mb-24">
+      <h2 class="reveal from-y text-[24px] lg:text-[36px] font-normal text-[#072447] leading-tight tracking-tight max-w-sm shrink-0">
         Partnerships that deliver.
       </h2>
-      <p class="reveal from-y-md delay-1 text-[14px] lg:text-[16px] font-normal text-[#3A4B5C] leading-[150%] max-w-sm lg:text-right">
-        Trusted by leading institutions and corporates across the MENAT region and beyond.
-      </p>
+      <div class="flex-1 flex lg:justify-end lg:items-start">
+        <p class="reveal from-y-md delay-1 text-[14px] lg:text-[16px] font-normal text-[#3A4B5C] leading-[150%] max-w-sm lg:text-right">
+          Trusted by leading institutions and corporates across the MENAT region and beyond.
+        </p>
+      </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-[#E5E7EB] rounded-2xl overflow-hidden">
-      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">PARTNER</span></div>
-      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">SWIFT</span></div>
-      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">VISA</span></div>
-      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">Mastercard</span></div>
-      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">Bloomberg</span></div>
-      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">REFINITIV</span></div>
-      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">SAP</span></div>
-      <div class="bg-white flex items-center justify-center py-10 px-6"><span class="text-[#072447]/40 font-bold text-[15px] tracking-wider">ORACLE</span></div>
+    <div class="grid grid-cols-2 md:grid-cols-4 mb-16 md:mb-24">
+
+      <div class="logo-cell logo-cell-0 flex items-center justify-center py-12 px-6 border-r border-b border-[#E5E7EB]">
+        <div class="logo-wrap">
+          <svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <text x="100" y="32" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#072447" text-anchor="middle" letter-spacing="6">EMAAR</text>
+            <text x="100" y="50" font-family="Arial, sans-serif" font-size="11" font-weight="400" fill="#666" text-anchor="middle" letter-spacing="2">Properties</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="logo-cell logo-cell-1 flex items-center justify-center py-12 px-6 border-b md:border-r border-[#E5E7EB]">
+        <div class="logo-wrap">
+          <svg viewBox="0 0 210 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <circle cx="36" cy="36" r="30" fill="#f8f8f8"/>
+            <path d="M 10 28 A 30 30 0 0 1 62 28 L 62 34 A 30 30 0 0 0 10 34 Z" fill="#00a19c"/>
+            <path d="M 10 42 A 30 30 0 0 0 62 42 L 62 48 A 30 30 0 0 1 10 48 Z" fill="#f47920"/>
+            <path d="M 10 34 L 62 34 L 62 42 L 10 42 Z" fill="white"/>
+            <rect x="34" y="8" width="4" height="56" rx="2" fill="#072447"/>
+            <rect x="22" y="30" width="28" height="3.5" rx="1.5" fill="#072447"/>
+            <circle cx="36" cy="10" r="5" fill="none" stroke="#072447" stroke-width="3"/>
+            <text x="80" y="30" font-family="Arial Black, sans-serif" font-size="16" font-weight="900" fill="#072447" text-anchor="start">DP World</text>
+            <text x="80" y="50" font-family="Arial, sans-serif" font-size="10" fill="#555" text-anchor="start">trade enables growth</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="logo-cell logo-cell-2 flex items-center justify-center py-12 px-6 border-r border-b border-[#E5E7EB]">
+        <div class="logo-wrap">
+          <svg viewBox="0 0 200 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <circle cx="36" cy="36" r="30" fill="#003087"/>
+            <ellipse cx="36" cy="26" rx="12" ry="18" fill="#C9A84C" transform="rotate(-20 36 26)"/>
+            <ellipse cx="36" cy="46" rx="12" ry="18" fill="#C9A84C" transform="rotate(20 36 46)" opacity="0.85"/>
+            <ellipse cx="36" cy="36" rx="7" ry="10" fill="#003087"/>
+            <text x="78" y="32" font-family="Arial Black, sans-serif" font-size="18" font-weight="900" fill="#003087" text-anchor="start">Aldar</text>
+            <text x="78" y="50" font-family="Arial, sans-serif" font-size="10" fill="#888" text-anchor="start">Properties</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="logo-cell logo-cell-3 flex items-center justify-center py-12 px-6 border-b border-[#E5E7EB]">
+        <div class="logo-wrap">
+          <svg viewBox="0 0 230 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <path d="M 6 58 L 6 28 C 6 16 14 10 22 10 C 30 10 38 16 38 28 L 38 38 C 38 46 44 50 50 50 C 56 50 62 46 62 38 L 62 10" fill="none" stroke="#C9A84C" stroke-width="4" stroke-linecap="round"/>
+            <text x="80" y="28" font-family="Arial, sans-serif" font-size="9" font-weight="600" fill="#888" text-anchor="start" letter-spacing="1">MAJID AL FUTTAIM</text>
+            <text x="80" y="44" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="#1a1a1a" text-anchor="start">Group</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="logo-cell logo-cell-4 flex items-center justify-center py-12 px-6 border-r border-[#E5E7EB]">
+        <div class="logo-wrap">
+          <svg viewBox="0 0 160 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <text x="80" y="50" font-family="Arial Black, Impact, sans-serif" font-size="52" font-weight="900" fill="#C8102E" text-anchor="middle" letter-spacing="-2">e&amp;</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="logo-cell logo-cell-5 flex items-center justify-center py-12 px-6 md:border-r border-[#E5E7EB]">
+        <div class="logo-wrap">
+          <svg viewBox="0 0 180 72" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <path d="M 36 8 A 28 28 0 0 0 36 64 Z" fill="#009b74"/>
+            <path d="M 36 8 A 28 28 0 0 1 36 64 Z" fill="#c8102e"/>
+            <path d="M 36 16 C 32 22 30 28 34 33 C 35 30 37 28 36 24 C 38 28 40 32 38 36 C 41 33 42 28 40 22 C 43 27 43 35 38 40 C 35 43 33 43 36 44 C 39 43 41 40 41 36 C 43 38 43 43 40 46 C 36 49 32 46 32 42 C 30 44 30 49 33 51 C 25 47 24 36 30 28 C 28 32 28 38 32 40 C 30 34 30 28 36 16 Z" fill="white" opacity="0.9"/>
+            <text x="80" y="42" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" fill="#1a1a1a" text-anchor="start" letter-spacing="2">ENOC</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="logo-cell logo-cell-6 flex items-center justify-center py-12 px-6 border-r border-[#E5E7EB]">
+        <div class="logo-wrap">
+          <svg viewBox="0 0 200 64" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <text x="100" y="36" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" fill="#DC291E" text-anchor="middle">aramex</text>
+            <text x="100" y="54" font-family="Arial, sans-serif" font-size="9.5" fill="#999" text-anchor="middle" letter-spacing="1.8">delivery unlimited</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="logo-cell logo-cell-7 flex items-center justify-center py-12 px-6">
+        <div class="logo-wrap">
+          <svg viewBox="0 0 210 60" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <text y="40" font-family="Arial Black, sans-serif" font-size="30" text-anchor="middle" x="100">
+              <tspan font-weight="400" fill="#FF8200">fly</tspan><tspan font-weight="900" fill="#006496">dubai</tspan><tspan fill="#FF8200" font-size="38" font-weight="900" dy="-4" dx="2">·</tspan>
+            </text>
+          </svg>
+        </div>
+      </div>
+
     </div>
+
+    <div class="reveal from-y flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <h3 class="text-[22px] lg:text-[28px] font-normal text-[#072447] tracking-tight leading-tight">Ready to bank smarter?</h3>
+      <a href="#" class="cta-btn reveal from-x delay-2 flex items-center gap-2 px-6 py-3 border border-[#D1D9E0] rounded-lg text-[#072447] text-sm font-medium hover:border-[#072447] whitespace-nowrap shrink-0">
+        Get in touch
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </a>
+    </div>
+
   </div>
 </section>
 
@@ -671,10 +764,10 @@
 
 
 <!-- ═══════════════════════════════════════════════════════════════
-     11. ACCORDION — Single Row
+     11. ACCORDION
      "At the centre of insight and exchange"
      ═══════════════════════════════════════════════════════════════ -->
-<section class="bg-white w-full px-6 lg:px-[120px] py-16 md:py-24">
+<section class="bg-white w-full px-4 md:px-[120px] py-16 md:py-24">
   <div class="max-w-[1400px] mx-auto">
     <div class="mb-12">
       <p class="reveal text-[11px] lg:text-[13px] font-semibold tracking-[0.22em] uppercase text-[#2765FF] mb-4">Product Suite</p>
@@ -682,16 +775,7 @@
         At the centre of insight and exchange.
       </h2>
     </div>
-
-    <div class="flex flex-wrap gap-2 justify-start mb-10" id="sr-tab-pills">
-      <button onclick="srSetTab('all')" data-tab="all" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#072447] text-white transition-all">All</button>
-      <button onclick="srSetTab('corporate')" data-tab="corporate" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200 transition-all">Corporate Banking</button>
-      <button onclick="srSetTab('trade')" data-tab="trade" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200 transition-all">Trade Finance</button>
-      <button onclick="srSetTab('treasury')" data-tab="treasury" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200 transition-all">Treasury</button>
-      <button onclick="srSetTab('digital')" data-tab="digital" class="sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200 transition-all">Digital</button>
-    </div>
-
-    <div id="sr-content-area" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 tab-content active"></div>
+    <div class="border-t border-[#E5E7EB]" id="products-accordion"></div>
   </div>
 </section>
 
@@ -813,11 +897,51 @@ setTimeout(() => {
   });
 }, 200);
 
-/* ── DA reveal ─────────────────────────────────────────────────── */
-const daObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); daObserver.unobserve(e.target); } });
-}, { threshold: 0.15 });
-document.querySelectorAll('.da-reveal').forEach(el => daObserver.observe(el));
+/* ── GSAP Download App ─────────────────────────────────────────── */
+(function() {
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+  gsap.registerPlugin(ScrollTrigger);
+  const container = document.getElementById('gsap-container');
+  const mainCard  = document.getElementById('main-card');
+  if (!container || !mainCard) return;
+  const isMobile  = window.innerWidth < 768;
+
+  mainCard.addEventListener('mousemove', (e) => {
+    const rect = mainCard.getBoundingClientRect();
+    mainCard.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+    mainCard.style.setProperty('--mouse-y', (e.clientY - rect.top)  + 'px');
+  });
+
+  gsap.set('.text-track',  { autoAlpha:0, y:60, scale:0.85, filter:'blur(20px)', rotationX:-20 });
+  gsap.set('.text-days',   { autoAlpha:0, y:50, filter:'blur(10px)' });
+  gsap.set('.main-card',   { y: window.innerHeight + 200, autoAlpha:1 });
+  gsap.set(['.card-left-text','.card-right-text','.mockup-scroll-wrapper','.floating-badge','.phone-widget'], { autoAlpha:0 });
+  gsap.set('.cta-wrapper', { autoAlpha:0, scale:0.8, filter:'blur(30px)' });
+
+  const introTl = gsap.timeline({ scrollTrigger:{ trigger:container, start:'top 80%', once:true }, delay:0.2 });
+  introTl
+    .to('.text-track', { duration:1.8, autoAlpha:1, y:0, scale:1, filter:'blur(0px)', rotationX:0, ease:'expo.out' })
+    .to('.text-days',  { duration:1.2, autoAlpha:1, y:0, filter:'blur(0px)', ease:'expo.out' }, '-=1.0');
+
+  const scrollTl = gsap.timeline({ scrollTrigger:{ trigger:container, start:'top top', end:'+=7000', pin:true, scrub:1, anticipatePin:1 } });
+  scrollTl
+    .to(['.hero-text-wrapper','.bg-grid-theme'], { scale:1.15, filter:'blur(20px)', opacity:0.2, ease:'power2.inOut', duration:2 }, 0)
+    .to('.main-card', { y:0, ease:'power3.inOut', duration:2 }, 0)
+    .to('.main-card', { width:'100%', height:'100%', borderRadius:'0px', ease:'power3.inOut', duration:1.5 })
+    .fromTo('.mockup-scroll-wrapper', { y:300, z:-500, rotationX:50, rotationY:-30, autoAlpha:0, scale:0.6 }, { y:0, z:0, rotationX:0, rotationY:0, autoAlpha:1, scale:1, ease:'expo.out', duration:2.5 }, '-=0.8')
+    .fromTo('.phone-widget',    { y:40, autoAlpha:0, scale:0.95 }, { y:0, autoAlpha:1, scale:1, ease:'back.out(1.2)', duration:1.5 }, '-=1.5')
+    .fromTo('.floating-badge',  { y:100, autoAlpha:0, scale:0.7, rotationZ:-10 }, { y:0, autoAlpha:1, scale:1, rotationZ:0, ease:'back.out(1.5)', duration:1.5, stagger:0.2 }, '-=2.0')
+    .fromTo('.card-left-text',  { x:-50, autoAlpha:0 }, { x:0, autoAlpha:1, ease:'power4.out', duration:1.5 }, '-=1.5')
+    .fromTo('.card-right-text', { x:50, autoAlpha:0, scale:0.8 }, { x:0, autoAlpha:1, scale:1, ease:'expo.out', duration:1.5 }, '<')
+    .to({}, { duration:2.5 })
+    .set('.hero-text-wrapper', { autoAlpha:0 })
+    .set('.cta-wrapper',       { autoAlpha:1 })
+    .to({}, { duration:1.5 })
+    .to(['.mockup-scroll-wrapper','.floating-badge','.card-left-text','.card-right-text'], { scale:0.9, y:-40, z:-200, autoAlpha:0, ease:'power3.in', duration:1.2, stagger:0.05 })
+    .to('.main-card', { width:isMobile?'92vw':'85vw', height:isMobile?'92vh':'85vh', borderRadius:isMobile?'32px':'40px', ease:'expo.inOut', duration:1.8 }, 'pullback')
+    .to('.cta-wrapper', { scale:1, filter:'blur(0px)', ease:'expo.inOut', duration:1.8 }, 'pullback')
+    .to('.main-card', { y:-(window.innerHeight + 300), ease:'power3.in', duration:1.5 });
+})();
 
 /* ── Metrics Counter ──────────────────────────────────────────── */
 function startMetricCount(el) {
@@ -1070,60 +1194,138 @@ function ftRender() {
 function ftSelectTab(idx) { ftActive = idx; ftRender(); }
 ftRender();
 
-/* ── Single Row Accordion (products) ─────────────────────────── */
-const SR_PRODUCTS = {
-  all: [
-    {icon:'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',title:'businessONLINE',desc:'Complete digital banking platform for corporate treasury and payments management across all entities.',cat:'Corporate Banking'},
-    {icon:'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064',title:'Letters of Credit',desc:'Secure, fully digital LC issuance and management with guaranteed settlement and risk protection.',cat:'Trade Finance'},
-    {icon:'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',title:'FX Solutions',desc:'Spot, forward and options strategies to manage your currency exposure with precision.',cat:'Treasury'},
-    {icon:'M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z',title:'smartTRADE',desc:'End-to-end digital trade finance platform for paperless processing of all trade instruments.',cat:'Digital'},
-    {icon:'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',title:'Trade Guarantees',desc:'Bank guarantees, bid bonds and performance bonds for domestic and international transactions.',cat:'Trade Finance'},
-    {icon:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',title:'Money Markets',desc:'Short-term investment and borrowing solutions to efficiently deploy idle cash.',cat:'Treasury'},
-  ],
-  corporate:[
-    {icon:'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',title:'businessONLINE',desc:'Complete digital banking platform for corporate treasury and payments management.',cat:'Corporate Banking'},
-    {icon:'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z',title:'Cash Pooling',desc:'Physical and notional cash pooling to optimise liquidity and reduce inter-company funding costs.',cat:'Corporate Banking'},
-    {icon:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',title:'Payroll Services',desc:'Automated WPS-compliant payroll processing for UAE and GCC workforce management.',cat:'Corporate Banking'},
-  ],
-  trade:[
-    {icon:'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945',title:'Letters of Credit',desc:'Secure, fully digital LC issuance and management with guaranteed settlement.',cat:'Trade Finance'},
-    {icon:'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944',title:'Trade Guarantees',desc:'Bank guarantees, bid bonds and performance bonds for all transaction types.',cat:'Trade Finance'},
-    {icon:'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5',title:'Supply Chain Finance',desc:'Extend payment terms while enabling suppliers to receive early payment.',cat:'Trade Finance'},
-  ],
-  treasury:[
-    {icon:'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6',title:'FX Solutions',desc:'Spot, forward and options strategies to manage your currency exposure.',cat:'Treasury'},
-    {icon:'M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z',title:'Rates & Derivatives',desc:'Interest rate swaps, caps and structured products to optimise funding cost.',cat:'Treasury'},
-    {icon:'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1',title:'Money Markets',desc:'Short-term investment and borrowing solutions to deploy idle cash efficiently.',cat:'Treasury'},
-  ],
-  digital:[
-    {icon:'M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z',title:'smartTRADE',desc:'End-to-end digital trade finance for paperless LC, collections, and guarantees.',cat:'Digital'},
-    {icon:'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',title:'businessONLINE X',desc:'Full corporate banking control from your mobile device, wherever you are.',cat:'Digital'},
-    {icon:'M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z',title:'Emirates NBD Pay',desc:'Seamless payment acceptance across all channels for your business.',cat:'Digital'},
-  ],
-};
-let srCurrentTab = 'all';
+/* ── World Map — Animated Routes ─────────────────────────────── */
+(function() {
+  const mapSvg = document.getElementById('map-svg');
+  if (!mapSvg) return;
 
-function srSetTab(tab) {
-  srCurrentTab = tab;
-  document.querySelectorAll('.sr-pill').forEach(btn => {
-    const isActive = btn.dataset.tab === tab;
-    btn.className = `sr-pill px-5 py-2.5 rounded-full text-[13px] font-semibold transition-all ${isActive?'bg-[#072447] text-white':'bg-[#F4F7FB] text-[#3A4B5C] hover:bg-gray-200'}`;
+  const LINE_COLOR = '#2765FF', X_OFFSET = 8, Y_OFFSET = 40;
+  const ANIM_DURATION = 2, STAGGER_DELAY = 0.3, PAUSE_TIME = 2;
+  const DOTS = [
+    { start:{ lat:25.2048, lng:55.2708, label:'Dubai', labelSide:'below' }, end:{ lat:48.8566, lng:2.3522, label:'Paris', labelSide:'below' } },
+    { start:{ lat:25.2048, lng:55.2708, label:'Dubai', labelSide:'below' }, end:{ lat:40.7128, lng:-90.0, label:'New York', labelSide:'below' } },
+    { start:{ lat:25.2048, lng:55.2708, label:'Dubai', labelSide:'below' }, end:{ lat:30.0444, lng:31.2357, label:'Cairo', labelSide:'below' } },
+    { start:{ lat:25.2048, lng:55.2708, label:'Dubai', labelSide:'below' }, end:{ lat:19.0760, lng:72.8777, label:'Mumbai', labelSide:'below' } },
+    { start:{ lat:25.2048, lng:55.2708, label:'Dubai', labelSide:'below' }, end:{ lat:1.3521, lng:103.8198, label:'Singapore', labelSide:'below' } },
+    { start:{ lat:1.3521, lng:103.8198, label:'Singapore', labelSide:'below' }, end:{ lat:31.2304, lng:121.4737, label:'Shanghai', labelSide:'below' } },
+    { start:{ lat:1.3521, lng:103.8198, label:'Singapore', labelSide:'below' }, end:{ lat:35.6762, lng:139.6503, label:'Tokyo', labelSide:'below' } },
+  ];
+  const N = DOTS.length;
+  const totalAnimationTime = N * STAGGER_DELAY + ANIM_DURATION;
+  const fullCycleDuration  = totalAnimationTime + PAUSE_TIME;
+  const svgNS = 'http://www.w3.org/2000/svg';
+
+  function projectPoint(lat, lng) { return { x:(lng+180)*(800/360)+X_OFFSET, y:(90-lat)*(400/180)+Y_OFFSET }; }
+  function createCurvedPath(s, e) { const midX=(s.x+e.x)/2, midY=Math.min(s.y,e.y)-50; return `M ${s.x} ${s.y} Q ${midX} ${midY} ${e.x} ${e.y}`; }
+  function labelOffset(side) { if(side==='below') return {x:0,y:6}; if(side==='left') return {x:0,y:-9}; if(side==='right') return {x:0,y:-9}; return {x:0,y:-26}; }
+  function el(tag, attrs={}) { const e=document.createElementNS(svgNS,tag); Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v)); return e; }
+
+  const seen = new Map();
+  DOTS.forEach((dot,i)=>{ [dot.start,dot.end].forEach(ep=>{ const key=`${ep.lat.toFixed(1)},${ep.lng.toFixed(1)}`; if(!seen.has(key)) seen.set(key,{lat:ep.lat,lng:ep.lng,endpoint:ep,index:i}); }); });
+
+  DOTS.forEach((dot,i) => {
+    const s=projectPoint(dot.start.lat,dot.start.lng), e=projectPoint(dot.end.lat,dot.end.lng), d=createCurvedPath(s,e);
+    const startTime=(i*STAGGER_DELAY)/fullCycleDuration, endTime=(i*STAGGER_DELAY+ANIM_DURATION)/fullCycleDuration, resetTime=totalAnimationTime/fullCycleDuration;
+    const g=el('g'), path=el('path',{d,fill:'none',stroke:'url(#path-gradient)','stroke-width':'1'});
+    g.appendChild(path); mapSvg.appendChild(g);
+    const len=path.getTotalLength();
+    path.style.strokeDasharray=len; path.style.strokeDashoffset=len;
+    path.appendChild(el('animate',{attributeName:'stroke-dashoffset',values:`${len};${len};0;0;${len}`,keyTimes:`0;${startTime.toFixed(4)};${endTime.toFixed(4)};${resetTime.toFixed(4)};1`,dur:`${fullCycleDuration}s`,repeatCount:'indefinite',calcMode:'linear'}));
   });
-  const area = document.getElementById('sr-content-area');
-  area.innerHTML = SR_PRODUCTS[tab].map((p, i) => `
-    <div class="bg-[#F4F7FB] rounded-2xl p-6 flex flex-col gap-3 card-anim hover:bg-[#EEF4FB] transition-colors cursor-pointer" style="animation-delay:${i*0.08}s">
-      <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
-        <svg class="w-5 h-5 text-[#072447]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${p.icon}"/></svg>
-      </div>
-      <div>
-        <p class="text-[14px] font-semibold text-[#072447] mb-1">${p.title}</p>
-        <p class="text-[12px] text-[#3A4B5C] leading-relaxed">${p.desc}</p>
-      </div>
-      <span class="text-[11px] font-semibold text-[#2765FF] tracking-wide">${p.cat}</span>
-    </div>
-  `).join('');
-}
-srSetTab('all');
+
+  Array.from(seen.values()).forEach(({lat,lng,endpoint,index}) => {
+    const pt=projectPoint(lat,lng), side=endpoint.labelSide??'above', off=labelOffset(side), pulseBegin=((index*0.4)%1.5).toFixed(2), labelDelay=(0.35*index+0.3).toFixed(2);
+    const g=el('g');
+    g.appendChild(el('circle',{cx:pt.x,cy:pt.y,r:'3',fill:LINE_COLOR,filter:'url(#glow)'}));
+    const pulse=el('circle',{cx:pt.x,cy:pt.y,r:'3',fill:LINE_COLOR,opacity:'0.5'});
+    pulse.appendChild(el('animate',{attributeName:'r',from:'3',to:'12',dur:'2s',begin:`${pulseBegin}s`,repeatCount:'indefinite'}));
+    pulse.appendChild(el('animate',{attributeName:'opacity',from:'0.6',to:'0',dur:'2s',begin:`${pulseBegin}s`,repeatCount:'indefinite'}));
+    g.appendChild(pulse);
+    if(endpoint.label) {
+      const city=endpoint.label, boxW=Math.ceil(city.length*4.2+16), boxH=14;
+      let centerX=pt.x; if(side==='left') centerX=pt.x-boxW/2-10; if(side==='right') centerX=pt.x+boxW/2+10;
+      const boxX=centerX-boxW/2, boxY=pt.y+off.y, textY=boxY+boxH/2+2;
+      const labelG=el('g',{opacity:'0'}); labelG.style.pointerEvents='none';
+      const rect=el('rect',{x:boxX,y:boxY,width:boxW,height:boxH,rx:'4',fill:'rgba(255,255,255,0.95)',stroke:'#e5e7eb','stroke-width':'0.75'}); rect.style.filter='drop-shadow(0 1px 4px rgba(0,0,0,0.14))'; labelG.appendChild(rect);
+      const text=el('text',{x:centerX,y:textY,'text-anchor':'middle',fill:'#000000','font-size':'6','font-weight':'600','font-family':'Plus Jakarta Sans, system-ui, sans-serif','letter-spacing':'0.3'}); text.textContent=city; labelG.appendChild(text);
+      labelG.appendChild(el('animate',{attributeName:'opacity',from:'0',to:'1',dur:'0.5s',begin:`${labelDelay}s`,fill:'freeze'}));
+      g.appendChild(labelG);
+    }
+    mapSvg.appendChild(g);
+  });
+})();
+
+/* ── Trusted Partners Logo Grid ───────────────────────────────── */
+(function() {
+  const logoObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = parseInt(entry.target.dataset.idx);
+        setTimeout(() => entry.target.classList.add('visible'), idx * 50);
+        logoObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.logo-cell').forEach((el, i) => { el.dataset.idx = i; logoObserver.observe(el); });
+})();
+
+/* ── Products Accordion ───────────────────────────────────────── */
+(function() {
+  const PROD_ACC = [
+    { title:'Corporate Banking', items:['businessONLINE — full digital banking platform','Cash management and liquidity pooling','Trade finance and working capital solutions','FX and risk management products','Payroll and corporate card services'] },
+    { title:'Capital Markets', items:['Equity capital markets (ECM)','Debt capital markets (DCM)','Sukuk origination and distribution','Syndicated loans and project finance','Private placements and structured products'] },
+    { title:'Trade Finance', items:['Letters of credit issuance and management','Trade guarantees and bid bonds','Supply chain finance (smartSCF)','Collections and documentary credits','Commodity finance'] },
+    { title:'Treasury & Markets', items:['FX spot, forward and options','Interest rate swaps and derivatives','Money market placements','Fixed income and sukuk','Structured solutions'] },
+  ];
+  const openState = PROD_ACC.map((_, i) => i === 0);
+
+  function buildProductsAccordion() {
+    const container = document.getElementById('products-accordion');
+    if (!container) return;
+    container.innerHTML = '';
+    PROD_ACC.forEach((item, i) => {
+      const isOpen = openState[i];
+      const row = document.createElement('div');
+      row.className = 'border-b border-[#E5E7EB]';
+      row.innerHTML = `
+        <button class="prod-acc-btn w-full flex items-center gap-4 py-5 text-left" data-idx="${i}">
+          <span class="icon-box w-8 h-8 rounded border-2 border-[#2765FF] shrink-0 relative" style="display:flex;align-items:center;justify-content:center;">
+            <span class="icon-bar icon-bar-h"></span>
+            <span class="icon-bar icon-bar-v ${isOpen?'is-open':'is-closed'}"></span>
+          </span>
+          <span class="text-[16px] lg:text-[18px] font-semibold text-[#2765FF]">${item.title}</span>
+        </button>
+        <div class="prod-acc-body" style="height:${isOpen?'auto':'0px'};opacity:${isOpen?'1':'0'};overflow:hidden;transition:height 0.35s cubic-bezier(0.16,1,0.3,1),opacity 0.35s ease;">
+          <div class="pb-8 pl-12 flex flex-col">
+            ${item.items.map(entry=>`<div class="flex items-start gap-3 py-2"><span class="mt-[6px] rounded-full bg-[#072447] shrink-0" style="width:6px;height:6px;min-width:6px;"></span><p class="text-[14px] lg:text-[15px] font-medium text-[#072447]">${entry}</p></div>`).join('')}
+          </div>
+        </div>`;
+      container.appendChild(row);
+    });
+    container.querySelectorAll('.prod-acc-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        openState[idx] = !openState[idx];
+        const isOpen = openState[idx];
+        const row = container.querySelectorAll(':scope > div')[idx];
+        const body = row.querySelector('.prod-acc-body');
+        const vBar = row.querySelector('.icon-bar-v');
+        const inner = body.querySelector('div');
+        if (isOpen) {
+          body.style.height='0px'; body.style.opacity='0';
+          requestAnimationFrame(()=>{ body.style.height=inner.scrollHeight+'px'; body.style.opacity='1'; });
+          body.addEventListener('transitionend',()=>{ body.style.height='auto'; },{once:true});
+        } else {
+          body.style.height=body.scrollHeight+'px';
+          requestAnimationFrame(()=>{ body.style.height='0px'; body.style.opacity='0'; });
+        }
+        vBar.classList.toggle('is-open',isOpen);
+        vBar.classList.toggle('is-closed',!isOpen);
+      });
+    });
+  }
+  buildProductsAccordion();
+})();
 
 /* ── HFW Accordion (Offerings) ────────────────────────────────── */
 const HFW_ACC = [
